@@ -1,103 +1,240 @@
-import Image from "next/image";
+import { Show, SignIn, SignInButton } from "@clerk/nextjs";
 
-export default function Home() {
+import { StartSurveyButton } from "@/components/auth/start-survey-button";
+import { SiteTopNav } from "@/components/site-top-nav";
+import { clerkSignInAppearance } from "@/lib/clerk";
+import { isClerkConfigured } from "@/lib/clerk.server";
+import { QUESTION_COUNT } from "@/lib/survey/questions";
+
+function primaryActionClassName() {
+  return "inline-flex h-11 items-center justify-center rounded-full bg-[var(--accent-blue)] px-5 text-sm font-semibold text-[var(--selected-contrast)] transition hover:brightness-105";
+}
+
+export default function HomePage() {
+  const clerkConfigured = isClerkConfigured();
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-6 pb-16 pt-4 sm:px-10 lg:px-12">
+      <SiteTopNav
+        helpHref="https://doi.org/10.1016/j.jrp.2010.01.002"
+        action={
+          <>
+            <Show when="signed-in">
+              <StartSurveyButton className={primaryActionClassName()} pendingLabel="Opening survey...">
+                Start survey
+              </StartSurveyButton>
+            </Show>
+            <Show when="signed-out">
+              <SignInButton
+                mode="modal"
+                withSignUp
+                fallbackRedirectUrl="/personalitysurvey"
+                forceRedirectUrl="/personalitysurvey"
+                appearance={clerkSignInAppearance}
+              >
+                <button type="button" className={primaryActionClassName()}>
+                  Sign in to start
+                </button>
+              </SignInButton>
+            </Show>
+          </>
+        }
+      />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <section
+        className="relative mt-4 overflow-hidden rounded-[2.8rem] border border-[var(--line)] px-6 py-10 shadow-[var(--shadow-strong)] sm:px-10 sm:py-14 lg:px-14 lg:py-16"
+        style={{ background: "var(--hero-gradient)" }}
+      >
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] lg:block"
+          style={{ backgroundImage: "var(--hero-spotlight)" }}
+        />
+
+        <div
+          className="relative grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.92fr)] lg:items-stretch"
+        >
+          <div className="flex flex-col justify-between">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
+                Multiple Measures of Personality
+              </p>
+              <h1 className="mt-5 font-display text-5xl leading-[0.94] text-[var(--ink)] sm:text-6xl lg:text-7xl">
+                A research-forward survey interface for the 181-item AMBI inventory.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--ink-soft)]">
+                This MVP recreates the intake phase of Tal Yarkoni&apos;s abbreviated personality survey:
+                one statement at a time, a visible response pattern after each choice, and a persistent
+                editable log so respondents never lose their place.
+              </p>
+
+              <div className="mt-10 flex flex-wrap gap-4">
+                <a
+                  href="https://doi.org/10.1016/j.jrp.2010.01.002"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-[var(--line)] bg-[var(--surface-panel)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:border-[var(--line-strong)]"
+                >
+                  Read the paper
+                </a>
+                <Show when="signed-in">
+                  <StartSurveyButton
+                    className="rounded-full border border-[var(--line)] bg-[var(--surface-panel)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:border-[var(--line-strong)] hover:text-[var(--accent-coral)]"
+                    pendingLabel="Opening survey..."
+                  >
+                    Open your survey
+                  </StartSurveyButton>
+                </Show>
+              </div>
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              {[
+                {
+                  title: "One account",
+                  body: "Your draft and the latest submitted response set stay attached to you.",
+                },
+                {
+                  title: "Fast return",
+                  body: "Pick up where you left off instead of relying on a single browser cookie.",
+                },
+                {
+                  title: "Flexible sign-in",
+                  body: "Choose GitHub, Google, LinkedIn, or email and password inside the same branded surface.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-[1.8rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)] backdrop-blur"
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+                    {item.title}
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">{item.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Show when="signed-in">
+            <div className="grid gap-4 rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 backdrop-blur">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+                  Survey scope
+                </p>
+                <p className="mt-3 font-display text-4xl text-[var(--ink)]">{QUESTION_COUNT}</p>
+                <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
+                  public-domain prompts across multiple personality frameworks
+                </p>
+              </div>
+              <div className="h-px bg-[var(--line)]" />
+              <div className="text-sm leading-7 text-[var(--ink-soft)]">
+                Expect 15 to 30 minutes for a full pass. Answers autosave to the signed-in account and
+                the submit action opens a scored dashboard with AMBI-based rankings and framework
+                breakdowns.
+              </div>
+            </div>
+          </Show>
+
+          <Show when="signed-out">
+            <div
+              id="auth-panel"
+              className="border-t border-[var(--line)] bg-[var(--surface-panel)] px-5 py-8 backdrop-blur sm:px-7 lg:-my-16 lg:-mr-14 lg:-ml-2 lg:border-t-0 lg:border-l lg:px-8 lg:py-10"
+            >
+              <div className="mx-auto w-full max-w-[34rem] rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-strong)]">
+                <div className="mb-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+                    Sign in to start
+                  </p>
+                  <h2 className="mt-3 font-display text-4xl text-[var(--ink)]">
+                    Your account sits inside the same survey canvas.
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">
+                    Use GitHub, Google, LinkedIn, or email and password to save progress and continue
+                    directly into the AMBI survey.
+                  </p>
+                </div>
+
+                {clerkConfigured ? (
+                  <SignIn
+                    routing="hash"
+                    fallbackRedirectUrl="/personalitysurvey"
+                    forceRedirectUrl="/personalitysurvey"
+                    withSignUp
+                    appearance={clerkSignInAppearance}
+                  />
+                ) : (
+                  <div className="rounded-[2rem] border border-dashed border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-6">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+                      Clerk setup needed
+                    </p>
+                    <h2 className="mt-3 font-display text-3xl text-[var(--ink)]">
+                      Add your Clerk keys to enable sign-in.
+                    </h2>
+                    <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
+                      Set <code>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</code> and{" "}
+                      <code>CLERK_SECRET_KEY</code>, then enable GitHub, Google, LinkedIn, and
+                      email/password in the Clerk dashboard.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Show>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      <section className="grid gap-6 py-10 lg:grid-cols-3">
+        {[
+          {
+            title: "One live prompt at a time",
+            body: "The survey surface stays focused: a single statement, a six-point response ladder, and no hidden navigation traps.",
+          },
+          {
+            title: "Violin plot feedback",
+            body: "Each answer reveals a seeded comparison plot immediately so respondents see how the broader pattern bends around that item.",
+          },
+          {
+            title: "Persistent editable log",
+            body: "Every question remains visible in the sidebar with answered state and current rating, making revisions frictionless.",
+          },
+        ].map((feature) => (
+          <div
+            key={feature.title}
+            className="rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-soft)]"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+              Feature
+            </p>
+            <h2 className="mt-4 font-display text-3xl text-[var(--ink)]">{feature.title}</h2>
+            <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">{feature.body}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="mt-auto rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] px-6 py-8 shadow-[var(--shadow-soft)] sm:px-8">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+              Important note
+            </p>
+            <p className="mt-4 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">
+              Results in later phases are for informational purposes only and are not psychological or
+              medical advice. This product focuses on survey completion, draft persistence, and a
+              source-backed AMBI dashboard that helps respondents inspect their score profile.
+            </p>
+          </div>
+          <Show when="signed-in">
+            <div className="flex justify-start lg:justify-end">
+              <StartSurveyButton
+                className="rounded-full border border-[var(--line)] bg-[var(--surface-panel)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:border-[var(--line-strong)] hover:text-[var(--accent-coral)]"
+                pendingLabel="Opening survey..."
+              >
+                Continue to survey
+              </StartSurveyButton>
+            </div>
+          </Show>
+        </div>
+      </section>
+    </main>
   );
 }

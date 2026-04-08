@@ -1,26 +1,180 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf9f5;
+  --foreground: #262624;
+  --ink: #262624;
+  --ink-soft: rgba(38, 38, 36, 0.76);
+  --muted: rgba(38, 38, 36, 0.56);
+  --surface: #faf9f5;
+  --surface-secondary: #f0eee6;
+  --surface-panel: rgba(250, 249, 245, 0.84);
+  --surface-panel-strong: rgba(240, 238, 230, 0.94);
+  --surface-inset: rgba(227, 218, 204, 0.72);
+  --line: rgba(38, 38, 36, 0.1);
+  --line-strong: rgba(38, 38, 36, 0.18);
+  --accent: #7fa9d1;
+  --accent-soft: rgba(127, 169, 209, 0.2);
+  --accent-mint: #bee5d8;
+  --accent-lilac: #b8c5ff;
+  --accent-rose: #d787a2;
+  --accent-blue: #7fa9d1;
+  --accent-coral: #e6796d;
+  --accent-lime: #d9f2a5;
+  --accent-sand: #e3dacc;
+  --selected-contrast: #262624;
+  --keycap-bg: rgba(240, 238, 230, 0.96);
+  --keycap-shadow: 0 10px 22px rgba(38, 38, 36, 0.08);
+  --home-crumb-button-bg: var(--surface-panel);
+  --shadow-soft: 0 20px 70px rgba(38, 38, 36, 0.08);
+  --shadow-strong: 0 30px 120px rgba(38, 38, 36, 0.14);
+  --plot-fill-start: rgba(216, 135, 162, 0.34);
+  --plot-fill-end: rgba(127, 169, 209, 0.78);
+  --plot-grid: rgba(38, 38, 36, 0.1);
+  --plot-label: rgba(38, 38, 36, 0.58);
+  --plot-stroke: rgba(38, 38, 36, 0.22);
+  --hero-gradient:
+    radial-gradient(circle at top left, rgba(190, 229, 216, 0.7), transparent 34%),
+    radial-gradient(circle at 80% 25%, rgba(184, 197, 255, 0.5), transparent 22%),
+    linear-gradient(180deg, rgba(250, 249, 245, 0.98), rgba(240, 238, 230, 0.94));
+  --hero-spotlight: radial-gradient(circle at center, rgba(230, 121, 109, 0.2), transparent 62%);
+  --app-background:
+    radial-gradient(circle at top left, rgba(190, 229, 216, 0.38), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(184, 197, 255, 0.3), transparent 26%),
+    linear-gradient(180deg, rgba(250, 249, 245, 0.98), rgba(240, 238, 230, 0.95));
+  --glow-left: rgba(190, 229, 216, 0.3);
+  --glow-right: rgba(184, 197, 255, 0.24);
+}
+
+html[data-theme="dark"] {
+  --background: #262624;
+  --foreground: #faf9f5;
+  --ink: #faf9f5;
+  --ink-soft: rgba(250, 249, 245, 0.76);
+  --muted: rgba(250, 249, 245, 0.56);
+  --surface: #262624;
+  --surface-secondary: #30302e;
+  --surface-panel: rgba(48, 48, 46, 0.82);
+  --surface-panel-strong: rgba(48, 48, 46, 0.94);
+  --surface-inset: rgba(227, 218, 204, 0.12);
+  --line: rgba(250, 249, 245, 0.1);
+  --line-strong: rgba(250, 249, 245, 0.18);
+  --selected-contrast: #262624;
+  --keycap-bg: rgba(63, 63, 60, 0.98);
+  --keycap-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
+  --home-crumb-button-bg: #141413;
+  --shadow-soft: 0 20px 70px rgba(0, 0, 0, 0.28);
+  --shadow-strong: 0 30px 120px rgba(0, 0, 0, 0.36);
+  --plot-fill-start: rgba(216, 135, 162, 0.42);
+  --plot-fill-end: rgba(127, 169, 209, 0.84);
+  --plot-grid: rgba(250, 249, 245, 0.12);
+  --plot-label: rgba(250, 249, 245, 0.56);
+  --plot-stroke: rgba(250, 249, 245, 0.22);
+  --hero-gradient:
+    radial-gradient(circle at top left, rgba(190, 229, 216, 0.14), transparent 34%),
+    radial-gradient(circle at 80% 25%, rgba(184, 197, 255, 0.14), transparent 22%),
+    linear-gradient(180deg, rgba(38, 38, 36, 0.98), rgba(48, 48, 46, 0.96));
+  --hero-spotlight: radial-gradient(circle at center, rgba(230, 121, 109, 0.12), transparent 62%);
+  --app-background:
+    radial-gradient(circle at top left, rgba(190, 229, 216, 0.14), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(184, 197, 255, 0.12), transparent 26%),
+    linear-gradient(180deg, rgba(38, 38, 36, 0.98), rgba(48, 48, 46, 0.96));
+  --glow-left: rgba(190, 229, 216, 0.14);
+  --glow-right: rgba(184, 197, 255, 0.12);
+  --selected-contrast-strong: #faf9f5;
+}
+
+:root {
+  --selected-contrast-strong: #262624;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--background);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), sans-serif;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--app-background);
+}
+
+.app-glow {
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+  height: 28rem;
+  width: 28rem;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.45;
+}
+
+.app-glow-left {
+  left: -10rem;
+  top: -6rem;
+  background: var(--glow-left);
+}
+
+.app-glow-right {
+  bottom: -8rem;
+  right: -8rem;
+  background: var(--glow-right);
+}
+
+main,
+section,
+aside,
+header,
+footer {
+  position: relative;
+  z-index: 1;
+}
+
+.font-display {
+  font-family: var(--font-display), serif;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

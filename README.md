@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AMBI Survey MVP
 
-## Getting Started
+A greenfield Next.js 15 application for phase one of the AMBI personality survey flow:
 
-First, run the development server:
+- intro page at `/`
+- 181-item survey experience at `/personalitysurvey` (with `/survey` preserved as a compatibility redirect)
+- per-question violin plot revealed after every answer
+- account-based autosaved drafts plus final submission
+- scored dashboard at `/personalitysurvey/dashboard` (with `/dashboard` preserved as a compatibility redirect)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Next.js 15 App Router
+- TypeScript
+- Tailwind CSS v4
+- Supabase Postgres via `DATABASE_URL`
+- Vitest + Testing Library
+- Playwright
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Local setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Copy `.env.example` to `.env.local`.
+2. Set `DATABASE_URL` to your Supabase Postgres connection string and keep `SURVEY_STORAGE=postgres`.
+3. Add your Clerk keys.
+4. Enable GitHub, Google, LinkedIn, and email/password in the Clerk dashboard.
+5. Run `pnpm install`.
+6. Start the app with `pnpm dev`.
 
-## Learn More
+If `DATABASE_URL` is omitted, the app automatically falls back to in-memory storage. That mode is useful for local UI work and automated tests, but it is not durable and should not be used for real survey data.
 
-To learn more about Next.js, take a look at the following resources:
+If the Clerk keys are missing, the public home page still loads and the embedded auth panel shows setup guidance, but protected survey routes will remain unavailable until auth is configured.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The canonical schema lives in [db/schema.sql](/Volumes/TiaSSD/.CloudStorage/Data/OneDrive-Luiss/Repository/personality-gpt/db/schema.sql). Survey data is stored in:
 
-## Deploy on Vercel
+- `survey_submissions` for draft and submitted survey sessions keyed by the Clerk `user_id`
+- `survey_answers` for one normalized row per answered question per submission
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The Postgres repository bootstraps these tables automatically on first use, so a Supabase Postgres database can be used without a separate migration step.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Scripts
+
+- `pnpm dev` starts the Next.js dev server
+- `pnpm lint` runs ESLint
+- `pnpm test` runs unit tests with coverage
+- `pnpm test:e2e` runs the Playwright flow against an in-memory local server
+
+## Notes
+
+- Response plots are seeded demo distributions in this MVP, not real respondent microdata.
+- The item order and AMBI question IDs are aligned to Appendix A of Yarkoni (2010).
