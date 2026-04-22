@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 type ProtectedRouteProps = {
   children: ReactNode;
@@ -39,12 +40,13 @@ export function ProtectedRoute({
   redirectingBody = "Your session is not available on this page yet, so we are sending you back to the sign-in panel.",
 }: ProtectedRouteProps) {
   const { isLoaded, isSignedIn } = useAuth({ treatPendingAsSignedOut: false });
+  const router = useRouter();
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      window.location.replace("/#auth-panel");
+      router.replace("/#auth-panel");
     }
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, router]);
 
   if (!isLoaded) {
     return (

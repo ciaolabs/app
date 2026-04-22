@@ -63,6 +63,15 @@ vi.mock("@clerk/nextjs", () => ({
   SignIn: () => React.createElement("div", { "data-testid": "clerk-sign-in" }, "Clerk Sign In"),
 }));
 
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn(),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+}));
+
 Object.defineProperty(window, "scrollTo", {
   value: () => undefined,
   writable: true,
