@@ -138,9 +138,9 @@ export function QuestionLog({
                     type="button"
                     onClick={() => onSelect(index)}
                     className={[
-                      "w-full rounded-[1.4rem] border px-4 py-3 text-left transition duration-200",
+                      "w-full rounded-[1rem] border px-4 py-3 text-left shadow-[var(--shadow-soft)] transition duration-200",
                       isActive
-                        ? "border-[var(--accent)] bg-[var(--accent-soft)]"
+                        ? "border-black bg-[var(--accent-soft)]"
                         : "border-[var(--line)] bg-[var(--surface-panel-strong)] hover:border-[var(--line-strong)]",
                     ].join(" ")}
                   >

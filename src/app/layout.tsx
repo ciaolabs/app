@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Fraunces, Manrope } from "next/font/google";
+import { Manrope, Space_Mono } from "next/font/google";
 
 import { clerkAppName, clerkLocalization, clerkProviderAppearance } from "@/lib/clerk";
+import { InteractiveDotBackground } from "@/components/interactive-dot-background";
 
 import "./globals.css";
 
@@ -11,9 +12,16 @@ const bodyFont = Manrope({
   subsets: ["latin"],
 });
 
-const displayFont = Fraunces({
+const displayFont = Manrope({
   variable: "--font-display",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const monoFont = Space_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -44,9 +52,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${bodyFont.variable} ${displayFont.variable} antialiased`}>
+      <body className={`${bodyFont.variable} ${displayFont.variable} ${monoFont.variable} antialiased`}>
         <ClerkProvider dynamic appearance={clerkProviderAppearance} localization={clerkLocalization}>
           <div className="app-shell">
+            <InteractiveDotBackground />
             <div className="app-glow app-glow-left" />
             <div className="app-glow app-glow-right" />
             {children}

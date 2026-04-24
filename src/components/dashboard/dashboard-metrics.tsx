@@ -22,26 +22,26 @@ function polarY(centerY: number, angle: number, radius: number) {
 
 export function scoreBandColor(band: ScoreBand) {
   if (band === "High") {
-    return "var(--accent-blue)";
+    return "var(--clay-slushie-500)";
   }
 
   if (band === "Low") {
-    return "var(--accent-coral)";
+    return "var(--clay-pomegranate-400)";
   }
 
-  return "var(--accent-sand)";
+  return "var(--clay-lemon-500)";
 }
 
 export function scoreBandAccent(band: ScoreBand) {
   if (band === "High") {
-    return "rgba(127, 169, 209, 0.75)";
+    return "rgba(59, 211, 253, 0.78)";
   }
 
   if (band === "Low") {
-    return "rgba(230, 121, 109, 0.78)";
+    return "rgba(252, 121, 129, 0.78)";
   }
 
-  return "rgba(227, 218, 204, 0.92)";
+  return "rgba(251, 189, 65, 0.82)";
 }
 
 type DashboardGaugeProps = {
@@ -186,7 +186,7 @@ export function SegmentedScoreBar({
   return (
     <div
       className={[
-        "relative h-4 overflow-hidden rounded-full bg-[var(--surface-inset)]",
+        "relative h-4 overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface-inset)]",
         className ?? "",
       ].join(" ")}
     >

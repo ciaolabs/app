@@ -26,7 +26,7 @@ export function LikertScale({
 
       <div
         className={[
-          "gap-2",
+          "gap-3",
           isHero ? "grid h-full flex-1 grid-cols-3 grid-rows-2" : "grid",
         ].join(" ")}
         style={
@@ -47,18 +47,18 @@ export function LikertScale({
               type="button"
               onClick={() => onSelect(value)}
               className={[
-                "group min-w-0 rounded-[1.2rem] border text-center transition duration-200",
+                "group clay-button-hover min-w-0 rounded-[1.25rem] border text-center duration-200",
                 isHero ? "flex h-full min-h-[10rem] flex-col items-center justify-center px-3 py-5" : "px-2 py-3",
                 selected
-                  ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
-                  : "border-[var(--line)] bg-[var(--surface-panel-strong)] text-[var(--ink)] hover:border-[var(--line-strong)] hover:bg-[var(--surface-panel)]",
+                  ? "border-black bg-[var(--accent)] text-[var(--selected-contrast)] shadow-[var(--shadow-strong)]"
+                  : "border-[var(--line)] bg-[var(--surface-panel-strong)] text-[var(--ink)] shadow-[var(--shadow-soft)]",
               ].join(" ")}
               aria-pressed={selected}
             >
               <span
                 className={[
                   "inline-flex items-center justify-center border font-semibold shadow-[var(--keycap-shadow)]",
-                  isHero ? "h-12 min-w-[3.2rem] rounded-[0.95rem] px-3 text-lg" : "h-9 min-w-[2.5rem] rounded-[0.75rem] px-2 text-sm",
+                  isHero ? "h-12 min-w-[3.2rem] rounded-[0.625rem] px-3 text-lg" : "h-9 min-w-[2.5rem] rounded-[0.75rem] px-2 text-sm",
                   selected
                     ? "border-black/10 bg-white/35 text-[var(--selected-contrast)]"
                     : "border-[var(--line)] bg-[var(--keycap-bg)] text-[var(--muted)]",

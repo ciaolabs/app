@@ -163,7 +163,7 @@ function ShortcutKey({
   ariaLabel,
 }: ShortcutKeyProps) {
   const classes = [
-    "inline-flex h-8 items-center justify-center rounded-[0.9rem] border border-[var(--line)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-[var(--ink)] shadow-[var(--keycap-shadow)]",
+    "inline-flex h-8 items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-black shadow-[var(--keycap-shadow)]",
     wide ? "min-w-[3.3rem]" : "min-w-[2.2rem]",
     onClick ? "transition hover:border-[var(--line-strong)] disabled:cursor-not-allowed disabled:opacity-40" : "",
   ].join(" ");
@@ -185,7 +185,7 @@ function ShortcutKey({
   return (
     <span
       className={[
-        "inline-flex h-8 items-center justify-center rounded-[0.9rem] border border-[var(--line)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-[var(--ink)] shadow-[var(--keycap-shadow)]",
+        "inline-flex h-8 items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-black shadow-[var(--keycap-shadow)]",
         wide ? "min-w-[3.3rem]" : "min-w-[2.2rem]",
       ].join(" ")}
     >
@@ -479,7 +479,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
               type="button"
               onClick={handleSubmit}
               disabled={answeredCount !== questions.length || isSubmitting}
-              className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--accent-sand)] px-5 text-sm font-semibold text-[var(--selected-contrast)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-40"
+              className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-sand)] px-5 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isSubmitting ? "Submitting..." : "Submit survey"}
             </button>
@@ -488,17 +488,17 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
 
         <div className="grid min-h-0 gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
           <aside className="min-h-0 lg:h-full">
-            <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)] backdrop-blur">
+            <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)] backdrop-blur">
               <div className="shrink-0 space-y-3">
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+                  <p className="clay-label">
                     Survey progress
                   </p>
                   <button
                     type="button"
                     onClick={goToFirstUnansweredQuestion}
                     disabled={!hasUnansweredQuestions || isSubmitting}
-                    className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:border-[var(--line-strong)] hover:bg-[var(--surface-panel)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="clay-button-hover inline-flex rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ink)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     First unanswered
                   </button>
@@ -510,7 +510,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                       of {questions.length} prompts answered
                     </p>
                   </div>
-                  <p className="rounded-full bg-[var(--accent-blue)] px-4 py-2 text-sm font-semibold text-[var(--selected-contrast)]">
+                  <p className="rounded-full border border-black bg-[var(--accent-blue)] px-4 py-2 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
                     {completion}%
                   </p>
                 </div>
@@ -534,15 +534,15 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
           </aside>
 
           <main className="min-h-0">
-            <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] shadow-[var(--shadow-strong)] backdrop-blur">
+            <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] shadow-[var(--shadow-strong)] backdrop-blur">
               <div className="border-b border-[var(--line)] px-6 py-4 sm:px-7">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+                    <p className="clay-label">
                       Question {currentQuestion.order} of {questions.length}
                     </p>
                     {currentSection ? (
-                      <span className="rounded-full bg-[var(--surface-panel-strong)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink)]">
+                      <span className="rounded-full border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink)]">
                         {currentSection.shortTitle ?? currentSection.title}
                       </span>
                     ) : null}
@@ -570,9 +570,9 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                   </div>
                 </div>
                 {currentSection ? (
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[1.4rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-3">
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[1rem] border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-3">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+                      <p className="clay-label">
                         {currentSection.eyebrow ?? "Survey section"}
                       </p>
                       <p className="mt-1 text-lg font-semibold text-[var(--ink)]">
@@ -619,8 +619,8 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                         />
                       </div>
                     ) : (
-                      <div className="rounded-[1.6rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] px-5 py-5 text-[var(--ink-soft)] motion-safe:animate-[fadeIn_320ms_ease-out]">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+                      <div className="rounded-[1.5rem] border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] px-5 py-5 text-[var(--ink-soft)] motion-safe:animate-[fadeIn_320ms_ease-out]">
+                        <p className="clay-label">
                           Response saved
                         </p>
                         <p className="mt-3 max-w-3xl text-base leading-7">
@@ -651,11 +651,11 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
             id="survey-help-panel"
             role="dialog"
             aria-modal="true"
-            className="w-full max-w-xl rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] p-6 shadow-[var(--shadow-strong)]"
+            className="w-full max-w-xl rounded-[1.5rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-6 shadow-[var(--shadow-strong)]"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+                <p className="clay-label">
                   Documentation
                 </p>
                 <h2 className="mt-2 font-display text-4xl text-[var(--ink)]">Survey help</h2>
@@ -663,7 +663,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
               <button
                 type="button"
                 onClick={() => setIsHelpOpen(false)}
-                className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-panel)] px-3 text-sm font-semibold text-[var(--ink)] transition hover:border-[var(--line-strong)] hover:bg-[var(--surface-panel-strong)]"
+                className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel)] px-3 text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)]"
               >
                 Close
               </button>
@@ -674,13 +674,13 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                 {survey.helpContent?.body}
               </p>
               <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.4rem] bg-[var(--accent-lilac)] p-4 text-[var(--selected-contrast)]">
+                <div className="rounded-[1.5rem] border border-black bg-[var(--accent-lilac)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
                     <ShortcutKey wide>1-6</ShortcutKey>
                     <span>Answer</span>
                   </div>
                 </div>
-                <div className="rounded-[1.4rem] bg-[var(--accent-mint)] p-4 text-[var(--selected-contrast)]">
+                <div className="rounded-[1.5rem] border border-black bg-[var(--accent-mint)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
                     <ShortcutKey>
                       <ArrowLeftIcon />
@@ -688,7 +688,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                     <span>Previous</span>
                   </div>
                 </div>
-                <div className="rounded-[1.4rem] bg-[var(--accent-lime)] p-4 text-[var(--selected-contrast)]">
+                <div className="rounded-[1.5rem] border border-black bg-[var(--accent-lime)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
                     <ShortcutKey>
                       <ArrowRightIcon />
@@ -707,7 +707,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                         href={reference.href}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center rounded-full bg-[var(--accent-blue)] px-4 py-2 text-sm font-semibold text-[var(--selected-contrast)] transition hover:brightness-105"
+                        className="clay-button-hover inline-flex items-center rounded-full border border-black bg-[var(--accent-blue)] px-4 py-2 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
                       >
                         {reference.label}
                       </a>

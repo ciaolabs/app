@@ -9,7 +9,7 @@ import { QUESTION_COUNT } from "@/lib/survey/constants";
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
 
 function primaryActionClassName() {
-  return "inline-flex h-11 items-center justify-center rounded-full bg-[var(--accent-blue)] px-5 text-sm font-semibold text-[var(--selected-contrast)] transition hover:brightness-105";
+  return "clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-blue)] px-5 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]";
 }
 
 export default async function HomePage() {
@@ -17,7 +17,7 @@ export default async function HomePage() {
   const isSignedIn = Boolean(await getCurrentUserId());
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-6 pb-16 pt-4 sm:px-10 lg:px-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-6 pb-16 pt-0 sm:px-10 lg:px-12">
       <SiteTopNav
         helpHref="https://doi.org/10.1016/j.jrp.2010.01.002"
         action={
@@ -42,7 +42,7 @@ export default async function HomePage() {
       />
 
       <section
-        className="relative mt-4 overflow-hidden rounded-[2.8rem] border border-[var(--line)] px-6 py-10 shadow-[var(--shadow-strong)] sm:px-10 sm:py-14 lg:px-14 lg:py-16"
+        className="clay-section relative mt-6 overflow-hidden px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-16"
         style={{ background: "var(--hero-gradient)" }}
       >
         <div
@@ -55,7 +55,7 @@ export default async function HomePage() {
         >
           <div className="flex flex-col justify-between">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--muted)]">
+              <p className="clay-label">
                 Multiple Measures of Personality
               </p>
               <h1 className="mt-5 font-display text-5xl leading-[0.94] text-[var(--ink)] sm:text-6xl lg:text-7xl">
@@ -72,14 +72,14 @@ export default async function HomePage() {
                   href="https://doi.org/10.1016/j.jrp.2010.01.002"
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full border border-[var(--line)] bg-[var(--surface-panel)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:border-[var(--line-strong)]"
+                  className="clay-button-hover rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] shadow-[var(--shadow-soft)]"
                 >
                   Read the paper
                 </a>
                 {isSignedIn ? (
                   <Link
                     href={SURVEYS_ROUTE}
-                    className="rounded-full border border-[var(--line)] bg-[var(--surface-panel)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:border-[var(--line-strong)] hover:text-[var(--accent-coral)]"
+                    className="clay-button-hover rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] shadow-[var(--shadow-soft)]"
                   >
                     Open your surveys
                   </Link>
@@ -104,9 +104,9 @@ export default async function HomePage() {
               ].map((item) => (
                 <div
                   key={item.title}
-                  className="rounded-[1.8rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)] backdrop-blur"
+                  className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)] backdrop-blur"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+                  <p className="clay-label">
                     {item.title}
                   </p>
                   <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">{item.body}</p>
@@ -116,9 +116,9 @@ export default async function HomePage() {
           </div>
 
           {isSignedIn ? (
-            <div className="grid gap-4 rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 backdrop-blur">
+            <div className="grid gap-4 rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-soft)] backdrop-blur">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+                <p className="clay-label">
                   Survey scope
                 </p>
                 <p className="mt-3 font-display text-4xl text-[var(--ink)]">{QUESTION_COUNT}</p>
@@ -140,9 +140,9 @@ export default async function HomePage() {
               id="auth-panel"
               className="border-t border-[var(--line)] bg-[var(--surface-panel)] px-5 py-8 backdrop-blur sm:px-7 lg:-my-16 lg:-mr-14 lg:-ml-2 lg:border-t-0 lg:border-l lg:px-8 lg:py-10"
             >
-              <div className="mx-auto w-full max-w-[34rem] rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-strong)]">
+              <div className="mx-auto w-full max-w-[34rem] rounded-[1.5rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-6 shadow-[var(--shadow-strong)]">
                 <div className="mb-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+                  <p className="clay-label">
                     Sign in to start
                   </p>
                   <h2 className="mt-3 font-display text-4xl text-[var(--ink)]">
@@ -163,8 +163,8 @@ export default async function HomePage() {
                     appearance={clerkSignInAppearance}
                   />
                 ) : (
-                  <div className="rounded-[2rem] border border-dashed border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-6">
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+                  <div className="rounded-[1.5rem] border border-dashed border-[var(--line-strong)] bg-[var(--surface-panel)] p-6">
+                    <p className="clay-label">
                       Clerk setup needed
                     </p>
                     <h2 className="mt-3 font-display text-3xl text-[var(--ink)]">
@@ -200,9 +200,9 @@ export default async function HomePage() {
         ].map((feature) => (
           <div
             key={feature.title}
-            className="rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-soft)]"
+            className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-soft)]"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+            <p className="clay-label">
               Feature
             </p>
             <h2 className="mt-4 font-display text-3xl text-[var(--ink)]">{feature.title}</h2>
@@ -211,10 +211,10 @@ export default async function HomePage() {
         ))}
       </section>
 
-      <section className="mt-auto rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] px-6 py-8 shadow-[var(--shadow-soft)] sm:px-8">
+      <section className="mt-auto rounded-[2.5rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] px-6 py-8 shadow-[var(--shadow-soft)] sm:px-8">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+            <p className="clay-label">
               Important note
             </p>
             <p className="mt-4 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">
@@ -227,7 +227,7 @@ export default async function HomePage() {
             <div className="flex justify-start lg:justify-end">
               <Link
                 href={SURVEYS_ROUTE}
-                className="rounded-full border border-[var(--line)] bg-[var(--surface-panel)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:border-[var(--line-strong)] hover:text-[var(--accent-coral)]"
+                className="clay-button-hover rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] shadow-[var(--shadow-soft)]"
               >
                 Continue to surveys
               </Link>

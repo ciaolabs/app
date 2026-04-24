@@ -120,7 +120,7 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
 
 function primaryActionClassName(label: string) {
   const baseClassName =
-    "inline-flex h-11 items-center justify-center rounded-full px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50";
+    "clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-50";
 
   if (label === "Continue final attempt" || label === "View details") {
     return `${baseClassName} bg-[var(--accent-blue)]`;
@@ -159,10 +159,10 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
   return (
     <>
       <section
-        className="mt-4 rounded-[2.6rem] border border-[var(--line)] px-6 py-8 shadow-[var(--shadow-strong)] sm:px-8 sm:py-10"
+        className="clay-section mt-6 px-6 py-8 sm:px-8 sm:py-10"
         style={{ background: "var(--hero-gradient)" }}
       >
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+        <p className="clay-label">
           Survey selection
         </p>
         <h1 className="mt-4 font-display text-5xl text-[var(--ink)] sm:text-6xl">
@@ -174,7 +174,7 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
         </p>
       </section>
 
-      <section className="mt-6 grid gap-6 lg:grid-cols-2">
+      <section className="mt-4 grid gap-6 lg:grid-cols-2">
         {surveys.map((survey) => {
           const status = initialStatuses[survey.type] ?? null;
           const primaryAction = buildPrimaryAction(survey, status);
@@ -191,24 +191,24 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
           return (
             <article
               key={survey.type}
-              className="relative overflow-hidden rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-soft)]"
+              className="relative overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-soft)]"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+                  <p className="clay-label">
                     {buildUsageLabel(survey, status)}
                   </p>
                   <h2 className="mt-3 font-display text-3xl text-[var(--ink)]">{survey.title}</h2>
                 </div>
-                <span className="rounded-full bg-[var(--surface-panel-strong)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
+                <span className="rounded-full border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
                   {buildSurveyBadge(survey, status)}
                 </span>
               </div>
 
               <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">{survey.description}</p>
 
-              <div className="mt-6 rounded-[1.6rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+              <div className="mt-6 rounded-[1rem] border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] p-4">
+                <p className="clay-label">
                   Latest submission
                 </p>
                 <p className="mt-2 text-base text-[var(--ink)]">
@@ -231,7 +231,7 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                     type="button"
                     onClick={() => setRepeatSurvey(repeatActionSurvey)}
                     disabled={navigatingPath !== null}
-                    className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:border-[var(--line-strong)] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Repeat
                   </button>
@@ -242,7 +242,7 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                     type="button"
                     onClick={() => handleNavigate(reviewHref)}
                     disabled={navigatingPath !== null}
-                    className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:border-[var(--line-strong)] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Review results
                   </button>
@@ -258,9 +258,9 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
           <div
             role="dialog"
             aria-modal="true"
-            className="w-full max-w-xl rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] p-6 shadow-[var(--shadow-strong)]"
+            className="w-full max-w-xl rounded-[1.5rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-6 shadow-[var(--shadow-strong)]"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+            <p className="clay-label">
               Final attempt
             </p>
             <h2 className="mt-3 font-display text-4xl text-[var(--ink)]">
@@ -274,14 +274,14 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
               <button
                 type="button"
                 onClick={handleConfirmRepeat}
-                className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--accent-coral)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] transition hover:brightness-105"
+                className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-coral)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
               >
                 Yes
               </button>
               <button
                 type="button"
                 onClick={() => setRepeatSurvey(null)}
-                className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-panel)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] transition hover:border-[var(--line-strong)]"
+                className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)] shadow-[var(--shadow-soft)]"
               >
                 No
               </button>

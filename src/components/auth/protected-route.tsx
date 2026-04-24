@@ -22,8 +22,8 @@ function StatusPanel({
   body: string;
 }) {
   return (
-    <div className="mx-auto mt-4 max-w-2xl rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] p-8 shadow-[var(--shadow-strong)]">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+    <div className="mx-auto mt-4 max-w-2xl rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-8 shadow-[var(--shadow-strong)]">
+      <p className="clay-label">
         {eyebrow}
       </p>
       <h1 className="mt-3 font-display text-4xl text-[var(--ink)]">{title}</h1>

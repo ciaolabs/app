@@ -177,10 +177,10 @@ function getOrderedBeliefLevelThreeItems(results: BeliefsResultTab) {
 function EmptyDashboard({ ctaHref }: { ctaHref: string }) {
   return (
     <section
-      className="mt-4 rounded-[2.6rem] border border-[var(--line)] px-8 py-10 shadow-[var(--shadow-strong)] sm:px-12"
+      className="clay-section mt-6 px-8 py-10 sm:px-12"
       style={{ background: "var(--hero-gradient)" }}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+      <p className="clay-label">
         No submission yet
       </p>
       <h1 className="mt-4 font-display text-5xl text-[var(--ink)] sm:text-6xl">
@@ -191,7 +191,7 @@ function EmptyDashboard({ ctaHref }: { ctaHref: string }) {
       </p>
       <Link
         href={ctaHref}
-        className="mt-8 inline-flex rounded-full bg-[var(--accent-blue)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] transition hover:brightness-105"
+        className="clay-button-hover mt-8 inline-flex rounded-full border border-black bg-[var(--accent-blue)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
       >
         New Surveys
       </Link>
@@ -216,14 +216,14 @@ function SubmissionHistoryList({
     <div className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+          <p className="clay-label">
             Completed surveys
           </p>
           <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
             Open any saved submission stored for this account.
           </p>
         </div>
-        <p className="rounded-full bg-[var(--surface-panel-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
+        <p className="rounded-full border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
           {submissions.length} saved
         </p>
       </div>
@@ -245,7 +245,7 @@ function SubmissionHistoryList({
               onClick={() => onSelect(submission.submissionId)}
               disabled={isSwitchingSubmission && !isActive}
               className={[
-                "w-full rounded-[1.4rem] border px-4 py-4 text-left transition",
+                "w-full rounded-[1rem] border px-4 py-4 text-left shadow-[var(--shadow-soft)] transition",
                 isActive
                   ? "border-[var(--line-strong)] bg-[var(--surface-panel-strong)] shadow-[var(--shadow-soft)]"
                   : "border-[var(--line)] bg-[var(--surface-panel)] hover:border-[var(--line-strong)]",
@@ -254,7 +254,7 @@ function SubmissionHistoryList({
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                  <p className="clay-label">
                     {index === 0 ? "Most recent" : "Saved submission"}
                   </p>
                   <p className="mt-2 text-base font-semibold text-[var(--ink)]">
@@ -263,7 +263,7 @@ function SubmissionHistoryList({
                 </div>
                 <span
                   className={[
-                    "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
+                    "rounded-full border border-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
                     isActive
                       ? "bg-[var(--accent-coral)] text-[var(--selected-contrast)]"
                       : "bg-[var(--surface-panel-strong)] text-[var(--ink-soft)]",
@@ -357,7 +357,7 @@ function TabReferences({
   references: readonly { citation: string; href: string }[];
 }) {
   return (
-    <section className="rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+    <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
         More information about the science behind this survey can be found here:
       </p>
@@ -382,7 +382,7 @@ function TabReferences({
 
 function BeliefsIntro({ results }: { results: ValuesBeliefsResults["beliefs"] }) {
   return (
-    <section className="rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+    <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
         Showing score estimates for Beliefs.
       </p>
@@ -392,16 +392,16 @@ function BeliefsIntro({ results }: { results: ValuesBeliefsResults["beliefs"] })
         sample of previous respondents.
       </p>
       <div className="mt-6 grid gap-4 xl:grid-cols-3">
-        <div className="rounded-[1.6rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+        <div className="rounded-[1rem] border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-4">
+          <p className="clay-label">
             Level 1
           </p>
           <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
             Your responses are scored to show how much you view the world as Good vs. Bad.
           </p>
         </div>
-        <div className="rounded-[1.6rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+        <div className="rounded-[1rem] border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-4">
+          <p className="clay-label">
             Level 2
           </p>
           <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
@@ -409,8 +409,8 @@ function BeliefsIntro({ results }: { results: ValuesBeliefsResults["beliefs"] })
             Dangerous, Enticing vs. Dull, and Alive vs. Mechanistic.
           </p>
         </div>
-        <div className="rounded-[1.6rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+        <div className="rounded-[1rem] border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-4">
+          <p className="clay-label">
             Level 3
           </p>
           <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
@@ -428,7 +428,7 @@ function BeliefsIntro({ results }: { results: ValuesBeliefsResults["beliefs"] })
 
 function ValuesIntro({ results }: { results: ValuesBeliefsResults["values"] }) {
   return (
-    <section className="rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+    <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
         Showing score estimates for Values.
       </p>
@@ -547,7 +547,7 @@ export function ValuesBeliefsDashboardShell({
         action={
           <Link
             href={SURVEYS_ROUTE}
-            className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--accent-blue)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] transition hover:brightness-105"
+            className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-blue)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
           >
             New Surveys
           </Link>
@@ -556,10 +556,10 @@ export function ValuesBeliefsDashboardShell({
 
       {error ? (
         <section
-          className="mt-4 rounded-[2.6rem] border border-[var(--line)] px-8 py-10 shadow-[var(--shadow-strong)] sm:px-12"
+          className="clay-section mt-6 px-8 py-10 sm:px-12"
           style={{ background: "var(--hero-gradient)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+          <p className="clay-label">
             Results unavailable
           </p>
           <h1 className="mt-4 font-display text-5xl text-[var(--ink)] sm:text-6xl">
@@ -574,14 +574,14 @@ export function ValuesBeliefsDashboardShell({
       {!error && !results ? <EmptyDashboard ctaHref={SURVEYS_ROUTE} /> : null}
 
       {!error && results ? (
-        <div className="mt-4 space-y-6">
+        <div className="mt-6 space-y-6">
           <section
-            className="overflow-hidden rounded-[2.4rem] border border-[var(--line)] px-5 py-6 shadow-[var(--shadow-strong)] sm:px-8 sm:py-8"
+            className="clay-section overflow-hidden px-5 py-6 sm:px-8 sm:py-8"
             style={{ background: "var(--hero-gradient)" }}
           >
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_22rem] xl:items-start">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+                <p className="clay-label">
                   Survey Results
                 </p>
                 <h1 className="mt-4 font-display text-4xl text-[var(--ink)] sm:text-5xl">
@@ -599,8 +599,8 @@ export function ValuesBeliefsDashboardShell({
                 </p>
               </div>
 
-              <div className="rounded-[1.8rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+              <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)]">
+                <p className="clay-label">
                   Viewing saved results
                 </p>
                 <p className="mt-3 text-[1.65rem] text-[var(--ink)]">
@@ -615,7 +615,7 @@ export function ValuesBeliefsDashboardShell({
                     href="https://doi.org/10.1037/pas0000639"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition hover:border-[var(--line-strong)]"
+                    className="clay-button-hover inline-flex rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)]"
                   >
                     Beliefs source
                   </a>
@@ -623,7 +623,7 @@ export function ValuesBeliefsDashboardShell({
                     href="https://doi.org/10.1177/1073191121998760"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition hover:border-[var(--line-strong)]"
+                    className="clay-button-hover inline-flex rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)]"
                   >
                     Values source
                   </a>
@@ -640,7 +640,7 @@ export function ValuesBeliefsDashboardShell({
             </div>
           </section>
 
-          <section className="rounded-[2.4rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
+          <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
             <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
               {(["beliefs", "values"] as const).map((tab) => (
                 <button
@@ -648,7 +648,7 @@ export function ValuesBeliefsDashboardShell({
                   type="button"
                   onClick={() => setActiveTab(tab)}
                   className={[
-                    "rounded-[1.05rem] px-4 py-2.5 text-lg font-semibold uppercase tracking-[0.08em] transition",
+                    "rounded-full px-4 py-2.5 text-lg font-semibold uppercase tracking-[0.08em] transition",
                     activeTab === tab
                       ? "bg-[var(--accent-coral)] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
                       : "text-[var(--ink)] hover:bg-[var(--surface-panel-strong)]",
@@ -727,7 +727,7 @@ export function ValuesBeliefsDashboardShell({
                 </DashboardGaugeCard>
               ))}
 
-              <section className="rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+              <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
                 <h2 className="font-display text-3xl text-[var(--ink)]">Neutral Primals</h2>
                 <p className="mt-3 max-w-4xl text-base leading-7 text-[var(--ink-soft)]">
                   Several primal beliefs are unrelated to the 3 secondary dimensions described above.
@@ -780,7 +780,7 @@ export function ValuesBeliefsDashboardShell({
                 </DashboardGaugeCard>
               ))}
 
-              <section className="rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+              <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
                 <h2 className="font-display text-3xl text-[var(--ink)]">Other values</h2>
                 <p className="mt-3 max-w-4xl text-base leading-7 text-[var(--ink-soft)]">
                   These values are not included in any of the sections above.

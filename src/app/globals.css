@@ -1,95 +1,127 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf9f5;
-  --foreground: #262624;
-  --ink: #262624;
-  --ink-soft: rgba(38, 38, 36, 0.76);
-  --muted: rgba(38, 38, 36, 0.56);
-  --surface: #faf9f5;
-  --surface-secondary: #f0eee6;
-  --surface-panel: rgba(250, 249, 245, 0.84);
-  --surface-panel-strong: rgba(240, 238, 230, 0.94);
-  --surface-inset: rgba(227, 218, 204, 0.72);
-  --line: rgba(38, 38, 36, 0.1);
-  --line-strong: rgba(38, 38, 36, 0.18);
-  --accent: #7fa9d1;
-  --accent-soft: rgba(127, 169, 209, 0.2);
-  --accent-mint: #bee5d8;
-  --accent-lilac: #b8c5ff;
-  --accent-rose: #d787a2;
-  --accent-blue: #7fa9d1;
-  --accent-coral: #e6796d;
-  --accent-lime: #d9f2a5;
-  --accent-sand: #e3dacc;
-  --selected-contrast: #262624;
-  --keycap-bg: rgba(240, 238, 230, 0.96);
-  --keycap-shadow: 0 10px 22px rgba(38, 38, 36, 0.08);
-  --home-crumb-button-bg: var(--surface-panel);
-  --shadow-soft: 0 20px 70px rgba(38, 38, 36, 0.08);
-  --shadow-strong: 0 30px 120px rgba(38, 38, 36, 0.14);
-  --plot-fill-start: rgba(216, 135, 162, 0.34);
-  --plot-fill-end: rgba(127, 169, 209, 0.78);
+  --clay-black: #000000;
+  --clay-white: #ffffff;
+  --clay-cream: #faf9f7;
+  --clay-oat: #dad4c8;
+  --clay-oat-light: #eee9df;
+  --clay-warm-silver: #9f9b93;
+  --clay-warm-charcoal: #55534e;
+  --clay-matcha-300: #84e7a5;
+  --clay-matcha-600: #078a52;
+  --clay-matcha-800: #02492a;
+  --clay-slushie-500: #3bd3fd;
+  --clay-slushie-800: #0089ad;
+  --clay-lemon-400: #f8cc65;
+  --clay-lemon-500: #fbbd41;
+  --clay-lemon-700: #d08a11;
+  --clay-ube-300: #c1b0ff;
+  --clay-ube-800: #43089f;
+  --clay-pomegranate-400: #fc7981;
+  --clay-blueberry-800: #01418d;
+  --clay-focus: #146ef5;
+  --clay-radius-card: 1.5rem;
+  --clay-radius-section: 2.5rem;
+  --clay-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset, 0 -0.5px 1px rgba(0, 0, 0, 0.05);
+  --clay-hard-shadow: -7px 7px 0 #000000;
+  --background: #faf9f7;
+  --foreground: #000000;
+  --ink: #000000;
+  --ink-soft: #55534e;
+  --muted: #9f9b93;
+  --surface: #faf9f7;
+  --surface-secondary: #eee9df;
+  --surface-panel: rgba(255, 255, 255, 0.92);
+  --surface-panel-strong: #ffffff;
+  --surface-inset: rgba(238, 233, 223, 0.86);
+  --line: rgba(218, 212, 200, 0.9);
+  --line-strong: #dad4c8;
+  --accent: #3bd3fd;
+  --accent-soft: rgba(59, 211, 253, 0.16);
+  --accent-mint: #84e7a5;
+  --accent-lilac: #c1b0ff;
+  --accent-rose: #fc7981;
+  --accent-blue: #3bd3fd;
+  --accent-coral: #fc7981;
+  --accent-lime: #f8cc65;
+  --accent-sand: #eee9df;
+  --selected-contrast: #000000;
+  --keycap-bg: rgba(255, 255, 255, 0.98);
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
+  --home-crumb-button-bg: #ffffff;
+  --shadow-soft: var(--clay-shadow);
+  --shadow-strong: var(--clay-shadow), -7px 7px 0 rgba(0, 0, 0, 0.12);
+  --plot-fill-start: rgba(252, 121, 129, 0.42);
+  --plot-fill-end: rgba(59, 211, 253, 0.72);
   --plot-grid: rgba(38, 38, 36, 0.1);
   --plot-label: rgba(38, 38, 36, 0.58);
   --plot-stroke: rgba(38, 38, 36, 0.22);
   --hero-gradient:
-    radial-gradient(circle at top left, rgba(190, 229, 216, 0.7), transparent 34%),
-    radial-gradient(circle at 80% 25%, rgba(184, 197, 255, 0.5), transparent 22%),
-    linear-gradient(180deg, rgba(250, 249, 245, 0.98), rgba(240, 238, 230, 0.94));
-  --hero-spotlight: radial-gradient(circle at center, rgba(230, 121, 109, 0.2), transparent 62%);
+    linear-gradient(135deg, rgba(251, 189, 65, 0.72), rgba(132, 231, 165, 0.48) 48%, rgba(255, 255, 255, 0.78));
+  --hero-spotlight: radial-gradient(circle at center, rgba(59, 211, 253, 0.28), transparent 62%);
   --app-background:
-    radial-gradient(circle at top left, rgba(190, 229, 216, 0.38), transparent 34%),
-    radial-gradient(circle at bottom right, rgba(184, 197, 255, 0.3), transparent 26%),
-    linear-gradient(180deg, rgba(250, 249, 245, 0.98), rgba(240, 238, 230, 0.95));
-  --glow-left: rgba(190, 229, 216, 0.3);
-  --glow-right: rgba(184, 197, 255, 0.24);
-  --skeleton-base: rgba(227, 218, 204, 0.62);
-  --skeleton-highlight: rgba(250, 249, 245, 0.92);
+    linear-gradient(180deg, rgba(250, 249, 247, 0.98), rgba(250, 249, 247, 0.94));
+  --glow-left: rgba(132, 231, 165, 0.18);
+  --glow-right: rgba(193, 176, 255, 0.16);
+  --skeleton-base: rgba(218, 212, 200, 0.62);
+  --skeleton-highlight: rgba(255, 255, 255, 0.92);
+  --dot-color: rgba(38, 38, 36, 0.14);
+  --dot-hot-coral: rgba(224, 74, 64, 0.96);
+  --dot-hot-blue: rgba(32, 126, 210, 0.98);
+  --dot-hot-mint: rgba(39, 168, 131, 0.96);
+  --dot-hot-lilac: rgba(106, 93, 232, 0.96);
+  --dot-hot-opacity: 1;
+  --dot-hot-size: 1.35px;
+  --dot-hot-edge: 1.56px;
 }
 
 html[data-theme="dark"] {
-  --background: #262624;
+  --background: #26231f;
   --foreground: #faf9f5;
   --ink: #faf9f5;
-  --ink-soft: rgba(250, 249, 245, 0.76);
-  --muted: rgba(250, 249, 245, 0.56);
-  --surface: #262624;
-  --surface-secondary: #30302e;
-  --surface-panel: rgba(48, 48, 46, 0.82);
-  --surface-panel-strong: rgba(48, 48, 46, 0.94);
+  --ink-soft: rgba(250, 249, 245, 0.78);
+  --muted: rgba(250, 249, 245, 0.58);
+  --surface: #26231f;
+  --surface-secondary: #342f28;
+  --surface-panel: rgba(52, 47, 40, 0.88);
+  --surface-panel-strong: #3c352c;
   --surface-inset: rgba(227, 218, 204, 0.12);
-  --line: rgba(250, 249, 245, 0.1);
-  --line-strong: rgba(250, 249, 245, 0.18);
+  --line: rgba(218, 212, 200, 0.22);
+  --line-strong: rgba(238, 233, 223, 0.34);
   --selected-contrast: #262624;
-  --keycap-bg: rgba(63, 63, 60, 0.98);
-  --keycap-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
-  --home-crumb-button-bg: #141413;
-  --shadow-soft: 0 20px 70px rgba(0, 0, 0, 0.28);
-  --shadow-strong: 0 30px 120px rgba(0, 0, 0, 0.36);
-  --plot-fill-start: rgba(216, 135, 162, 0.42);
-  --plot-fill-end: rgba(127, 169, 209, 0.84);
+  --keycap-bg: rgba(250, 249, 247, 0.92);
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.34), 0 -1px 1px rgba(255, 255, 255, 0.08) inset;
+  --home-crumb-button-bg: #2a251f;
+  --shadow-soft: 0 1px 1px rgba(0, 0, 0, 0.4), 0 -1px 1px rgba(255, 255, 255, 0.06) inset, 0 -0.5px 1px rgba(255, 255, 255, 0.04);
+  --shadow-strong: var(--shadow-soft), -7px 7px 0 rgba(0, 0, 0, 0.48);
+  --plot-fill-start: rgba(252, 121, 129, 0.5);
+  --plot-fill-end: rgba(59, 211, 253, 0.78);
   --plot-grid: rgba(250, 249, 245, 0.12);
   --plot-label: rgba(250, 249, 245, 0.56);
   --plot-stroke: rgba(250, 249, 245, 0.22);
   --hero-gradient:
-    radial-gradient(circle at top left, rgba(190, 229, 216, 0.14), transparent 34%),
-    radial-gradient(circle at 80% 25%, rgba(184, 197, 255, 0.14), transparent 22%),
-    linear-gradient(180deg, rgba(38, 38, 36, 0.98), rgba(48, 48, 46, 0.96));
+    linear-gradient(135deg, rgba(67, 8, 159, 0.82), rgba(2, 73, 42, 0.74) 58%, rgba(52, 47, 40, 0.94));
   --hero-spotlight: radial-gradient(circle at center, rgba(230, 121, 109, 0.12), transparent 62%);
   --app-background:
-    radial-gradient(circle at top left, rgba(190, 229, 216, 0.14), transparent 34%),
-    radial-gradient(circle at bottom right, rgba(184, 197, 255, 0.12), transparent 26%),
-    linear-gradient(180deg, rgba(38, 38, 36, 0.98), rgba(48, 48, 46, 0.96));
+    linear-gradient(180deg, rgba(38, 35, 31, 0.98), rgba(44, 39, 33, 0.96));
   --glow-left: rgba(190, 229, 216, 0.14);
   --glow-right: rgba(184, 197, 255, 0.12);
   --skeleton-base: rgba(250, 249, 245, 0.08);
   --skeleton-highlight: rgba(250, 249, 245, 0.18);
   --selected-contrast-strong: #faf9f5;
+  --dot-color: rgba(250, 249, 245, 0.18);
+  --dot-hot-coral: rgba(255, 255, 255, 0.96);
+  --dot-hot-blue: rgba(255, 255, 255, 0.96);
+  --dot-hot-mint: rgba(255, 255, 255, 0.96);
+  --dot-hot-lilac: rgba(255, 255, 255, 0.96);
+  --dot-hot-opacity: 1;
+  --dot-hot-size: 1.15px;
+  --dot-hot-edge: 1.36px;
 }
 
 :root {
-  --selected-contrast-strong: #262624;
+  --selected-contrast-strong: #000000;
 }
 
 @theme inline {
@@ -119,6 +151,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
+  font-feature-settings: "ss03", "ss10", "ss11", "ss12";
   transition:
     background-color 180ms ease,
     color 180ms ease;
@@ -129,11 +162,93 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--clay-focus);
+  outline-offset: 3px;
+}
+
 .app-shell {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  background: var(--app-background);
+  background:
+    var(--app-background),
+    var(--background);
+}
+
+.interactive-dot-background {
+  --dot-pointer-x: -20rem;
+  --dot-pointer-y: -20rem;
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.82;
+  background-image: radial-gradient(circle, var(--dot-color) 1.15px, transparent 1.35px);
+  background-position: 0 0;
+  background-size: 12px 12px;
+  transition: opacity 180ms ease;
+}
+
+.interactive-dot-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: conic-gradient(
+    from 20deg at var(--dot-pointer-x) var(--dot-pointer-y),
+    var(--dot-hot-coral),
+    var(--dot-hot-blue),
+    var(--dot-hot-mint),
+    var(--dot-hot-lilac),
+    var(--dot-hot-coral)
+  );
+  filter: saturate(1.25) contrast(1.08);
+  mask-image:
+    radial-gradient(
+      circle 9rem at var(--dot-pointer-x) var(--dot-pointer-y),
+      black 0%,
+      black 42%,
+      transparent 78%
+    ),
+    radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
+  mask-position:
+    0 0,
+    0 0;
+  mask-size:
+    auto,
+    12px 12px;
+  mask-repeat:
+    no-repeat,
+    repeat;
+  mask-composite: intersect;
+  -webkit-mask-image:
+    radial-gradient(
+      circle 9rem at var(--dot-pointer-x) var(--dot-pointer-y),
+      black 0%,
+      black 42%,
+      transparent 78%
+    ),
+    radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
+  -webkit-mask-position:
+    0 0,
+    0 0;
+  -webkit-mask-size:
+    auto,
+    12px 12px;
+  -webkit-mask-repeat:
+    no-repeat,
+    repeat;
+  -webkit-mask-composite: source-in;
+  transition: opacity 160ms ease;
+}
+
+.interactive-dot-background[data-pointer="active"]::after {
+  opacity: var(--dot-hot-opacity);
 }
 
 .app-glow {
@@ -169,7 +284,78 @@ footer {
 }
 
 .font-display {
-  font-family: var(--font-display), serif;
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-feature-settings: "ss01", "ss03", "ss10", "ss11", "ss12";
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.font-mono {
+  font-family: var(--font-mono), "Space Mono", monospace;
+}
+
+.clay-label {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.clay-card {
+  border: 1px solid var(--line);
+  border-radius: var(--clay-radius-card);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.clay-section {
+  border: 1px solid var(--line);
+  border-radius: var(--clay-radius-section);
+  box-shadow: var(--shadow-strong);
+}
+
+.clay-button-hover {
+  transform-origin: center;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.clay-button-hover:hover:not(:disabled) {
+  background: var(--clay-pomegranate-400);
+  border-color: var(--clay-black);
+  color: var(--clay-black);
+  box-shadow: var(--clay-hard-shadow);
+  transform: translateY(-0.18rem) rotateZ(-3deg);
+}
+
+.clay-button-hover[data-clay-hover="dark"]:hover:not(:disabled) {
+  background: #434346;
+  color: #ffffff;
+}
+
+.clay-button-hover[data-clay-hover="blue"]:hover:not(:disabled) {
+  background: var(--clay-slushie-500);
+  color: var(--clay-black);
+}
+
+.clay-button-hover[data-clay-hover="lemon"]:hover:not(:disabled) {
+  background: var(--clay-lemon-500);
+  color: var(--clay-black);
+}
+
+.clay-swatch-section {
+  background: var(--clay-matcha-800);
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
+  box-shadow: -7px 7px 0 rgba(0, 0, 0, 0.9);
 }
 
 @keyframes fadeIn {

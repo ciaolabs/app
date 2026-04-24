@@ -83,17 +83,17 @@ export function ViolinPlot({
   return (
     <div
       className={[
-        "flex h-full min-h-0 flex-col rounded-[1.8rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] p-4 shadow-[var(--shadow-soft)]",
+        "flex h-full min-h-0 flex-col rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] p-4 shadow-[var(--shadow-soft)]",
         className ?? "",
       ].join(" ")}
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+          <p className="clay-label">
             Response pattern
           </p>
         </div>
-        <div className="rounded-full bg-[var(--accent-mint)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--selected-contrast)]">
+        <div className="rounded-full border border-black bg-[var(--accent-mint)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
           Selected: {selectedValue}
         </div>
       </div>

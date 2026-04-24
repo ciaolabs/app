@@ -7,7 +7,7 @@ export default async function SurveysPage() {
   const initialStatuses = await getInitialSurveyStatuses(surveyDefinitions);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-[1440px] px-6 py-4 sm:px-10 lg:px-12">
+    <main className="mx-auto min-h-screen w-full max-w-[1440px] px-6 pt-0 pb-16 sm:px-10 lg:px-12">
       <SiteTopNav breadcrumbTitle="Surveys" action={null} />
       <SurveyChooserShell surveys={surveyDefinitions} initialStatuses={initialStatuses} />
     </main>

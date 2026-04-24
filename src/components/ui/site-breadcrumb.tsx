@@ -46,12 +46,12 @@ export function SiteBreadcrumb({ title, items }: SiteBreadcrumbProps) {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex min-h-11 min-w-0 w-full max-w-full items-center gap-2 overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-3 py-1.5 text-sm font-semibold text-[var(--ink)] lg:inline-flex lg:w-auto"
+      className="flex min-h-11 min-w-0 w-full max-w-full items-center gap-2 overflow-hidden rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-3 py-1.5 text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)] lg:inline-flex lg:w-auto"
     >
       <Link
         href="/"
         aria-label="Home"
-        className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--home-crumb-button-bg)] text-[var(--ink)] transition hover:border-[var(--line-strong)] hover:bg-[var(--home-crumb-button-bg)]"
+        className="clay-button-hover inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--home-crumb-button-bg)] text-[var(--ink)]"
       >
         <HomeIcon />
       </Link>
@@ -74,7 +74,7 @@ export function SiteBreadcrumb({ title, items }: SiteBreadcrumbProps) {
                   {item.label}
                 </span>
               )}
-              <span className="pointer-events-none absolute left-1/2 top-full mt-2 hidden max-w-[18rem] -translate-x-1/2 overflow-hidden truncate whitespace-nowrap rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-2 text-xs text-[var(--ink)] shadow-[0_12px_30px_rgba(38,38,36,0.08)] opacity-0 transition duration-150 ease-out group-hover:block group-hover:opacity-100">
+              <span className="pointer-events-none absolute left-1/2 top-full mt-2 hidden max-w-[18rem] -translate-x-1/2 overflow-hidden truncate whitespace-nowrap rounded-[1rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-2 text-xs text-[var(--ink)] shadow-[var(--shadow-soft)] opacity-0 transition duration-150 ease-out group-hover:block group-hover:opacity-100">
                 {item.label}
               </span>
             </span>

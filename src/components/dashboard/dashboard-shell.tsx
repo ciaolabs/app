@@ -114,8 +114,8 @@ function SummaryNarrative({ results }: { results: SurveyResults }) {
 
 function HoverDetailCard({ item }: { item: RankedScaleResult }) {
   return (
-    <div className="rounded-[1.8rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-5 shadow-[var(--shadow-strong)]">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+    <div className="rounded-[1.5rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-5 shadow-[var(--shadow-strong)]">
+      <p className="clay-label">
         {item.inventoryLabel}
       </p>
       <h3 className="mt-2 font-display text-3xl text-[var(--ink)]">{item.displayName}</h3>
@@ -201,7 +201,7 @@ function RankingColumn({
               onFocus={(event) => onHover(item, event.currentTarget)}
               onBlur={() => onHover(null)}
               className={[
-                "grid w-full grid-cols-[minmax(0,1fr)_4rem] items-center gap-4 rounded-[1.1rem] p-2 text-left transition",
+                "grid w-full grid-cols-[minmax(0,1fr)_4rem] items-center gap-4 rounded-[1rem] p-2 text-left transition",
                 highlight
                   ? "bg-[var(--surface-panel-strong)] shadow-[var(--shadow-soft)]"
                   : "hover:bg-[var(--surface-panel)]",
@@ -214,7 +214,7 @@ function RankingColumn({
                     value={value}
                     maxValue={metric === "score" ? 50 : 100}
                     band={item.band}
-                    className="h-12 rounded-[1rem]"
+                    className="h-12 rounded-[0.75rem]"
                   />
                 </div>
               </div>
@@ -229,7 +229,7 @@ function RankingColumn({
 
 function DetailBars({ items }: { items: DashboardScaleLike[] }) {
   return (
-    <div className="divide-y divide-[var(--line)] rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel)]">
+    <div className="divide-y divide-[var(--line)] rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] shadow-[var(--shadow-soft)]">
       {items.map((item) => (
         <div key={item.code} className="grid gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-center">
           <div>
@@ -245,7 +245,7 @@ function DetailBars({ items }: { items: DashboardScaleLike[] }) {
                 value={item.score}
                 maxValue={50}
                 band={item.band}
-                className="h-12 rounded-[1rem]"
+                className="h-12 rounded-[0.75rem]"
               />
             </div>
             <p className="mt-3 text-right text-[1.1rem] text-[var(--ink-soft)]">{item.percentileText}</p>
@@ -258,7 +258,7 @@ function DetailBars({ items }: { items: DashboardScaleLike[] }) {
 
 function FrameworkPanel({ framework }: { framework: SurveyResults["frameworks"][number] }) {
   return (
-    <section className="rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+    <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
       <div className="mx-auto max-w-5xl text-center">
         <p className="text-sm uppercase tracking-[0.2em] text-[var(--muted)]">
           Score estimates comparable to
@@ -305,7 +305,7 @@ function FrameworkPanel({ framework }: { framework: SurveyResults["frameworks"][
               return (
                 <article
                   key={section.id}
-                  className="rounded-[1.8rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] p-4 shadow-[var(--shadow-soft)] sm:p-5"
+                  className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] p-4 shadow-[var(--shadow-soft)] sm:p-5"
                 >
                   <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
                     <div>
@@ -351,10 +351,10 @@ function FrameworkPanel({ framework }: { framework: SurveyResults["frameworks"][
 function EmptyDashboard({ ctaHref }: { ctaHref: string }) {
   return (
     <section
-      className="mt-4 rounded-[2.6rem] border border-[var(--line)] px-8 py-10 shadow-[var(--shadow-strong)] sm:px-12"
+      className="clay-section mt-6 px-8 py-10 sm:px-12"
       style={{ background: "var(--hero-gradient)" }}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+      <p className="clay-label">
         No submission yet
       </p>
       <h1 className="mt-4 font-display text-5xl text-[var(--ink)] sm:text-6xl">
@@ -366,7 +366,7 @@ function EmptyDashboard({ ctaHref }: { ctaHref: string }) {
       </p>
       <Link
         href={ctaHref}
-        className="mt-8 inline-flex rounded-full bg-[var(--accent-blue)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] transition hover:brightness-105"
+        className="clay-button-hover mt-8 inline-flex rounded-full border border-black bg-[var(--accent-blue)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
       >
         New Surveys
       </Link>
@@ -391,14 +391,14 @@ function SubmissionHistoryList({
     <div className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+          <p className="clay-label">
             Completed surveys
           </p>
           <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
             Open any saved submission stored for this account.
           </p>
         </div>
-        <p className="rounded-full bg-[var(--surface-panel-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
+        <p className="rounded-full border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
           {submissions.length} saved
         </p>
       </div>
@@ -420,7 +420,7 @@ function SubmissionHistoryList({
               onClick={() => onSelect(submission.submissionId)}
               disabled={isSwitchingSubmission && !isActive}
               className={[
-                "w-full rounded-[1.4rem] border px-4 py-4 text-left transition",
+                "w-full rounded-[1rem] border px-4 py-4 text-left shadow-[var(--shadow-soft)] transition",
                 isActive
                   ? "border-[var(--line-strong)] bg-[var(--surface-panel-strong)] shadow-[var(--shadow-soft)]"
                   : "border-[var(--line)] bg-[var(--surface-panel)] hover:border-[var(--line-strong)]",
@@ -429,7 +429,7 @@ function SubmissionHistoryList({
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                  <p className="clay-label">
                     {index === 0 ? "Most recent" : "Saved submission"}
                   </p>
                   <p className="mt-2 text-base font-semibold text-[var(--ink)]">
@@ -438,7 +438,7 @@ function SubmissionHistoryList({
                 </div>
                 <span
                   className={[
-                    "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
+                    "rounded-full border border-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
                     isActive
                       ? "bg-[var(--accent-coral)] text-[var(--selected-contrast)]"
                       : "bg-[var(--surface-panel-strong)] text-[var(--ink-soft)]",
@@ -592,7 +592,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
         action={
           <Link
             href={SURVEYS_ROUTE}
-            className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--accent-blue)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] transition hover:brightness-105"
+            className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-blue)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
           >
             New Surveys
           </Link>
@@ -601,10 +601,10 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
 
       {error ? (
         <section
-          className="mt-4 rounded-[2.6rem] border border-[var(--line)] px-8 py-10 shadow-[var(--shadow-strong)] sm:px-12"
+          className="clay-section mt-6 px-8 py-10 sm:px-12"
           style={{ background: "var(--hero-gradient)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+          <p className="clay-label">
             Results unavailable
           </p>
           <h1 className="mt-4 font-display text-5xl text-[var(--ink)] sm:text-6xl">
@@ -619,14 +619,14 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
       {!error && !results ? <EmptyDashboard ctaHref={SURVEYS_ROUTE} /> : null}
 
       {!error && results ? (
-        <div className="mt-4 space-y-6">
+        <div className="mt-6 space-y-6">
           <section
-            className="overflow-hidden rounded-[2.4rem] border border-[var(--line)] px-5 py-6 shadow-[var(--shadow-strong)] sm:px-8 sm:py-8"
+            className="clay-section overflow-hidden px-5 py-6 sm:px-8 sm:py-8"
             style={{ background: "var(--hero-gradient)" }}
           >
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_22rem] xl:items-start">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+                <p className="clay-label">
                   Survey Results
                 </p>
                 <h1 className="mt-4 font-display text-4xl text-[var(--ink)] sm:text-5xl">
@@ -644,8 +644,8 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
                 </p>
               </div>
 
-              <div className="rounded-[1.8rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+              <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)]">
+                <p className="clay-label">
                   Viewing saved results
                 </p>
                 <p className="mt-3 text-[1.65rem] text-[var(--ink)]">
@@ -660,13 +660,13 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
                     href={activeFramework?.readMoreHref ?? "https://doi.org/10.1016/j.jrp.2010.01.002"}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition hover:border-[var(--line-strong)]"
+                    className="clay-button-hover inline-flex rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)]"
                   >
                     Read the source
                   </a>
                   <button
                     type="button"
-                    className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] opacity-80"
+                    className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] opacity-80 shadow-[var(--shadow-soft)]"
                   >
                     Share your results
                   </button>
@@ -687,10 +687,10 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
             </div>
           </section>
 
-          <section className="rounded-[2.4rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6">
+          <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <h2 className="font-display text-3xl text-[var(--ink)]">Your Scores</h2>
-              <div className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] p-1">
+              <div className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] p-1 shadow-[var(--shadow-soft)]">
                 {(["highest", "lowest"] as const).map((mode) => (
                   <button
                     key={mode}
@@ -745,7 +745,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
             )}
           </section>
 
-          <section className="rounded-[2.4rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
+          <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
             <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
               {results.frameworks.map((framework) => (
                 <button
@@ -753,7 +753,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
                   type="button"
                   onClick={() => setActiveFrameworkId(framework.id)}
                   className={[
-                    "rounded-[1.05rem] px-4 py-2.5 text-lg font-semibold uppercase tracking-[0.08em] transition",
+                    "rounded-full px-4 py-2.5 text-lg font-semibold uppercase tracking-[0.08em] transition",
                     activeFrameworkId === framework.id
                       ? "bg-[var(--accent-coral)] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
                       : "text-[var(--ink)] hover:bg-[var(--surface-panel-strong)]",

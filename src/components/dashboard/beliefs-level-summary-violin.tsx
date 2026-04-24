@@ -135,11 +135,11 @@ export function BeliefsLevelSummaryViolin({ groups }: BeliefsLevelSummaryViolinP
   return (
     <section
       aria-label="Beliefs level summary violin"
-      className="rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7"
+      className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7"
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+          <p className="clay-label">
             Beliefs summary
           </p>
           <h2 className="mt-2 font-display text-4xl text-[var(--ink)]">I believe the world is...</h2>
