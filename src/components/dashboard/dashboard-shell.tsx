@@ -1,0 +1,778 @@
+"use client";
+
+import Link from "next/link";
+import { createPortal } from "react-dom";
+import { useCallback, useEffect, useState } from "react";
+
+import {
+  DashboardGauge,
+  SegmentedScoreBar,
+} from "@/components/dashboard/dashboard-metrics";
+import { SiteTopNav } from "@/components/site-top-nav";
+import {
+  getPendingResultsKey,
+  getStoredAnswersKey,
+  type ActiveSurveyDefinition,
+} from "@/lib/survey/definitions";
+import {
+  type ResultsPayload,
+  type RankedScaleResult,
+  type ScaleResult,
+  type SurveyResults,
+} from "@/lib/survey/results/types";
+import { SURVEYS_ROUTE, getSurveyApiBasePath } from "@/lib/survey/routes";
+import { type SurveySubmissionSummary } from "@/lib/survey/types";
+
+type RankingMode = "highest" | "lowest";
+
+type DashboardScaleLike = Pick<
+  ScaleResult,
+  "code" | "displayName" | "description" | "score" | "percentileText" | "band"
+>;
+
+const DEFAULT_VISIBLE_ROWS = 10;
+
+function percentileSentence(item: { percentileDirection: "higher" | "lower"; percentileMagnitude: number }) {
+  return item.percentileDirection === "higher"
+    ? `You scored higher than ${item.percentileMagnitude} percent of people.`
+    : `You scored lower than ${item.percentileMagnitude} percent of people.`;
+}
+
+function formatSubmittedAt(timestamp: string | null) {
+  if (!timestamp) {
+    return "not yet submitted";
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(timestamp));
+}
+
+function describeDashboardError(error: string) {
+  if (/authentication required/i.test(error)) {
+    return "Please refresh the page and try again.";
+  }
+
+  return error;
+}
+
+function SummaryNarrative({ results }: { results: SurveyResults }) {
+  const strongestScore = results.narrative.strongestScore;
+  const strongestPercentile = results.narrative.strongestPercentile;
+  const lowestScore = results.narrative.lowestScore;
+  const lowestPercentile = results.narrative.lowestPercentile;
+  const strongestOthers = results.narrative.strongestOthers.map((item) => item.displayName).join(", ");
+  const lowestOthers = results.narrative.lowestOthers.map((item) => item.displayName).join(", ");
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <p className="text-base leading-8 text-[var(--ink-soft)]">
+        {strongestScore ? (
+          <>
+            The highest score you received was on{" "}
+            <span className="font-semibold text-[var(--ink)]">{strongestScore.displayName}</span>,
+            indicating you likely exhibit {strongestScore.description.toLowerCase()}.{" "}
+          </>
+        ) : null}
+        {strongestPercentile ? (
+          <>
+            Your score for{" "}
+            <span className="font-semibold text-[var(--ink)]">{strongestPercentile.displayName}</span>{" "}
+            was higher than {strongestPercentile.percentileMagnitude}% of respondents, indicating{" "}
+            {strongestPercentile.description.toLowerCase()}.
+          </>
+        ) : null}
+        {strongestOthers ? (
+          <> You also scored highly on {strongestOthers}.</>
+        ) : null}
+      </p>
+
+      <p className="text-base leading-8 text-[var(--ink-soft)]">
+        {lowestScore ? (
+          <>
+            The lowest score you received was on{" "}
+            <span className="font-semibold text-[var(--ink)]">{lowestScore.displayName}</span>,
+            suggesting you do not exhibit {lowestScore.description.toLowerCase()}.{" "}
+          </>
+        ) : null}
+        {lowestPercentile ? (
+          <>
+            Your score for{" "}
+            <span className="font-semibold text-[var(--ink)]">{lowestPercentile.displayName}</span>{" "}
+            was lower than {lowestPercentile.percentileMagnitude}% of respondents, indicating{" "}
+            {lowestPercentile.description.toLowerCase()}.
+          </>
+        ) : null}
+        {lowestOthers ? (
+          <> You also scored low on {lowestOthers}.</>
+        ) : null}
+      </p>
+    </div>
+  );
+}
+
+function HoverDetailCard({ item }: { item: RankedScaleResult }) {
+  return (
+    <div className="rounded-[1.8rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-5 shadow-[var(--shadow-strong)]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+        {item.inventoryLabel}
+      </p>
+      <h3 className="mt-2 font-display text-3xl text-[var(--ink)]">{item.displayName}</h3>
+      <p className="mt-3 max-w-2xl text-base leading-8 text-[var(--ink-soft)]">{item.description}</p>
+      <div className="mt-5 flex flex-wrap gap-6 text-sm text-[var(--ink-soft)]">
+        <p>
+          Your score: <span className="font-semibold text-[var(--ink)]">{item.score}/50</span>
+        </p>
+        <p>
+          <span className="font-semibold text-[var(--ink)]">{item.percentileText}</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function HoverPopover({
+  item,
+  rect,
+}: {
+  item: RankedScaleResult;
+  rect: DOMRect;
+}) {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  const popoverWidth = 340;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const left = rect.right + 18 + popoverWidth <= viewportWidth
+    ? rect.right + 18
+    : Math.max(16, rect.left - popoverWidth - 18);
+  const top = clamp(rect.top + rect.height / 2 - 110, 16, viewportHeight - 220);
+
+  return createPortal(
+    <div
+      className="pointer-events-none fixed z-50 w-[21.25rem]"
+      style={{
+        left,
+        top,
+      }}
+    >
+      <HoverDetailCard item={item} />
+    </div>,
+    document.body,
+  );
+}
+
+function RankingColumn({
+  label,
+  valueLabel,
+  items,
+  metric,
+  hoveredCode,
+  onHover,
+}: {
+  label: string;
+  valueLabel: string;
+  items: RankedScaleResult[];
+  metric: "score" | "percentile";
+  hoveredCode: string | null;
+  onHover: (item: RankedScaleResult | null, target?: HTMLElement | null) => void;
+}) {
+  return (
+    <div>
+      <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-4 border-b border-[var(--line)] pb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+        <p>{label}</p>
+        <p className="text-right">{valueLabel}</p>
+      </div>
+
+      <div className="mt-4 space-y-3">
+        {items.map((item) => {
+          const highlight = hoveredCode === item.code;
+          const value = metric === "score" ? item.score : item.percentileMagnitude;
+
+          return (
+            <button
+              key={`${metric}-${item.code}`}
+              type="button"
+              onMouseEnter={(event) => onHover(item, event.currentTarget)}
+              onMouseLeave={() => onHover(null)}
+              onFocus={(event) => onHover(item, event.currentTarget)}
+              onBlur={() => onHover(null)}
+              className={[
+                "grid w-full grid-cols-[minmax(0,1fr)_4rem] items-center gap-4 rounded-[1.1rem] p-2 text-left transition",
+                highlight
+                  ? "bg-[var(--surface-panel-strong)] shadow-[var(--shadow-soft)]"
+                  : "hover:bg-[var(--surface-panel)]",
+              ].join(" ")}
+            >
+              <div className="min-w-0">
+                <p className="line-clamp-1 text-[1.35rem] leading-tight text-[var(--ink)]">{item.displayName}</p>
+                <div className="mt-2">
+                  <SegmentedScoreBar
+                    value={value}
+                    maxValue={metric === "score" ? 50 : 100}
+                    band={item.band}
+                    className="h-12 rounded-[1rem]"
+                  />
+                </div>
+              </div>
+              <p className="text-right text-xl font-semibold text-[var(--ink)]">{value}</p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DetailBars({ items }: { items: DashboardScaleLike[] }) {
+  return (
+    <div className="divide-y divide-[var(--line)] rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel)]">
+      {items.map((item) => (
+        <div key={item.code} className="grid gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-center">
+          <div>
+            <h4 className="text-[1.65rem] leading-tight text-[var(--ink)]">{item.displayName}</h4>
+            <p className="mt-2 max-w-2xl text-[15px] leading-7 text-[var(--ink-soft)]">
+              {item.description}
+            </p>
+          </div>
+          <div>
+            <p className="text-right text-xl font-semibold text-[var(--ink)]">{item.score}/50</p>
+            <div className="mt-3">
+              <SegmentedScoreBar
+                value={item.score}
+                maxValue={50}
+                band={item.band}
+                className="h-12 rounded-[1rem]"
+              />
+            </div>
+            <p className="mt-3 text-right text-[1.1rem] text-[var(--ink-soft)]">{item.percentileText}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FrameworkPanel({ framework }: { framework: SurveyResults["frameworks"][number] }) {
+  return (
+    <section className="rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+      <div className="mx-auto max-w-5xl text-center">
+        <p className="text-sm uppercase tracking-[0.2em] text-[var(--muted)]">
+          Score estimates comparable to
+        </p>
+        <h2 className="mt-3 font-display text-3xl text-[var(--ink)] sm:text-4xl">
+          {framework.heading}
+        </h2>
+        <p className="mt-3 text-base leading-7 text-[var(--ink-soft)]">{framework.methodology}</p>
+      </div>
+
+      {framework.overview.length > 0 ? (
+        <div className="mx-auto mt-8 grid max-w-6xl gap-8 sm:grid-cols-2 xl:grid-cols-3">
+          {framework.overview.map((metric) => (
+            <DashboardGauge
+              key={metric.id}
+              score={metric.score}
+              band={metric.band}
+              label={metric.label}
+              median={metric.median}
+              iqrStart={metric.iqrStart}
+              iqrEnd={metric.iqrEnd}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      <div className="mx-auto mt-10 max-w-6xl">
+        <p className="text-base leading-8 text-[var(--ink-soft)]">{framework.intro}</p>
+        <a
+          href={framework.readMoreHref}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-5 inline-flex text-base underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--accent-coral)]"
+        >
+          Read more
+        </a>
+      </div>
+
+      <div className="mx-auto mt-7 max-w-6xl space-y-5">
+        {framework.layout === "gauges"
+          ? framework.sections.map((section) => {
+              const metric = framework.overview.find((item) => item.label === section.title);
+
+              return (
+                <article
+                  key={section.id}
+                  className="rounded-[1.8rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] p-4 shadow-[var(--shadow-soft)] sm:p-5"
+                >
+                  <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
+                    <div>
+                      <h3 className="font-display text-3xl text-[var(--ink)]">{section.title}</h3>
+                      {section.description ? (
+                        <p className="mt-3 max-w-3xl text-base leading-8 text-[var(--ink-soft)]">
+                          {section.description}
+                        </p>
+                      ) : null}
+                      {metric ? (
+                        <p className="mt-4 text-xl font-semibold text-[var(--ink)]">
+                          {percentileSentence(metric)}
+                        </p>
+                      ) : null}
+                    </div>
+                    {metric ? (
+                      <DashboardGauge
+                        score={metric.score}
+                        band={metric.band}
+                        label={metric.label}
+                        median={metric.median}
+                        iqrStart={metric.iqrStart}
+                        iqrEnd={metric.iqrEnd}
+                      />
+                    ) : null}
+                  </div>
+                  <div className="mt-8">
+                    <DetailBars items={section.items} />
+                  </div>
+                </article>
+              );
+            })
+          : framework.sections.map((section) => (
+              <article key={section.id}>
+                <DetailBars items={section.items} />
+              </article>
+            ))}
+      </div>
+    </section>
+  );
+}
+
+function EmptyDashboard({ ctaHref }: { ctaHref: string }) {
+  return (
+    <section
+      className="mt-4 rounded-[2.6rem] border border-[var(--line)] px-8 py-10 shadow-[var(--shadow-strong)] sm:px-12"
+      style={{ background: "var(--hero-gradient)" }}
+    >
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+        No submission yet
+      </p>
+      <h1 className="mt-4 font-display text-5xl text-[var(--ink)] sm:text-6xl">
+        Your results dashboard appears after you submit the survey.
+      </h1>
+      <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--ink-soft)]">
+        Finish the questionnaire to generate AMBI-based score estimates, ranked traits, and the
+        eight-framework breakdown on this page.
+      </p>
+      <Link
+        href={ctaHref}
+        className="mt-8 inline-flex rounded-full bg-[var(--accent-blue)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] transition hover:brightness-105"
+      >
+        New Surveys
+      </Link>
+    </section>
+  );
+}
+
+function SubmissionHistoryList({
+  submissions,
+  selectedSubmissionId,
+  isSwitchingSubmission,
+  selectionError,
+  onSelect,
+}: {
+  submissions: SurveySubmissionSummary[];
+  selectedSubmissionId: string | null;
+  isSwitchingSubmission: boolean;
+  selectionError: string | null;
+  onSelect: (submissionId: string) => void;
+}) {
+  return (
+    <div className="mt-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+            Completed surveys
+          </p>
+          <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
+            Open any saved submission stored for this account.
+          </p>
+        </div>
+        <p className="rounded-full bg-[var(--surface-panel-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
+          {submissions.length} saved
+        </p>
+      </div>
+
+      {selectionError ? (
+        <p className="mt-4 text-sm leading-6 text-[var(--accent-coral)]">
+          {describeDashboardError(selectionError)}
+        </p>
+      ) : null}
+
+      <div className="mt-4 max-h-[18rem] space-y-3 overflow-y-auto pr-1">
+        {submissions.map((submission, index) => {
+          const isActive = selectedSubmissionId === submission.submissionId;
+
+          return (
+            <button
+              key={submission.submissionId}
+              type="button"
+              onClick={() => onSelect(submission.submissionId)}
+              disabled={isSwitchingSubmission && !isActive}
+              className={[
+                "w-full rounded-[1.4rem] border px-4 py-4 text-left transition",
+                isActive
+                  ? "border-[var(--line-strong)] bg-[var(--surface-panel-strong)] shadow-[var(--shadow-soft)]"
+                  : "border-[var(--line)] bg-[var(--surface-panel)] hover:border-[var(--line-strong)]",
+                isSwitchingSubmission && !isActive ? "cursor-not-allowed opacity-60" : "",
+              ].join(" ")}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                    {index === 0 ? "Most recent" : "Saved submission"}
+                  </p>
+                  <p className="mt-2 text-base font-semibold text-[var(--ink)]">
+                    {formatSubmittedAt(submission.submittedAt)}
+                  </p>
+                </div>
+                <span
+                  className={[
+                    "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
+                    isActive
+                      ? "bg-[var(--accent-coral)] text-[var(--selected-contrast)]"
+                      : "bg-[var(--surface-panel-strong)] text-[var(--ink-soft)]",
+                  ].join(" ")}
+                >
+                  {isSwitchingSubmission && isActive ? "Loading..." : isActive ? "Viewing" : "Open"}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-[var(--ink-soft)]">
+                {submission.answerCount} scored responses attached to this completion.
+              </p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+type DashboardShellProps = {
+  survey: Pick<ActiveSurveyDefinition, "type" | "title" | "route" | "resultsTitle">;
+  initialPayload: ResultsPayload<SurveyResults>;
+};
+
+export function DashboardShell({ survey, initialPayload }: DashboardShellProps) {
+  const [results, setResults] = useState<SurveyResults | null>(initialPayload.results ?? null);
+  const [submissions, setSubmissions] = useState<SurveySubmissionSummary[]>(
+    initialPayload.submissions ?? [],
+  );
+  const [isSwitchingSubmission, setIsSwitchingSubmission] = useState(false);
+  const [error, setError] = useState<string | null>(initialPayload.error ?? null);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(
+    initialPayload.selectedSubmissionId ?? initialPayload.results?.submission.submissionId ?? null,
+  );
+  const [rankingMode, setRankingMode] = useState<RankingMode>("highest");
+  const [showAllRankings, setShowAllRankings] = useState(false);
+  const [hoveredScale, setHoveredScale] = useState<RankedScaleResult | null>(null);
+  const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
+  const [activeFrameworkId, setActiveFrameworkId] = useState(
+    initialPayload.results?.frameworks[0]?.id ?? "NEO",
+  );
+  const pendingResultsKey = getPendingResultsKey(survey.type);
+  const storedAnswersKey = getStoredAnswersKey(survey.type);
+  const surveyApiBasePath = getSurveyApiBasePath(survey.type);
+
+  useEffect(() => {
+    function handleViewportChange() {
+      setHoveredScale(null);
+      setHoveredRect(null);
+    }
+
+    window.addEventListener("scroll", handleViewportChange, { passive: true });
+    window.addEventListener("resize", handleViewportChange);
+
+    return () => {
+      window.removeEventListener("scroll", handleViewportChange);
+      window.removeEventListener("resize", handleViewportChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!results) {
+      return;
+    }
+
+    window.sessionStorage.removeItem(pendingResultsKey);
+    window.sessionStorage.removeItem(storedAnswersKey);
+  }, [pendingResultsKey, results, storedAnswersKey]);
+
+  const applyResultsPayload = useCallback((payload: ResultsPayload<SurveyResults>) => {
+    if (payload.results) {
+      window.sessionStorage.removeItem(pendingResultsKey);
+      window.sessionStorage.removeItem(storedAnswersKey);
+    }
+
+    setResults(payload.results);
+    setSubmissions(payload.submissions ?? []);
+    setSelectedSubmissionId(payload.selectedSubmissionId ?? payload.results?.submission.submissionId ?? null);
+    setActiveFrameworkId(payload.results?.frameworks[0]?.id ?? "NEO");
+    setHoveredScale(null);
+    setHoveredRect(null);
+    setSelectionError(null);
+    setError(null);
+  }, [pendingResultsKey, storedAnswersKey]);
+
+  const fetchResultsPayload = useCallback(async (submissionId?: string) => {
+    const search = submissionId ? `?submissionId=${encodeURIComponent(submissionId)}` : "";
+    const response = await fetch(`${surveyApiBasePath}/results${search}`, {
+      cache: "no-store",
+      credentials: "include",
+    });
+    const payload = (await response.json()) as ResultsPayload<SurveyResults>;
+
+    if (!response.ok) {
+      throw new Error(payload.error ?? "Unable to load the saved survey results.");
+    }
+
+    return payload;
+  }, [surveyApiBasePath]);
+
+  const handleSelectSubmission = useCallback(
+    (submissionId: string) => {
+      if (submissionId === selectedSubmissionId || isSwitchingSubmission) {
+        return;
+      }
+
+      setIsSwitchingSubmission(true);
+      setSelectionError(null);
+
+      void (async () => {
+        try {
+          const payload = await fetchResultsPayload(submissionId);
+          applyResultsPayload(payload);
+        } catch (fetchError) {
+          setSelectionError(
+            fetchError instanceof Error
+              ? fetchError.message
+              : "Unable to load the selected survey results.",
+          );
+        } finally {
+          setIsSwitchingSubmission(false);
+        }
+      })();
+    },
+    [applyResultsPayload, fetchResultsPayload, isSwitchingSubmission, selectedSubmissionId],
+  );
+
+  const activeFramework = results?.frameworks.find((framework) => framework.id === activeFrameworkId)
+    ?? results?.frameworks[0]
+    ?? null;
+  const leftRankings = rankingMode === "highest" ? results?.ranked.highestByScore : results?.ranked.lowestByScore;
+  const rightRankings =
+    rankingMode === "highest" ? results?.ranked.highestByPercentile : results?.ranked.lowestByPercentile;
+  const visibleCount = showAllRankings ? undefined : DEFAULT_VISIBLE_ROWS;
+  const visibleLeftRankings = leftRankings?.slice(0, visibleCount);
+  const visibleRightRankings = rightRankings?.slice(0, visibleCount);
+  const handleHover = (item: RankedScaleResult | null, target?: HTMLElement | null) => {
+    setHoveredScale(item);
+    setHoveredRect(item && target ? target.getBoundingClientRect() : null);
+  };
+
+  return (
+    <>
+      <SiteTopNav
+        breadcrumbItems={[
+          { label: "Surveys", href: SURVEYS_ROUTE },
+          { label: survey.title, href: survey.route },
+          { label: "Survey Results" },
+        ]}
+        action={
+          <Link
+            href={SURVEYS_ROUTE}
+            className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--accent-blue)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] transition hover:brightness-105"
+          >
+            New Surveys
+          </Link>
+        }
+      />
+
+      {error ? (
+        <section
+          className="mt-4 rounded-[2.6rem] border border-[var(--line)] px-8 py-10 shadow-[var(--shadow-strong)] sm:px-12"
+          style={{ background: "var(--hero-gradient)" }}
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+            Results unavailable
+          </p>
+          <h1 className="mt-4 font-display text-5xl text-[var(--ink)] sm:text-6xl">
+            We could not load the dashboard right now.
+          </h1>
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--accent-coral)]">
+            {describeDashboardError(error)}
+          </p>
+        </section>
+      ) : null}
+
+      {!error && !results ? <EmptyDashboard ctaHref={SURVEYS_ROUTE} /> : null}
+
+      {!error && results ? (
+        <div className="mt-4 space-y-6">
+          <section
+            className="overflow-hidden rounded-[2.4rem] border border-[var(--line)] px-5 py-6 shadow-[var(--shadow-strong)] sm:px-8 sm:py-8"
+            style={{ background: "var(--hero-gradient)" }}
+          >
+            <div className="grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_22rem] xl:items-start">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+                  Survey Results
+                </p>
+                <h1 className="mt-4 font-display text-4xl text-[var(--ink)] sm:text-5xl">
+                  {survey.resultsTitle}
+                </h1>
+                <p className="mt-4 max-w-4xl text-base leading-7 text-[var(--ink-soft)]">
+                  The questions you answered are used to generate personality scores across several
+                  different frameworks. This approach, based on the Analog to Multiple Broadband
+                  Inventories, estimates your scores using a limited number of public-domain questions.
+                </p>
+                <p className="mt-3 max-w-4xl text-[15px] leading-7 text-[var(--ink-soft)]">
+                  Please note that the results provided below are for informational purposes only, and
+                  are not intended to be psychological or medical advice. The accuracy or completeness
+                  of the results are not guaranteed.
+                </p>
+              </div>
+
+              <div className="rounded-[1.8rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+                  Viewing saved results
+                </p>
+                <p className="mt-3 text-[1.65rem] text-[var(--ink)]">
+                  {formatSubmittedAt(results.submission.submittedAt)}
+                </p>
+                <p className="mt-3 text-sm leading-6 text-[var(--ink-soft)]">
+                  {results.submission.answerCount} responses were scored from the selected submission
+                  stored on this account.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <a
+                    href={activeFramework?.readMoreHref ?? "https://doi.org/10.1016/j.jrp.2010.01.002"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] transition hover:border-[var(--line-strong)]"
+                  >
+                    Read the source
+                  </a>
+                  <button
+                    type="button"
+                    className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] opacity-80"
+                  >
+                    Share your results
+                  </button>
+                </div>
+
+                <SubmissionHistoryList
+                  submissions={submissions}
+                  selectedSubmissionId={selectedSubmissionId}
+                  isSwitchingSubmission={isSwitchingSubmission}
+                  selectionError={selectionError}
+                  onSelect={handleSelectSubmission}
+                />
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <SummaryNarrative results={results} />
+            </div>
+          </section>
+
+          <section className="rounded-[2.4rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h2 className="font-display text-3xl text-[var(--ink)]">Your Scores</h2>
+              <div className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] p-1">
+                {(["highest", "lowest"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => {
+                      setRankingMode(mode);
+                      setShowAllRankings(false);
+                    }}
+                    className={[
+                      "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition",
+                      rankingMode === mode
+                        ? "bg-[var(--accent-coral)] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
+                        : "text-[var(--ink-soft)] hover:text-[var(--ink)]",
+                    ].join(" ")}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)]">
+              <RankingColumn
+                label="Overall score"
+                valueLabel="Out of 50"
+                items={visibleLeftRankings ?? []}
+                metric="score"
+                hoveredCode={hoveredScale?.code ?? null}
+                onHover={handleHover}
+              />
+              <RankingColumn
+                label="Compared to others"
+                valueLabel={rankingMode === "highest" ? "Higher than % of people" : "Lower than % of people"}
+                items={visibleRightRankings ?? []}
+                metric="percentile"
+                hoveredCode={hoveredScale?.code ?? null}
+                onHover={handleHover}
+              />
+            </div>
+
+            {((leftRankings?.length ?? 0) > DEFAULT_VISIBLE_ROWS ||
+              (rightRankings?.length ?? 0) > DEFAULT_VISIBLE_ROWS) && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowAllRankings((current) => !current)}
+                  className="text-xl text-[var(--ink-soft)] underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--ink)]"
+                >
+                  {showAllRankings ? "Show less" : "Show more"}
+                </button>
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-[2.4rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+              {results.frameworks.map((framework) => (
+                <button
+                  key={framework.id}
+                  type="button"
+                  onClick={() => setActiveFrameworkId(framework.id)}
+                  className={[
+                    "rounded-[1.05rem] px-4 py-2.5 text-lg font-semibold uppercase tracking-[0.08em] transition",
+                    activeFrameworkId === framework.id
+                      ? "bg-[var(--accent-coral)] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
+                      : "text-[var(--ink)] hover:bg-[var(--surface-panel-strong)]",
+                  ].join(" ")}
+                >
+                  {framework.tabLabel}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {activeFramework ? <FrameworkPanel framework={activeFramework} /> : null}
+          {hoveredScale && hoveredRect ? <HoverPopover item={hoveredScale} rect={hoveredRect} /> : null}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+function clamp(value: number, minValue: number, maxValue: number) {
+  return Math.min(maxValue, Math.max(minValue, value));
+}
