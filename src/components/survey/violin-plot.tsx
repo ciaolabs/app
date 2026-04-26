@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useMemo } from "react";
 import { max, quantileSorted, range, sum } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { area, curveCatmullRom } from "d3-shape";
@@ -34,11 +35,18 @@ function clamp(value: number, minValue: number, maxValue: number) {
   return Math.min(maxValue, Math.max(minValue, value));
 }
 
-export function ViolinPlot({
-  distribution,
-  selectedValue,
-  className,
-}: ViolinPlotProps) {
+type ViolinLayout = {
+  total: number;
+  violinPath: string;
+  whiskerArcPath: string;
+  q1X: number;
+  q3X: number;
+  medianX: number;
+  medianDotY: number;
+  ticks: ReadonlyArray<{ x: number; index: number; percent: number }>;
+};
+
+function buildLayout(distribution: number[]): ViolinLayout {
   const total = sum(distribution);
   const highestCount = max(distribution) ?? 1;
   const expandedValues = distribution.flatMap((count, index) => range(count).map(() => index + 1));
@@ -50,10 +58,7 @@ export function ViolinPlot({
   const whiskerHigh = clamp(q3 + iqr * 1.5, 1, distribution.length);
   const points: PlotPoint[] = [
     { value: 0.5, count: 0 },
-    ...distribution.map((count, index) => ({
-      value: index + 1,
-      count,
-    })),
+    ...distribution.map((count, index) => ({ value: index + 1, count })),
     { value: distribution.length + 0.5, count: 0 },
   ];
 
@@ -80,6 +85,30 @@ export function ViolinPlot({
     2 * (1 - 0.5) * 0.5 * STATS_CURVE_CONTROL_Y +
     (0.5 ** 2) * STATS_CURVE_BASE_Y;
 
+  const ticks = distribution.map((count, index) => ({
+    x: xScale(index + 1),
+    index,
+    percent: total > 0 ? Math.round((count / total) * 100) : 0,
+  }));
+
+  return { total, violinPath, whiskerArcPath, q1X, q3X, medianX, medianDotY, ticks };
+}
+
+const SelectedReadout = memo(function SelectedReadout({ value }: { value: LikertValue }) {
+  return (
+    <div className="rounded-full border border-black bg-[var(--accent-mint)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
+      Selected: {value}
+    </div>
+  );
+});
+
+export const ViolinPlot = memo(function ViolinPlot({
+  distribution,
+  selectedValue,
+  className,
+}: ViolinPlotProps) {
+  const layout = useMemo(() => buildLayout(distribution), [distribution]);
+
   return (
     <div
       className={[
@@ -93,9 +122,7 @@ export function ViolinPlot({
             Response pattern
           </p>
         </div>
-        <div className="rounded-full border border-black bg-[var(--accent-mint)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
-          Selected: {selectedValue}
-        </div>
+        <SelectedReadout value={selectedValue} />
       </div>
 
       <div className="mt-4 min-h-0 flex-1">
@@ -116,34 +143,17 @@ export function ViolinPlot({
             </linearGradient>
           </defs>
 
-          {distribution.map((count, index) => {
-            const x = xScale(index + 1);
-            const percent = Math.round((count / total) * 100);
-
-            return (
-              <g key={`${index + 1}-${count}`}>
-                <circle cx={x} cy={AXIS_DOT_Y} r={2.5} fill="var(--plot-grid)" />
-                <text
-                  x={x}
-                  y={AXIS_LABEL_Y}
-                  fill="var(--plot-label)"
-                  fontSize="12"
-                  textAnchor="middle"
-                >
-                  {index + 1}
-                </text>
-                <text
-                  x={x}
-                  y={TOP_LABEL_Y}
-                  fill="var(--plot-label)"
-                  fontSize="11"
-                  textAnchor="middle"
-                >
-                  {percent}%
-                </text>
-              </g>
-            );
-          })}
+          {layout.ticks.map(({ x, index, percent }) => (
+            <g key={`${index}-${percent}`}>
+              <circle cx={x} cy={AXIS_DOT_Y} r={2.5} fill="var(--plot-grid)" />
+              <text x={x} y={AXIS_LABEL_Y} fill="var(--plot-label)" fontSize="12" textAnchor="middle">
+                {index + 1}
+              </text>
+              <text x={x} y={TOP_LABEL_Y} fill="var(--plot-label)" fontSize="11" textAnchor="middle">
+                {percent}%
+              </text>
+            </g>
+          ))}
 
           <line
             x1={PLOT_LEFT}
@@ -155,7 +165,7 @@ export function ViolinPlot({
             strokeWidth="1.2"
           />
 
-          <path d={violinPath} fill="url(#violin-fill)" stroke="var(--plot-stroke)" strokeWidth="1.5" />
+          <path d={layout.violinPath} fill="url(#violin-fill)" stroke="var(--plot-stroke)" strokeWidth="1.5" />
 
           <line
             x1={PLOT_LEFT}
@@ -168,7 +178,7 @@ export function ViolinPlot({
           />
 
           <path
-            d={whiskerArcPath}
+            d={layout.whiskerArcPath}
             fill="none"
             stroke="var(--plot-label)"
             strokeWidth="8"
@@ -176,8 +186,8 @@ export function ViolinPlot({
             opacity="0.9"
           />
           <line
-            x1={q1X}
-            x2={q3X}
+            x1={layout.q1X}
+            x2={layout.q3X}
             y1={STATS_BAR_Y}
             y2={STATS_BAR_Y}
             stroke="url(#iqr-fill)"
@@ -185,8 +195,8 @@ export function ViolinPlot({
             strokeLinecap="round"
           />
           <circle
-            cx={medianX}
-            cy={medianDotY}
+            cx={layout.medianX}
+            cy={layout.medianDotY}
             r={11}
             fill="var(--plot-label)"
             stroke="var(--surface)"
@@ -196,4 +206,4 @@ export function ViolinPlot({
       </div>
     </div>
   );
-}
+});

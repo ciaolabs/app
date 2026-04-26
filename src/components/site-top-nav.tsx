@@ -230,7 +230,7 @@ export function SiteTopNav({
     : "Toggle color theme";
 
   return (
-    <header className="sticky top-4 z-40 rounded-[1.5rem] border border-[var(--line-strong)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] backdrop-blur sm:px-5">
+    <header className="nav-glass sticky top-0 z-40 rounded-b-[1.5rem] border-x border-b border-[var(--nav-glass-border)] bg-[var(--nav-glass-bg)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
       <div className="flex min-w-0 items-center gap-2 pr-12 sm:gap-3 lg:pr-0">
         <div className="min-w-0 overflow-hidden lg:max-w-[22rem] xl:max-w-[26rem]">
           <SiteBreadcrumb title={breadcrumbTitle} items={breadcrumbItems} />

@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { LikertValue, QuestionResponseScale } from "@/lib/survey/types";
 
 type LikertScaleProps = {
@@ -9,7 +11,7 @@ type LikertScaleProps = {
   variant?: "hero" | "compact";
 };
 
-export function LikertScale({
+export const LikertScale = memo(function LikertScale({
   responseScale,
   selectedValue,
   onSelect,
@@ -82,4 +84,4 @@ export function LikertScale({
       </div>
     </div>
   );
-}
+});

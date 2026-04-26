@@ -1,11 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import {
-  type ReactNode,
   startTransition,
   useCallback,
   useDeferredValue,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -13,6 +14,11 @@ import {
 import { SiteTopNav } from "@/components/site-top-nav";
 import { LikertScale } from "@/components/survey/likert-scale";
 import { QuestionLog } from "@/components/survey/question-log";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ShortcutKey,
+} from "@/components/survey/survey-keycaps";
 import { ViolinPlot } from "@/components/survey/violin-plot";
 import { navigateWithReload } from "@/lib/browser-navigation";
 import { formatTime } from "@/lib/date-format";
@@ -24,21 +30,17 @@ import {
 import { getSurveyApiBasePath, SURVEYS_ROUTE } from "@/lib/survey/routes";
 import { LikertValue, QuestionItem, SurveyAnswers, SurveyDraft } from "@/lib/survey/types";
 
+const SurveyHelpDialog = dynamic(() => import("@/components/survey/survey-help-dialog"), {
+  ssr: false,
+});
+
 type SurveyShellProps = {
   survey: Pick<
     ActiveSurveyDefinition,
     "type" | "title" | "dashboardRoute" | "helpContent" | "sections"
   >;
-  questions: QuestionItem[];
+  questions: readonly QuestionItem[];
   initialDraft: SurveyDraft;
-};
-
-type ShortcutKeyProps = {
-  children: ReactNode;
-  wide?: boolean;
-  onClick?: () => void;
-  disabled?: boolean;
-  ariaLabel?: string;
 };
 
 function readStoredAnswers(storageKey: string) {
@@ -94,37 +96,10 @@ function hasPendingResults(storageKey: string) {
   return Boolean(window.sessionStorage.getItem(storageKey));
 }
 
-function ArrowLeftIcon() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className="h-3.5 w-3.5">
-      <path
-        d="M9.5 3.5 5 8l4.5 4.5"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.7"
-      />
-    </svg>
-  );
-}
-
-function ArrowRightIcon() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className="h-3.5 w-3.5">
-      <path
-        d="m6.5 3.5 4.5 4.5-4.5 4.5"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.7"
-      />
-    </svg>
-  );
-}
-
-function findFirstUnansweredIndex(questions: QuestionItem[], answers: SurveyAnswers) {
+function findFirstUnansweredIndex(
+  questions: readonly QuestionItem[],
+  answers: SurveyAnswers,
+) {
   const unansweredIndex = questions.findIndex((question) => !answers[question.id]);
   return unansweredIndex === -1 ? questions.length - 1 : unansweredIndex;
 }
@@ -153,45 +128,6 @@ function describeSaveState(
   return "Autosaves to your account.";
 }
 
-function ShortcutKey({
-  children,
-  wide = false,
-  onClick,
-  disabled = false,
-  ariaLabel,
-}: ShortcutKeyProps) {
-  const classes = [
-    "inline-flex h-8 items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-black shadow-[var(--keycap-shadow)]",
-    wide ? "min-w-[3.3rem]" : "min-w-[2.2rem]",
-    onClick ? "transition hover:border-[var(--line-strong)] disabled:cursor-not-allowed disabled:opacity-40" : "",
-  ].join(" ");
-
-  if (onClick) {
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        disabled={disabled}
-        aria-label={ariaLabel}
-        className={classes}
-      >
-        {children}
-      </button>
-    );
-  }
-
-  return (
-    <span
-      className={[
-        "inline-flex h-8 items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-black shadow-[var(--keycap-shadow)]",
-        wide ? "min-w-[3.3rem]" : "min-w-[2.2rem]",
-      ].join(" ")}
-    >
-      {children}
-    </span>
-  );
-}
-
 export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProps) {
   const [answers, setAnswers] = useState<SurveyAnswers>(initialDraft.answers);
   const [activeIndex, setActiveIndex] = useState(() =>
@@ -209,26 +145,57 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   const pendingResultsKey = getPendingResultsKey(survey.type);
   const surveyApiBasePath = getSurveyApiBasePath(survey.type);
 
+  const sectionBounds = useMemo(() => {
+    const map = new Map<string, { start: number; end: number }>();
+    for (let i = 0; i < questions.length; i++) {
+      const id = questions[i].section?.id;
+      if (!id) continue;
+      const entry = map.get(id);
+      if (!entry) {
+        map.set(id, { start: i, end: i });
+      } else {
+        entry.end = i;
+      }
+    }
+    return map;
+  }, [questions]);
+
   const answeredCount = Object.keys(answers).length;
   const completion = Math.round((answeredCount / questions.length) * 100);
-  const firstUnansweredIndex = questions.findIndex((question) => !answers[question.id]);
+  const firstUnansweredIndex = useMemo(
+    () => questions.findIndex((question) => !answers[question.id]),
+    [questions, answers],
+  );
   const hasUnansweredQuestions = firstUnansweredIndex !== -1;
   const currentQuestion = questions[activeIndex];
   const currentAnswer = answers[currentQuestion.id];
-  const currentResponseLabels = currentQuestion.responseScale.options.map((option) => option.label);
+  const currentResponseLabels = useMemo(
+    () => currentQuestion.responseScale.options.map((option) => option.label),
+    [currentQuestion.responseScale],
+  );
   const currentSection = currentQuestion.section ?? null;
-  const sectionStartIndex = currentSection
-    ? questions.findIndex((question) => question.section?.id === currentSection.id)
-    : 0;
-  const sectionEndIndex = currentSection
-    ? questions.reduce((lastIndex, question, index) => {
-        return question.section?.id === currentSection.id ? index : lastIndex;
-      }, sectionStartIndex)
-    : questions.length - 1;
+  const { sectionStartIndex, sectionEndIndex } = useMemo(() => {
+    if (!currentSection) {
+      return { sectionStartIndex: 0, sectionEndIndex: questions.length - 1 };
+    }
+    const bounds = sectionBounds.get(currentSection.id);
+    return bounds
+      ? { sectionStartIndex: bounds.start, sectionEndIndex: bounds.end }
+      : { sectionStartIndex: 0, sectionEndIndex: questions.length - 1 };
+  }, [currentSection, sectionBounds, questions.length]);
   const isSectionStart = activeIndex === sectionStartIndex;
-  const sectionAnsweredCount = currentSection
-    ? questions.filter((question) => question.section?.id === currentSection.id && answers[question.id]).length
-    : answeredCount;
+  const sectionAnsweredCount = useMemo(() => {
+    if (!currentSection) {
+      return answeredCount;
+    }
+    let count = 0;
+    for (let i = sectionStartIndex; i <= sectionEndIndex; i++) {
+      if (answers[questions[i].id]) {
+        count++;
+      }
+    }
+    return count;
+  }, [currentSection, answers, questions, sectionStartIndex, sectionEndIndex, answeredCount]);
   const sectionQuestionCount = currentSection ? sectionEndIndex - sectionStartIndex + 1 : questions.length;
   const sectionCompletion = Math.round((sectionAnsweredCount / sectionQuestionCount) * 100);
 
@@ -354,6 +321,19 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
     }
   }, [firstUnansweredIndex, goToIndex]);
 
+  const keydownHandlersRef = useRef({
+    goToNextQuestion,
+    goToPreviousQuestion,
+    handleSelectAnswer,
+  });
+  useEffect(() => {
+    keydownHandlersRef.current = {
+      goToNextQuestion,
+      goToPreviousQuestion,
+      handleSelectAnswer,
+    };
+  });
+
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (isHelpOpen) {
@@ -385,21 +365,23 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
         return;
       }
 
+      const handlers = keydownHandlersRef.current;
+
       if (/^[1-6]$/.test(event.key)) {
         event.preventDefault();
-        handleSelectAnswer(Number(event.key) as LikertValue);
+        handlers.handleSelectAnswer(Number(event.key) as LikertValue);
         return;
       }
 
       if (event.key === "ArrowRight" || event.key === "ArrowDown") {
         event.preventDefault();
-        goToNextQuestion();
+        handlers.goToNextQuestion();
         return;
       }
 
       if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
         event.preventDefault();
-        goToPreviousQuestion();
+        handlers.goToPreviousQuestion();
       }
     }
 
@@ -408,13 +390,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [
-    goToNextQuestion,
-    goToPreviousQuestion,
-    handleSelectAnswer,
-    isHelpOpen,
-    isSubmitting,
-  ]);
+  }, [isHelpOpen, isSubmitting]);
 
   async function handleSubmit() {
     if (answeredCount !== questions.length || isSubmitting) {
@@ -457,10 +433,15 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
     setIsSubmitting(false);
   }
 
-  const breadcrumbItems = [
-    { label: "Surveys", href: SURVEYS_ROUTE },
-    { label: survey.title },
-  ];
+  const breadcrumbItems = useMemo(
+    () => [
+      { label: "Surveys", href: SURVEYS_ROUTE },
+      { label: survey.title },
+    ],
+    [survey.title],
+  );
+
+  const openHelp = useCallback(() => setIsHelpOpen(true), []);
 
   return (
     <>
@@ -470,7 +451,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
           breadcrumbItems={breadcrumbItems}
           saveStatus={saveStatus}
           saveStatusIsError={Boolean(saveError)}
-          helpOnClick={() => setIsHelpOpen(true)}
+          helpOnClick={openHelp}
           helpExpanded={isHelpOpen}
           action={
             <button
@@ -644,78 +625,10 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
       </div>
 
       {isHelpOpen ? (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/35 px-5 py-8 backdrop-blur-sm sm:items-center">
-          <div
-            id="survey-help-panel"
-            role="dialog"
-            aria-modal="true"
-            className="w-full max-w-xl rounded-[1.5rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-6 shadow-[var(--shadow-strong)]"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="clay-label">
-                  Documentation
-                </p>
-                <h2 className="mt-2 font-display text-4xl text-[var(--ink)]">Survey help</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsHelpOpen(false)}
-                className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel)] px-3 text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)]"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="mt-6 space-y-5 text-sm leading-7 text-[var(--ink-soft)]">
-              <p>
-                {survey.helpContent?.body}
-              </p>
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.5rem] border border-black bg-[var(--accent-lilac)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
-                    <ShortcutKey wide>1-6</ShortcutKey>
-                    <span>Answer</span>
-                  </div>
-                </div>
-                <div className="rounded-[1.5rem] border border-black bg-[var(--accent-mint)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
-                    <ShortcutKey>
-                      <ArrowLeftIcon />
-                    </ShortcutKey>
-                    <span>Previous</span>
-                  </div>
-                </div>
-                <div className="rounded-[1.5rem] border border-black bg-[var(--accent-lime)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
-                    <ShortcutKey>
-                      <ArrowRightIcon />
-                    </ShortcutKey>
-                    <span>Next</span>
-                  </div>
-                </div>
-              </div>
-              {survey.helpContent ? (
-                <>
-                  <p>{survey.helpContent.referencesIntro}</p>
-                  <div className="flex flex-wrap gap-3">
-                    {survey.helpContent.references.map((reference) => (
-                      <a
-                        key={reference.href}
-                        href={reference.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="clay-button-hover inline-flex items-center rounded-full border border-black bg-[var(--accent-blue)] px-4 py-2 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
-                      >
-                        {reference.label}
-                      </a>
-                    ))}
-                  </div>
-                </>
-              ) : null}
-            </div>
-          </div>
-        </div>
+        <SurveyHelpDialog
+          helpContent={survey.helpContent ?? null}
+          onClose={() => setIsHelpOpen(false)}
+        />
       ) : null}
     </>
   );

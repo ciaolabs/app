@@ -72,8 +72,10 @@
   --dot-hot-mint: rgba(39, 168, 131, 0.96);
   --dot-hot-lilac: rgba(106, 93, 232, 0.96);
   --dot-hot-opacity: 1;
-  --dot-hot-size: 1.35px;
-  --dot-hot-edge: 1.56px;
+  --dot-hot-size: 1.85px;
+  --dot-hot-edge: 2.05px;
+  --nav-glass-bg: rgba(255, 255, 255, 0.08);
+  --nav-glass-border: rgba(218, 212, 200, 0.22);
 }
 
 html[data-theme="dark"] {
@@ -90,7 +92,7 @@ html[data-theme="dark"] {
   --line: rgba(218, 212, 200, 0.22);
   --line-strong: rgba(238, 233, 223, 0.34);
   --selected-contrast: #262624;
-  --keycap-bg: rgba(250, 249, 247, 0.92);
+  --keycap-bg: rgba(52, 47, 40, 0.72);
   --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.34), 0 -1px 1px rgba(255, 255, 255, 0.08) inset;
   --home-crumb-button-bg: #2a251f;
   --shadow-soft: 0 1px 1px rgba(0, 0, 0, 0.4), 0 -1px 1px rgba(255, 255, 255, 0.06) inset, 0 -0.5px 1px rgba(255, 255, 255, 0.04);
@@ -116,8 +118,10 @@ html[data-theme="dark"] {
   --dot-hot-mint: rgba(255, 255, 255, 0.96);
   --dot-hot-lilac: rgba(255, 255, 255, 0.96);
   --dot-hot-opacity: 1;
-  --dot-hot-size: 1.15px;
-  --dot-hot-edge: 1.36px;
+  --dot-hot-size: 1.65px;
+  --dot-hot-edge: 1.92px;
+  --nav-glass-bg: rgba(30, 27, 23, 0.10);
+  --nav-glass-border: rgba(238, 233, 223, 0.08);
 }
 
 :root {
@@ -153,6 +157,8 @@ html[data-theme="dark"] {
   --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
   --shadow-soft: var(--clay-shadow);
   --shadow-strong: var(--clay-shadow), -7px 7px 0 rgba(0, 0, 0, 0.12);
+  --nav-glass-bg: rgba(255, 255, 255, 0.08);
+  --nav-glass-border: rgba(218, 212, 200, 0.22);
   --plot-fill-start: rgba(252, 121, 129, 0.42);
   --plot-fill-end: rgba(59, 211, 253, 0.72);
   --plot-grid: rgba(38, 38, 36, 0.1);
@@ -165,6 +171,7 @@ html[data-theme="dark"] {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-body);
+  --font-display: var(--font-body);
 }
 
 * {
@@ -211,10 +218,27 @@ textarea:focus-visible {
 .app-shell {
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
   background:
     var(--app-background),
     var(--background);
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+.nav-glass {
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+}
+
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .nav-glass {
+    background-color: var(--surface-panel) !important;
+  }
 }
 
 /* Hero floating blob animations */
@@ -296,26 +320,33 @@ html[data-theme="dark"] .hero-blob-3 {
   transition: opacity 180ms ease;
 }
 
+@property --dot-spin-angle {
+  syntax: "<angle>";
+  initial-value: 20deg;
+  inherits: false;
+}
+
 .interactive-dot-background::after {
   content: "";
   position: absolute;
   inset: 0;
   opacity: 0;
   background: conic-gradient(
-    from 20deg at var(--dot-pointer-x) var(--dot-pointer-y),
+    from var(--dot-spin-angle, 20deg) at var(--dot-pointer-x) var(--dot-pointer-y),
     var(--dot-hot-coral),
     var(--dot-hot-blue),
     var(--dot-hot-mint),
     var(--dot-hot-lilac),
     var(--dot-hot-coral)
   );
-  filter: saturate(1.25) contrast(1.08);
-  clip-path: circle(9rem at var(--dot-pointer-x) var(--dot-pointer-y));
+  animation: dot-spin 16s linear infinite;
+  filter: saturate(1.45) contrast(1.12);
+  clip-path: var(--dot-clip-shape, circle(6rem at var(--dot-pointer-x) var(--dot-pointer-y)));
   mask-image: radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
   mask-position: 0 0;
   mask-size: 12px 12px;
   mask-repeat: repeat;
-  -webkit-clip-path: circle(9rem at var(--dot-pointer-x) var(--dot-pointer-y));
+  -webkit-clip-path: var(--dot-clip-shape, circle(6rem at var(--dot-pointer-x) var(--dot-pointer-y)));
   -webkit-mask-image: radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
   -webkit-mask-position: 0 0;
   -webkit-mask-size: 12px 12px;
@@ -334,8 +365,14 @@ html[data-theme="dark"] .hero-blob-3 {
   height: 28rem;
   width: 28rem;
   border-radius: 9999px;
-  filter: blur(70px);
+  filter: blur(56px);
   opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-blob {
+    animation: none;
+  }
 }
 
 .app-glow-left {
@@ -452,6 +489,11 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
   100% {
     background-position: -200% 0;
   }
+}
+
+@keyframes dot-spin {
+  from { --dot-spin-angle: 20deg; }
+  to { --dot-spin-angle: 380deg; }
 }
 
 @keyframes mobileNavBackdropIn {

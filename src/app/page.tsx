@@ -52,7 +52,7 @@ export default async function HomePage() {
         <div className="relative">
           <div className="flex flex-col items-center text-center">
             <h1 className="max-w-5xl font-display text-5xl font-black leading-tight text-[var(--ink)] sm:text-6xl lg:text-7xl">
-              Surveys to measure your personality and beliefs.
+              Surveys to discover your personality and beliefs.
             </h1>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

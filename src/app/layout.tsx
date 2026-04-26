@@ -7,21 +7,18 @@ import { InteractiveDotBackground } from "@/components/interactive-dot-backgroun
 
 import "./globals.css";
 
-const bodyFont = Manrope({
+const manrope = Manrope({
   variable: "--font-body",
   subsets: ["latin"],
-});
-
-const displayFont = Manrope({
-  variable: "--font-display",
-  subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const monoFont = Space_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   weight: ["400", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -52,7 +49,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${bodyFont.variable} ${displayFont.variable} ${monoFont.variable} antialiased`}>
+      <body className={`${manrope.variable} ${monoFont.variable} antialiased`}>
         <ClerkProvider dynamic appearance={clerkProviderAppearance} localization={clerkLocalization}>
           <div className="app-shell">
             <InteractiveDotBackground />
