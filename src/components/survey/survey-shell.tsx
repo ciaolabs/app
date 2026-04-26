@@ -15,6 +15,7 @@ import { LikertScale } from "@/components/survey/likert-scale";
 import { QuestionLog } from "@/components/survey/question-log";
 import { ViolinPlot } from "@/components/survey/violin-plot";
 import { navigateWithReload } from "@/lib/browser-navigation";
+import { formatTime } from "@/lib/date-format";
 import {
   getPendingResultsKey,
   getStoredAnswersKey,
@@ -146,10 +147,7 @@ function describeSaveState(
   }
 
   if (lastSavedAt) {
-    return `Saved at ${new Intl.DateTimeFormat("en", {
-      hour: "numeric",
-      minute: "2-digit",
-    }).format(new Date(lastSavedAt))}`;
+    return `Saved at ${formatTime(lastSavedAt)}`;
   }
 
   return "Autosaves to your account.";
@@ -466,7 +464,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
 
   return (
     <>
-      <div className="grid gap-4 lg:h-[calc(100svh-2rem)] lg:grid-rows-[auto_minmax(0,1fr)]">
+      <div className="grid gap-6 lg:h-[calc(100svh-3rem)] lg:grid-rows-[auto_minmax(0,1fr)]">
         <SiteTopNav
           breadcrumbTitle={survey.title}
           breadcrumbItems={breadcrumbItems}
@@ -486,7 +484,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
           }
         />
 
-        <div className="grid min-h-0 gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
+        <div className="grid min-h-0 gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
           <aside className="min-h-0 lg:h-full">
             <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)] backdrop-blur">
               <div className="shrink-0 space-y-3">

@@ -7,6 +7,7 @@ import { BeliefsLevelSummaryViolin } from "@/components/dashboard/beliefs-level-
 import { DashboardGaugeCard } from "@/components/dashboard/dashboard-gauge-card";
 import { SegmentedScoreRow } from "@/components/dashboard/segmented-score-row";
 import { SiteTopNav } from "@/components/site-top-nav";
+import { formatSubmittedAt } from "@/lib/date-format";
 import {
   getPendingResultsKey,
   getStoredAnswersKey,
@@ -103,17 +104,6 @@ const VALUES_REFERENCES = [
     href: "https://doi.org/10.9707/2307-0919.1116",
   },
 ] as const;
-
-function formatSubmittedAt(timestamp: string | null) {
-  if (!timestamp) {
-    return "not yet submitted";
-  }
-
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(timestamp));
-}
 
 function describeDashboardError(error: string) {
   if (/authentication required/i.test(error)) {

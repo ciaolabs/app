@@ -9,6 +9,7 @@ import {
   SegmentedScoreBar,
 } from "@/components/dashboard/dashboard-metrics";
 import { SiteTopNav } from "@/components/site-top-nav";
+import { formatSubmittedAt } from "@/lib/date-format";
 import {
   getPendingResultsKey,
   getStoredAnswersKey,
@@ -36,17 +37,6 @@ function percentileSentence(item: { percentileDirection: "higher" | "lower"; per
   return item.percentileDirection === "higher"
     ? `You scored higher than ${item.percentileMagnitude} percent of people.`
     : `You scored lower than ${item.percentileMagnitude} percent of people.`;
-}
-
-function formatSubmittedAt(timestamp: string | null) {
-  if (!timestamp) {
-    return "not yet submitted";
-  }
-
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(timestamp));
 }
 
 function describeDashboardError(error: string) {

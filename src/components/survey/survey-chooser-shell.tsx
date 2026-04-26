@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 
 import { navigateWithReload } from "@/lib/browser-navigation";
+import { formatSubmittedAt } from "@/lib/date-format";
 import { type ActiveSurveyDefinition, type SurveyDefinition } from "@/lib/survey/definitions";
 import { type SurveyType, type SurveyUserStatus } from "@/lib/survey/types";
 
@@ -12,14 +13,7 @@ type SurveyChooserShellProps = {
 };
 
 function formatSubmissionDate(timestamp: string | null) {
-  if (!timestamp) {
-    return "No submissions yet";
-  }
-
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(timestamp));
+  return timestamp ? formatSubmittedAt(timestamp) : "No submissions yet";
 }
 
 function buildUsageLabel(survey: SurveyDefinition, status: SurveyUserStatus | null) {

@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { SignIn, SignInButton } from "@clerk/nextjs";
 
-import { LandingSurveyPreview } from "@/components/landing-survey-preview";
+import { SurveyPreview } from "@/components/home/survey-preview";
 import { SiteTopNav } from "@/components/site-top-nav";
 import { getCurrentUserId } from "@/lib/auth";
 import { clerkSignInAppearance } from "@/lib/clerk";
 import { isClerkConfigured } from "@/lib/clerk.server";
-import { QUESTION_COUNT } from "@/lib/survey/constants";
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
 
 function primaryActionClassName() {
@@ -43,29 +42,26 @@ export default async function HomePage() {
       />
 
       <section
-        className="clay-section relative mt-6 overflow-hidden px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-16"
-        style={{ background: "var(--hero-gradient)" }}
+        className="clay-section relative mt-6 overflow-hidden px-4 py-8 sm:px-8 sm:py-12 lg:px-10 lg:py-12"
+        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(238,233,223,0.72) 46%, rgba(132,231,165,0.2))" }}
       >
         <div
-          className="pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] lg:block"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[18rem] opacity-80"
           style={{ backgroundImage: "var(--hero-spotlight)" }}
         />
 
-        <div
-          className="relative grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.92fr)] lg:items-stretch"
-        >
-          <div className="flex flex-col justify-between">
-            <div className="max-w-3xl">
+        <div className="relative">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(24rem,0.52fr)] lg:items-end">
+            <div className="max-w-4xl">
               <p className="clay-label">
                 Multiple Measures of Personality
               </p>
-              <h1 className="mt-5 font-display text-5xl leading-[0.94] text-[var(--ink)] sm:text-6xl lg:text-7xl">
-                A research-forward survey interface for the 181-item AMBI inventory.
+              <h1 className="mt-5 font-display text-4xl leading-[0.94] text-[var(--ink)] sm:text-6xl lg:text-7xl xl:text-8xl">
+                A survey surface that feels like the product, before the first answer.
               </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--ink-soft)]">
-                This MVP recreates the intake phase of Tal Yarkoni&apos;s abbreviated personality survey:
-                one statement at a time, a visible response pattern after each choice, and a persistent
-                editable log so respondents never lose their place.
+              <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--ink-soft)] sm:text-lg">
+                Try the fake canvas below: switch between the personality and values surveys, answer
+                sample prompts, and watch the progress rail behave like the real intake flow.
               </p>
 
               <div className="mt-10 flex flex-wrap gap-4">
@@ -88,58 +84,33 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+            <div className="hidden gap-4 sm:grid-cols-3 lg:grid lg:grid-cols-1">
               {[
-                {
-                  title: "One account",
-                  body: "Your draft and the latest submitted response set stay attached to you.",
-                },
-                {
-                  title: "Fast return",
-                  body: "Pick up where you left off instead of relying on a single browser cookie.",
-                },
-                {
-                  title: "Flexible sign-in",
-                  body: "Choose GitHub, Google, LinkedIn, or email and password inside the same branded surface.",
-                },
-              ].map((item) => (
+                ["181", "personality prompts"],
+                ["156", "values and beliefs prompts"],
+                ["1-6", "keyboard-ready answer scale"],
+              ].map(([value, label]) => (
                 <div
-                  key={item.title}
-                  className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)] backdrop-blur"
+                  key={label}
+                  className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)] backdrop-blur"
                 >
-                  <p className="clay-label">
-                    {item.title}
+                  <p className="font-display text-4xl leading-none text-[var(--ink)]">{value}</p>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
+                    {label}
                   </p>
-                  <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">{item.body}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {isSignedIn ? (
-            <div className="grid gap-4 rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-6 shadow-[var(--shadow-soft)] backdrop-blur">
-              <div>
-                <p className="clay-label">
-                  Survey scope
-                </p>
-                <p className="mt-3 font-display text-4xl text-[var(--ink)]">{QUESTION_COUNT}</p>
-                <p className="mt-2 text-sm leading-7 text-[var(--ink-soft)]">
-                  public-domain prompts across multiple personality frameworks
-                </p>
-              </div>
-              <div className="h-px bg-[var(--line)]" />
-              <div className="text-sm leading-7 text-[var(--ink-soft)]">
-                Expect 15 to 30 minutes for a full pass. Answers autosave to the signed-in account and
-                the submit action opens a scored dashboard with AMBI-based rankings and framework
-                breakdowns.
-              </div>
-            </div>
-          ) : null}
+          <div className="mt-10">
+            <SurveyPreview />
+          </div>
 
           {!isSignedIn ? (
             <div
               id="auth-panel"
-              className="border-t border-[var(--line)] bg-[var(--surface-panel)] px-5 py-8 backdrop-blur sm:px-7 lg:-my-16 lg:-mr-14 lg:-ml-2 lg:border-t-0 lg:border-l lg:px-8 lg:py-10"
+              className="mt-8 rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-8 shadow-[var(--shadow-soft)] backdrop-blur sm:px-7 lg:px-8 lg:py-10"
             >
               <div className="mx-auto w-full max-w-[34rem] rounded-[1.5rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-6 shadow-[var(--shadow-strong)]">
                 <div className="mb-5">
@@ -181,10 +152,6 @@ export default async function HomePage() {
               </div>
             </div>
           ) : null}
-        </div>
-
-        <div className="relative mt-10">
-          <LandingSurveyPreview />
         </div>
       </section>
 

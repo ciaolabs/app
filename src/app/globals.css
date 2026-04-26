@@ -208,42 +208,16 @@ textarea:focus-visible {
     var(--dot-hot-coral)
   );
   filter: saturate(1.25) contrast(1.08);
-  mask-image:
-    radial-gradient(
-      circle 9rem at var(--dot-pointer-x) var(--dot-pointer-y),
-      black 0%,
-      black 42%,
-      transparent 78%
-    ),
-    radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
-  mask-position:
-    0 0,
-    0 0;
-  mask-size:
-    auto,
-    12px 12px;
-  mask-repeat:
-    no-repeat,
-    repeat;
-  mask-composite: intersect;
-  -webkit-mask-image:
-    radial-gradient(
-      circle 9rem at var(--dot-pointer-x) var(--dot-pointer-y),
-      black 0%,
-      black 42%,
-      transparent 78%
-    ),
-    radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
-  -webkit-mask-position:
-    0 0,
-    0 0;
-  -webkit-mask-size:
-    auto,
-    12px 12px;
-  -webkit-mask-repeat:
-    no-repeat,
-    repeat;
-  -webkit-mask-composite: source-in;
+  clip-path: circle(9rem at var(--dot-pointer-x) var(--dot-pointer-y));
+  mask-image: radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
+  mask-position: 0 0;
+  mask-size: 12px 12px;
+  mask-repeat: repeat;
+  -webkit-clip-path: circle(9rem at var(--dot-pointer-x) var(--dot-pointer-y));
+  -webkit-mask-image: radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
+  -webkit-mask-position: 0 0;
+  -webkit-mask-size: 12px 12px;
+  -webkit-mask-repeat: repeat;
   transition: opacity 160ms ease;
 }
 

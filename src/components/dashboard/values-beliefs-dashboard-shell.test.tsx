@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ValuesBeliefsDashboardShell } from "@/components/dashboard/values-beliefs-dashboard-shell";
+import { formatSubmittedAt } from "@/lib/date-format";
 import { valuesBeliefsSurveyDefinition } from "@/lib/survey/definitions";
 import { getSurveyQuestions } from "@/lib/survey/questions";
 import { buildSurveyResults } from "@/lib/survey/results/engine";
@@ -163,10 +164,7 @@ describe("ValuesBeliefsDashboardShell", () => {
       }),
     );
 
-    const earlierDateLabel = new Intl.DateTimeFormat("en", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(new Date(earlierSubmission.submittedAt));
+    const earlierDateLabel = formatSubmittedAt(earlierSubmission.submittedAt);
 
     await user.click(screen.getByRole("button", { name: new RegExp(earlierDateLabel, "i") }));
 
