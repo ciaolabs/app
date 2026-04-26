@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SignIn, SignInButton } from "@clerk/nextjs";
 
+import { LandingSurveyPreview } from "@/components/landing-survey-preview";
 import { SiteTopNav } from "@/components/site-top-nav";
 import { getCurrentUserId } from "@/lib/auth";
 import { clerkSignInAppearance } from "@/lib/clerk";
@@ -180,6 +181,10 @@ export default async function HomePage() {
               </div>
             </div>
           ) : null}
+        </div>
+
+        <div className="relative mt-10">
+          <LandingSurveyPreview />
         </div>
       </section>
 
