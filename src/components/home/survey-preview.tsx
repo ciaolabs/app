@@ -136,8 +136,99 @@ export function SurveyPreview() {
     setActiveIndex(0);
   }
 
+  const previewUrl =
+    survey === "personality"
+      ? "survey.ciaobang.com/surveys/personality"
+      : "survey.ciaobang.com/surveys/values";
+
   return (
-    <div className="rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel)] p-3 shadow-[var(--shadow-strong)] backdrop-blur sm:p-4">
+    <div className="overflow-hidden rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] shadow-[var(--shadow-strong)] backdrop-blur">
+      {/* Safari-style mac toolbar */}
+      <div className="flex items-center gap-3 border-b border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-3 sm:px-5">
+        {/* Traffic light dots */}
+        <div className="flex items-center gap-1.5">
+          <span className="block h-3 w-3 rounded-full" style={{ background: "#FF5F57" }} />
+          <span className="block h-3 w-3 rounded-full" style={{ background: "#FEBC2E" }} />
+          <span className="block h-3 w-3 rounded-full" style={{ background: "#28C840" }} />
+        </div>
+
+        {/* Sidebar icon + dropdown */}
+        <div className="hidden items-center gap-1 sm:flex">
+          <button
+            type="button"
+            aria-label="Toggle sidebar"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--muted)] transition hover:bg-[var(--surface-inset)] hover:text-[var(--ink)]"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current" strokeWidth="1.6">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <line x1="9" y1="5" x2="9" y2="19" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Sidebar options"
+            className="inline-flex h-7 w-5 items-center justify-center rounded-md text-[var(--muted)] transition hover:bg-[var(--surface-inset)] hover:text-[var(--ink)]"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3 w-3 fill-current">
+              <path d="M7 10l5 5 5-5z" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Back / forward arrows */}
+        <div className="flex items-center rounded-full bg-[var(--surface-inset)] p-0.5">
+          <button
+            type="button"
+            aria-label="Back"
+            className="inline-flex h-7 w-8 items-center justify-center rounded-full text-[var(--muted)] transition hover:text-[var(--ink)]"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 6l-6 6 6 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Forward"
+            className="inline-flex h-7 w-8 items-center justify-center rounded-full text-[var(--muted)] transition hover:text-[var(--ink)]"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </button>
+        </div>
+
+        {/* URL bar */}
+        <div className="flex flex-1 items-center justify-center rounded-full bg-[var(--surface-inset)] px-4 py-1.5 text-xs text-[var(--ink-soft)]">
+          <span className="truncate">{previewUrl}</span>
+        </div>
+
+        {/* Right-side tab actions */}
+        <div className="hidden items-center gap-1 sm:flex">
+          <button
+            type="button"
+            aria-label="New tab"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--muted)] transition hover:bg-[var(--surface-inset)] hover:text-[var(--ink)]"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current" strokeWidth="2" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Show all tabs"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--muted)] transition hover:bg-[var(--surface-inset)] hover:text-[var(--ink)]"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 fill-none stroke-current" strokeWidth="1.6">
+              <rect x="4" y="6" width="11" height="12" rx="1.5" />
+              <rect x="9" y="3" width="11" height="12" rx="1.5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Survey body */}
+      <div className="bg-[var(--surface-panel)] p-3 sm:p-4">
       <div className="grid min-h-[34rem] gap-4 lg:grid-cols-[19rem_minmax(0,1fr)]">
         <aside className="flex min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] p-5 shadow-[var(--shadow-soft)]">
           <div className="flex items-start justify-between gap-3">
@@ -322,6 +413,7 @@ export function SurveyPreview() {
             </div>
           </div>
         </section>
+      </div>
       </div>
     </div>
   );
