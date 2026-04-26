@@ -3,6 +3,7 @@ import postgres from "postgres";
 import { getActiveSurveyDefinition } from "@/lib/survey/definitions";
 import { SURVEY_SCHEMA_SQL } from "@/lib/survey/db-schema";
 import {
+  LikertValue,
   SurveyAnswers,
   SurveyDraft,
   SurveyRepository,
@@ -31,6 +32,24 @@ type SubmissionSummaryRow = {
   created_at: string | Date;
   updated_at: string | Date;
   submitted_at: string | Date;
+};
+
+type DraftIdRow = {
+  id: string;
+};
+
+type SurveyStatusRow = {
+  submitted_count: number;
+  has_active_draft: boolean;
+  latest_submission_at: string | Date | null;
+  latest_submission_id: string | null;
+};
+
+type AnswerInsertRow = {
+  submission_id: string;
+  question_id: string;
+  question_order: number;
+  response: LikertValue;
 };
 
 let client: ReturnType<typeof postgres> | null = null;
@@ -127,6 +146,64 @@ async function selectDraft(sql: SqlExecutor, userId: string, surveyType: SurveyT
   return rows[0] ? (toSurveyRecord(rows[0]) as SurveyDraft) : null;
 }
 
+async function selectDraftId(
+  sql: SqlExecutor,
+  userId: string,
+  surveyType: SurveyType,
+  submissionId?: string,
+) {
+  const rows = submissionId
+    ? await sql<DraftIdRow[]>`
+        select id
+        from survey_submissions
+        where
+          id = ${submissionId}
+          and user_id = ${userId}
+          and survey_type = ${surveyType}
+          and status = 'draft'
+        limit 1
+      `
+    : await sql<DraftIdRow[]>`
+        select id
+        from survey_submissions
+        where user_id = ${userId} and survey_type = ${surveyType} and status = 'draft'
+        limit 1
+      `;
+
+  return rows[0]?.id ?? null;
+}
+
+async function ensureDraftId(
+  sql: SqlExecutor,
+  userId: string,
+  surveyType: SurveyType,
+  submissionId?: string,
+) {
+  let draftId = await selectDraftId(sql, userId, surveyType, submissionId);
+
+  if (draftId) {
+    return draftId;
+  }
+
+  if (submissionId) {
+    throw new Error("Unable to load the active draft.");
+  }
+
+  await sql`
+    insert into survey_submissions (id, user_id, survey_type, status, answer_count)
+    values (${crypto.randomUUID()}, ${userId}, ${surveyType}, 'draft', 0)
+    on conflict do nothing
+  `;
+
+  draftId = await selectDraftId(sql, userId, surveyType);
+
+  if (!draftId) {
+    throw new Error("Unable to load the active draft.");
+  }
+
+  return draftId;
+}
+
 async function selectLatestSubmission(sql: SqlExecutor, userId: string, surveyType: SurveyType) {
   const rows = await sql<SubmissionRow[]>`
     select
@@ -205,6 +282,26 @@ async function selectSubmissionSummaries(sql: SqlExecutor, userId: string, surve
   return rows.map(toSubmissionSummary);
 }
 
+async function selectSurveyStatus(sql: SqlExecutor, userId: string, surveyType: SurveyType) {
+  const [row] = await sql<SurveyStatusRow[]>`
+    select
+      count(*) filter (where status = 'submitted')::int as submitted_count,
+      coalesce(bool_or(status = 'draft'), false) as has_active_draft,
+      max(submitted_at) filter (where status = 'submitted') as latest_submission_at,
+      (array_agg(id order by submitted_at desc) filter (where status = 'submitted'))[1]::text as latest_submission_id
+    from survey_submissions
+    where user_id = ${userId} and survey_type = ${surveyType}
+  `;
+
+  return {
+    surveyType,
+    submittedCount: row?.submitted_count ?? 0,
+    hasActiveDraft: row?.has_active_draft ?? false,
+    latestSubmissionAt: toIsoString(row?.latest_submission_at ?? null),
+    latestSubmissionId: row?.latest_submission_id ?? null,
+  };
+}
+
 export function createPostgresSurveyRepository(): SurveyRepository {
   return {
     async ensureDraft(userId, surveyType) {
@@ -243,30 +340,17 @@ export function createPostgresSurveyRepository(): SurveyRepository {
       return selectDraft(getClient(), userId, surveyType);
     },
 
-    async upsertAnswer({ userId, surveyType, questionId, questionOrder, value }) {
+    async upsertAnswer({ userId, surveyType, submissionId, questionId, questionOrder, value }) {
       await ensureSchema();
       const sql = getClient();
 
       return sql.begin(async (transaction) => {
         const tx = transaction as unknown as postgres.Sql;
-        let draft = await selectDraft(tx, userId, surveyType);
-
-        if (!draft) {
-          await tx`
-            insert into survey_submissions (id, user_id, survey_type, status, answer_count)
-            values (${crypto.randomUUID()}, ${userId}, ${surveyType}, 'draft', 0)
-            on conflict do nothing
-          `;
-          draft = await selectDraft(tx, userId, surveyType);
-        }
-
-        if (!draft) {
-          throw new Error("Unable to load the active draft.");
-        }
+        const draftId = await ensureDraftId(tx, userId, surveyType, submissionId);
 
         await tx`
           insert into survey_answers (submission_id, question_id, question_order, response, updated_at)
-          values (${draft.submissionId}, ${questionId}, ${questionOrder}, ${value}, now())
+          values (${draftId}, ${questionId}, ${questionOrder}, ${value}, now())
           on conflict (submission_id, question_id)
           do update set
             response = excluded.response,
@@ -274,16 +358,16 @@ export function createPostgresSurveyRepository(): SurveyRepository {
             updated_at = now()
         `;
 
-        const [{ count }] = await tx<{ count: number }[]>`
-          select count(*)::int as count
-          from survey_answers
-          where submission_id = ${draft.submissionId}
-        `;
-
         await tx`
           update survey_submissions
-          set answer_count = ${count}, updated_at = now()
-          where id = ${draft.submissionId}
+          set
+            answer_count = (
+              select count(*)::int
+              from survey_answers
+              where submission_id = ${draftId}
+            ),
+            updated_at = now()
+          where id = ${draftId}
         `;
 
         const refreshedDraft = await selectDraft(tx, userId, surveyType);
@@ -312,25 +396,14 @@ export function createPostgresSurveyRepository(): SurveyRepository {
 
       return sql.begin(async (transaction) => {
         const tx = transaction as unknown as postgres.Sql;
-        let draft = await selectDraft(tx, userId, surveyType);
-
-        if (!draft) {
-          await tx`
-            insert into survey_submissions (id, user_id, survey_type, status, answer_count)
-            values (${crypto.randomUUID()}, ${userId}, ${surveyType}, 'draft', 0)
-            on conflict do nothing
-          `;
-          draft = await selectDraft(tx, userId, surveyType);
-        }
-
-        if (!draft) {
-          throw new Error("Unable to load the draft for submission.");
-        }
+        const draftId = await ensureDraftId(tx, userId, surveyType);
 
         await tx`
           delete from survey_answers
-          where submission_id = ${draft.submissionId}
+          where submission_id = ${draftId}
         `;
+
+        const answerRows: AnswerInsertRow[] = [];
 
         for (const [questionId, value] of Object.entries(answers)) {
           const question = definition.questionsById.get(questionId);
@@ -339,11 +412,23 @@ export function createPostgresSurveyRepository(): SurveyRepository {
             throw new Error(`Unknown question id: ${questionId}`);
           }
 
-          await tx`
-            insert into survey_answers (submission_id, question_id, question_order, response, updated_at)
-            values (${draft.submissionId}, ${questionId}, ${question.order}, ${value}, now())
-          `;
+          answerRows.push({
+            submission_id: draftId,
+            question_id: questionId,
+            question_order: question.order,
+            response: value,
+          });
         }
+
+        await tx`
+          insert into survey_answers ${tx(
+            answerRows,
+            "submission_id",
+            "question_id",
+            "question_order",
+            "response",
+          )}
+        `;
 
         await tx`
           update survey_submissions
@@ -352,10 +437,10 @@ export function createPostgresSurveyRepository(): SurveyRepository {
             answer_count = ${definition.questionCount},
             updated_at = now(),
             submitted_at = now()
-          where id = ${draft.submissionId}
+          where id = ${draftId}
         `;
 
-        const submission = await selectLatestSubmission(tx, userId, surveyType);
+        const submission = await selectSubmissionById(tx, userId, surveyType, draftId);
 
         if (!submission) {
           throw new Error("Unable to load the submitted survey.");
@@ -382,19 +467,7 @@ export function createPostgresSurveyRepository(): SurveyRepository {
 
     async getSurveyStatus(userId, surveyType) {
       await ensureSchema();
-      const sql = getClient();
-      const [draft, submissions] = await Promise.all([
-        selectDraft(sql, userId, surveyType),
-        selectSubmissionSummaries(sql, userId, surveyType),
-      ]);
-
-      return {
-        surveyType,
-        submittedCount: submissions.length,
-        hasActiveDraft: Boolean(draft),
-        latestSubmissionAt: submissions[0]?.submittedAt ?? null,
-        latestSubmissionId: submissions[0]?.submissionId ?? null,
-      };
+      return selectSurveyStatus(getClient(), userId, surveyType);
     },
   };
 }

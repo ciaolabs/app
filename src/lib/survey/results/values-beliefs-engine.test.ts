@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { getSurveyQuestions } from "@/lib/survey/questions";
 import { buildSurveyResults } from "@/lib/survey/results/engine";
+import type { ValuesBeliefsResults } from "@/lib/survey/results/types";
 import type { SurveyAnswers, SurveySubmission } from "@/lib/survey/types";
 
 function makeAnswers(defaultValue: SurveyAnswers[string]) {
@@ -10,7 +11,7 @@ function makeAnswers(defaultValue: SurveyAnswers[string]) {
   ) as SurveyAnswers;
 }
 
-function makeSubmission(answers: SurveyAnswers): SurveySubmission {
+function makeSubmission(answers: SurveyAnswers): SurveySubmission & { surveyType: "values-beliefs" } {
   const now = new Date().toISOString();
 
   return {
@@ -26,7 +27,7 @@ function makeSubmission(answers: SurveyAnswers): SurveySubmission {
   };
 }
 
-function findBelief(results: ReturnType<typeof buildSurveyResults>, id: string) {
+function findBelief(results: ValuesBeliefsResults, id: string) {
   if (results.surveyType !== "values-beliefs") {
     throw new Error("Expected values-beliefs results.");
   }
@@ -46,7 +47,7 @@ function findBelief(results: ReturnType<typeof buildSurveyResults>, id: string) 
   return match;
 }
 
-function findValue(results: ReturnType<typeof buildSurveyResults>, id: string) {
+function findValue(results: ValuesBeliefsResults, id: string) {
   if (results.surveyType !== "values-beliefs") {
     throw new Error("Expected values-beliefs results.");
   }

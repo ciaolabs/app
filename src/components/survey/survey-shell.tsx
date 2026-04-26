@@ -140,6 +140,8 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const pendingSaveIds = useRef(new Set<string>());
   const pendingTimers = useRef<Map<string, number>>(new Map());
+  const pendingControllers = useRef<Map<string, AbortController>>(new Map());
+  const saveVersions = useRef<Map<string, number>>(new Map());
   const deferredAnswers = useDeferredValue(answers);
   const storedAnswersKey = getStoredAnswersKey(survey.type);
   const pendingResultsKey = getPendingResultsKey(survey.type);
@@ -212,14 +214,19 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   }, [answers, storedAnswersKey]);
 
   const persistAnswer = useCallback(
-    async (questionId: string, questionOrder: number, value: LikertValue) => {
+    async (questionId: string, questionOrder: number, value: LikertValue, saveVersion: number) => {
+      const controller = new AbortController();
+      pendingControllers.current.set(questionId, controller);
+
       try {
         const response = await surveyFetch(`${surveyApiBasePath}/answer`, {
           method: "PUT",
+          signal: controller.signal,
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            submissionId: initialDraft.submissionId,
             questionId,
             questionOrder,
             value,
@@ -231,17 +238,33 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
           throw new Error(payload.error ?? "Unable to save your answer.");
         }
 
-        setLastSavedAt(payload.draft.updatedAt);
-        setSaveError(null);
+        if (saveVersions.current.get(questionId) === saveVersion) {
+          setLastSavedAt(payload.draft.updatedAt);
+          setSaveError(null);
+        }
       } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        if (saveVersions.current.get(questionId) !== saveVersion) {
+          return;
+        }
+
         const message = error instanceof Error ? error.message : "Unable to save your answer.";
         setSaveError(message);
       } finally {
-        pendingSaveIds.current.delete(questionId);
-        setPendingSaveCount(pendingSaveIds.current.size);
+        if (pendingControllers.current.get(questionId) === controller) {
+          pendingControllers.current.delete(questionId);
+        }
+
+        if (saveVersions.current.get(questionId) === saveVersion) {
+          pendingSaveIds.current.delete(questionId);
+          setPendingSaveCount(pendingSaveIds.current.size);
+        }
       }
     },
-    [surveyApiBasePath, surveyFetch],
+    [initialDraft.submissionId, surveyApiBasePath, surveyFetch],
   );
 
   useEffect(() => {
@@ -258,10 +281,13 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
     }
 
     const timerMap = pendingTimers.current;
+    const controllerMap = pendingControllers.current;
 
     return () => {
       timerMap.forEach((timerId) => window.clearTimeout(timerId));
       timerMap.clear();
+      controllerMap.forEach((controller) => controller.abort());
+      controllerMap.clear();
     };
   }, [initialDraft.answers, pendingResultsKey, questions, storedAnswersKey, survey.dashboardRoute]);
 
@@ -273,12 +299,15 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
         window.clearTimeout(existingTimer);
       }
 
+      pendingControllers.current.get(questionId)?.abort();
+      const saveVersion = (saveVersions.current.get(questionId) ?? 0) + 1;
+      saveVersions.current.set(questionId, saveVersion);
       pendingSaveIds.current.add(questionId);
       setPendingSaveCount(pendingSaveIds.current.size);
 
       const timerId = window.setTimeout(() => {
         pendingTimers.current.delete(questionId);
-        void persistAnswer(questionId, questionOrder, value);
+        void persistAnswer(questionId, questionOrder, value, saveVersion);
       }, 450);
 
       pendingTimers.current.set(questionId, timerId);
@@ -399,6 +428,8 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
 
     pendingTimers.current.forEach((timerId) => window.clearTimeout(timerId));
     pendingTimers.current.clear();
+    pendingControllers.current.forEach((controller) => controller.abort());
+    pendingControllers.current.clear();
     pendingSaveIds.current.clear();
     setPendingSaveCount(0);
     setIsSubmitting(true);

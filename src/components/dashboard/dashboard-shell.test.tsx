@@ -19,13 +19,13 @@ function makeSubmission(
   answers: SurveyAnswers,
   submissionId: string,
   submittedAt: string,
-): SurveySubmission {
+): SurveySubmission & { surveyType: "personality" } {
   const now = submittedAt;
 
   return {
     submissionId,
     userId: "user_123",
-    surveyType: personalitySurveyDefinition.type,
+    surveyType: "personality",
     status: "submitted",
     answerCount: surveyQuestions.length,
     answers,

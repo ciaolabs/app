@@ -24,6 +24,12 @@ type MockAnswerRow = {
   updated_at: string;
 };
 
+type MockInsertHelper = {
+  __mockKind: "insert-helper";
+  rows: Array<Record<string, unknown>>;
+  columns: string[];
+};
+
 type MockDatabase = {
   submissions: MockSubmissionRow[];
   answers: MockAnswerRow[];
@@ -67,9 +73,113 @@ function buildAggregatedRow(database: MockDatabase, submission: MockSubmissionRo
   };
 }
 
+function isTemplateStringsArray(value: unknown): value is TemplateStringsArray {
+  return Array.isArray(value) && "raw" in value;
+}
+
+function isMockInsertHelper(value: unknown): value is MockInsertHelper {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "__mockKind" in value &&
+    (value as MockInsertHelper).__mockKind === "insert-helper"
+  );
+}
+
+function upsertAnswerRow(
+  database: MockDatabase,
+  submissionId: string,
+  questionId: string,
+  questionOrder: number,
+  response: number,
+) {
+  const updatedAt = nextTimestamp(database);
+  const existingIndex = database.answers.findIndex(
+    (answer) => answer.submission_id === submissionId && answer.question_id === questionId,
+  );
+
+  if (existingIndex >= 0) {
+    database.answers[existingIndex] = {
+      submission_id: submissionId,
+      question_id: questionId,
+      question_order: questionOrder,
+      response,
+      updated_at: updatedAt,
+    };
+  } else {
+    database.answers.push({
+      submission_id: submissionId,
+      question_id: questionId,
+      question_order: questionOrder,
+      response,
+      updated_at: updatedAt,
+    });
+  }
+}
+
 function createMockSql(database: MockDatabase) {
-  const sql = (async (strings: TemplateStringsArray, ...values: unknown[]) => {
+  const sql = ((strings: TemplateStringsArray | Array<Record<string, unknown>>, ...values: unknown[]) => {
+    if (!isTemplateStringsArray(strings)) {
+      return {
+        __mockKind: "insert-helper",
+        rows: strings,
+        columns: values as string[],
+      } satisfies MockInsertHelper;
+    }
+
     const query = normalizeQuery(strings);
+
+    if (query.startsWith("select count(*) filter")) {
+      const [userId, surveyType] = values as [string, "personality" | "values-beliefs"];
+      const submissions = database.submissions.filter(
+        (submission) => submission.user_id === userId && submission.survey_type === surveyType,
+      );
+      const submitted = submissions
+        .filter((submission) => submission.status === "submitted" && submission.submitted_at)
+        .sort((left, right) => String(right.submitted_at).localeCompare(String(left.submitted_at)));
+
+      return Promise.resolve([
+        {
+          submitted_count: submitted.length,
+          has_active_draft: submissions.some((submission) => submission.status === "draft"),
+          latest_submission_at: submitted[0]?.submitted_at ?? null,
+          latest_submission_id: submitted[0]?.id ?? null,
+        },
+      ]);
+    }
+
+    if (query.startsWith("select id from survey_submissions") && query.includes("s.status = 'draft'")) {
+      const [userId, surveyType] = values as [string, "personality" | "values-beliefs"];
+      const draft = database.submissions.find(
+        (submission) =>
+          submission.user_id === userId &&
+          submission.survey_type === surveyType &&
+          submission.status === "draft",
+      );
+
+      return Promise.resolve(draft ? [{ id: draft.id }] : []);
+    }
+
+    if (query.startsWith("select id from survey_submissions") && query.includes("status = 'draft'")) {
+      const hasSubmissionIdFilter = query.includes("where id =");
+      const [submissionId, userId, surveyType] = values as [
+        string,
+        string,
+        "personality" | "values-beliefs",
+      ];
+      const [resolvedUserId, resolvedSurveyType] = hasSubmissionIdFilter
+        ? [userId, surveyType]
+        : (values as [string, "personality" | "values-beliefs"]);
+      const draft = database.submissions.find(
+        (submission) =>
+          submission.user_id === resolvedUserId &&
+          submission.survey_type === resolvedSurveyType &&
+          submission.status === "draft" &&
+          (!hasSubmissionIdFilter || submission.id === submissionId),
+      );
+
+      return Promise.resolve(draft ? [{ id: draft.id }] : []);
+    }
 
     if (query.includes("from survey_submissions s") && query.includes("s.status = 'draft'")) {
       const [userId, surveyType] = values as [string, "personality" | "values-beliefs"];
@@ -79,7 +189,7 @@ function createMockSql(database: MockDatabase) {
           submission.survey_type === surveyType &&
           submission.status === "draft",
       );
-      return draft ? [buildAggregatedRow(database, draft)] : [];
+      return Promise.resolve(draft ? [buildAggregatedRow(database, draft)] : []);
     }
 
     if (
@@ -99,7 +209,7 @@ function createMockSql(database: MockDatabase) {
         )
         .sort((left, right) => String(right.submitted_at).localeCompare(String(left.submitted_at)))[0];
 
-      return submission ? [buildAggregatedRow(database, submission)] : [];
+      return Promise.resolve(submission ? [buildAggregatedRow(database, submission)] : []);
     }
 
     if (
@@ -117,7 +227,7 @@ function createMockSql(database: MockDatabase) {
           row.submitted_at,
       );
 
-      return submission ? [buildAggregatedRow(database, submission)] : [];
+      return Promise.resolve(submission ? [buildAggregatedRow(database, submission)] : []);
     }
 
     if (
@@ -126,7 +236,7 @@ function createMockSql(database: MockDatabase) {
       query.includes("s.status = 'submitted'")
     ) {
       const [userId, surveyType] = values as [string, "personality" | "values-beliefs"];
-      return database.submissions
+      return Promise.resolve(database.submissions
         .filter(
           (row) =>
             row.user_id === userId &&
@@ -143,7 +253,7 @@ function createMockSql(database: MockDatabase) {
           created_at: submission.created_at,
           updated_at: submission.updated_at,
           submitted_at: submission.submitted_at as string,
-        }));
+        })));
     }
 
     if (query.startsWith("insert into survey_submissions")) {
@@ -156,7 +266,7 @@ function createMockSql(database: MockDatabase) {
       );
 
       if (existingDraft && query.includes("on conflict do nothing")) {
-        return [];
+        return Promise.resolve([]);
       }
 
       if (existingDraft) {
@@ -177,48 +287,49 @@ function createMockSql(database: MockDatabase) {
         submitted_at: null,
       });
 
-      return [];
+      return Promise.resolve([]);
     }
 
     if (query.startsWith("insert into survey_answers")) {
-      const [submissionId, questionId, questionOrder, response] = values as [string, string, number, number];
-      const updatedAt = nextTimestamp(database);
-      const existingIndex = database.answers.findIndex(
-        (answer) => answer.submission_id === submissionId && answer.question_id === questionId,
-      );
+      const insertHelper = values.find(isMockInsertHelper);
 
-      if (existingIndex >= 0) {
-        database.answers[existingIndex] = {
-          submission_id: submissionId,
-          question_id: questionId,
-          question_order: questionOrder,
-          response,
-          updated_at: updatedAt,
-        };
-      } else {
-        database.answers.push({
-          submission_id: submissionId,
-          question_id: questionId,
-          question_order: questionOrder,
-          response,
-          updated_at: updatedAt,
+      if (insertHelper) {
+        insertHelper.rows.forEach((row) => {
+          upsertAnswerRow(
+            database,
+            row.submission_id as string,
+            row.question_id as string,
+            row.question_order as number,
+            row.response as number,
+          );
         });
+
+        return Promise.resolve([]);
       }
 
-      return [];
+      const [submissionId, questionId, questionOrder, response] = values as [string, string, number, number];
+      upsertAnswerRow(database, submissionId, questionId, questionOrder, response);
+
+      return Promise.resolve([]);
     }
 
     if (query.startsWith("select count(*)::int as count")) {
       const submissionId = values[0] as string;
-      return [
+      return Promise.resolve([
         {
           count: database.answers.filter((answer) => answer.submission_id === submissionId).length,
         },
-      ];
+      ]);
     }
 
     if (query.startsWith("update survey_submissions") && query.includes("set answer_count =")) {
-      const [answerCount, submissionId] = values as [number, string];
+      const isCountingAnswers = query.includes("select count(*)::int from survey_answers");
+      const [answerCount, submissionId] = isCountingAnswers
+        ? [
+            database.answers.filter((answer) => answer.submission_id === values[0]).length,
+            values[1] as string,
+          ]
+        : (values as [number, string]);
       const submission = database.submissions.find((row) => row.id === submissionId);
 
       if (submission) {
@@ -226,13 +337,13 @@ function createMockSql(database: MockDatabase) {
         submission.updated_at = nextTimestamp(database);
       }
 
-      return [];
+      return Promise.resolve([]);
     }
 
     if (query.startsWith("delete from survey_answers")) {
       const submissionId = values[0] as string;
       database.answers = database.answers.filter((answer) => answer.submission_id !== submissionId);
-      return [];
+      return Promise.resolve([]);
     }
 
     if (query.startsWith("update survey_submissions") && query.includes("set status = 'submitted'")) {
@@ -247,12 +358,13 @@ function createMockSql(database: MockDatabase) {
         submission.submitted_at = submittedAt;
       }
 
-      return [];
+      return Promise.resolve([]);
     }
 
     throw new Error(`Unhandled postgres query in test: ${query}`);
   }) as unknown as {
     (strings: TemplateStringsArray, ...values: unknown[]): Promise<unknown[]>;
+    (rows: Array<Record<string, unknown>>, ...columns: string[]): MockInsertHelper;
     unsafe: (query: string) => Promise<unknown[]>;
     begin: <T>(callback: (transaction: typeof sql) => Promise<T>) => Promise<T>;
   };

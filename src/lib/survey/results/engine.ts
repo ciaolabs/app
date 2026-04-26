@@ -19,6 +19,7 @@ import {
   type ScaleResult,
   type ScoreBand,
   type SurveyResults,
+  type ValuesBeliefsResults,
 } from "@/lib/survey/results/types";
 
 type ProbabilityDistribution = number[];
@@ -500,6 +501,13 @@ export function buildPersonalitySurveyResults(submission: SurveySubmission): Sur
   };
 }
 
+export function buildSurveyResults(
+  submission: SurveySubmission & { surveyType: "personality" },
+): SurveyResults;
+export function buildSurveyResults(
+  submission: SurveySubmission & { surveyType: "values-beliefs" },
+): ValuesBeliefsResults;
+export function buildSurveyResults(submission: SurveySubmission): AnySurveyResults;
 export function buildSurveyResults(submission: SurveySubmission): AnySurveyResults {
   if (submission.surveyType === "values-beliefs") {
     return buildValuesBeliefsResults(submission);

@@ -27,27 +27,18 @@ type SiteTopNavProps = {
 
 function HelpIcon() {
   return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-      <circle cx="10" cy="10" r="7.25" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M7.9 7.6a2.4 2.4 0 1 1 3.8 2c-.9.6-1.4 1-1.4 2"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.5"
-      />
-      <circle cx="10" cy="14.2" r=".85" fill="currentColor" />
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
+      <text x="12" y="18.2" textAnchor="middle" fontSize="20" fontWeight="800" fill="currentColor">?</text>
     </svg>
   );
 }
 
 function SunIcon() {
   return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-      <circle cx="10" cy="10" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
+      <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" />
       <path
-        d="M10 2.5v2.1M10 15.4v2.1M17.5 10h-2.1M4.6 10H2.5M15.3 4.7l-1.5 1.5M6.2 13.8l-1.5 1.5M15.3 15.3l-1.5-1.5M6.2 6.2 4.7 4.7"
+        d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
@@ -59,9 +50,9 @@ function SunIcon() {
 
 function MoonIcon() {
   return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
       <path
-        d="M12.8 3.3a6.9 6.9 0 1 0 3.9 12.6A7.6 7.6 0 1 1 12.8 3.3Z"
+        d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
@@ -135,7 +126,7 @@ function readTheme(): ThemeMode {
 }
 
 function actionButtonClassName() {
-  return "clay-button-hover inline-flex h-10 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)]";
+  return "clay-button-hover inline-flex h-10 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) text-sm font-semibold text-(--ink) shadow-(--shadow-soft)";
 }
 
 function iconButtonClassName() {
@@ -230,9 +221,9 @@ export function SiteTopNav({
     : "Toggle color theme";
 
   return (
-    <header className="nav-glass sticky top-0 z-40 rounded-b-[1.5rem] border-x border-b border-[var(--nav-glass-border)] bg-[var(--nav-glass-bg)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
+    <header className="nav-glass sticky top-0 z-40 rounded-b-3xl border-x border-b border-(--nav-glass-border) bg-(--nav-glass-bg) px-4 py-3 shadow-(--shadow-soft) sm:px-5">
       <div className="flex min-w-0 items-center gap-2 pr-12 sm:gap-3 lg:pr-0">
-        <div className="min-w-0 overflow-hidden lg:max-w-[22rem] xl:max-w-[26rem]">
+        <div className="min-w-0 overflow-hidden lg:max-w-88 xl:max-w-104">
           <SiteBreadcrumb title={breadcrumbTitle} items={breadcrumbItems} />
         </div>
 
@@ -240,8 +231,8 @@ export function SiteTopNav({
           {saveStatus ? (
             <div
               className={[
-                "inline-flex min-h-11 min-w-[10rem] items-center justify-end px-1 text-sm font-semibold",
-                saveStatusIsError ? "text-[var(--accent-rose)]" : "text-[var(--ink-soft)]",
+                "inline-flex min-h-11 min-w-40 items-center justify-end px-1 text-sm font-semibold",
+                saveStatusIsError ? "text-(--accent-rose)" : "text-(--ink-soft)",
               ].join(" ")}
             >
               {saveStatus}
@@ -320,23 +311,23 @@ export function SiteTopNav({
                 type="button"
                 aria-label="Close navigation menu"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="mobile-nav-backdrop fixed inset-0 z-[70] bg-black/20 backdrop-blur-[2px] lg:hidden"
+                className="mobile-nav-backdrop fixed inset-0 z-70 bg-black/20 backdrop-blur-[2px] lg:hidden"
               />
 
-              <div className="fixed right-0 top-1/2 z-[80] w-[min(18rem,calc(100vw-1rem))] -translate-y-1/2 pl-3 lg:hidden">
+              <div className="fixed right-0 top-1/2 z-80 w-[min(18rem,calc(100vw-1rem))] -translate-y-1/2 pl-3 lg:hidden">
                 <div
                   ref={mobileMenuPanelRef}
                   role="dialog"
                   aria-modal="true"
                   aria-label="Navigation menu"
-                  className="mobile-nav-sheet max-h-[calc(100vh-2rem)] overflow-y-auto rounded-l-[1.5rem] border-l border-y border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-2 shadow-[var(--shadow-strong)] backdrop-blur"
+                  className="mobile-nav-sheet max-h-[calc(100vh-2rem)] overflow-y-auto rounded-l-3xl border-l border-y border-(--line-strong) bg-(--surface-panel-strong) p-2 shadow-(--shadow-strong) backdrop-blur"
                 >
                   <div className="space-y-1">
                     {saveStatus ? (
                       <div
                         className={[
-                          "rounded-[0.75rem] px-3 py-2 text-sm font-semibold",
-                          saveStatusIsError ? "text-[var(--accent-rose)]" : "text-[var(--ink-soft)]",
+                          "rounded-xl px-3 py-2 text-sm font-semibold",
+                          saveStatusIsError ? "text-(--accent-rose)" : "text-(--ink-soft)",
                         ].join(" ")}
                       >
                         {saveStatus}
@@ -348,7 +339,7 @@ export function SiteTopNav({
                     <Link
                       href="/"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="clay-button-hover flex min-h-11 items-center gap-3 rounded-[1rem] px-3 text-sm font-semibold text-[var(--ink)]"
+                      className="clay-button-hover flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-(--ink)"
                     >
                       <HomeIcon />
                       <span>Home</span>
@@ -357,7 +348,7 @@ export function SiteTopNav({
                     <Link
                       href={SURVEYS_ROUTE}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="clay-button-hover flex min-h-11 items-center gap-3 rounded-[1rem] px-3 text-sm font-semibold text-[var(--ink)]"
+                      className="clay-button-hover flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-(--ink)"
                     >
                       <DashboardIcon />
                       <span>Dashboard</span>
@@ -369,7 +360,7 @@ export function SiteTopNav({
                         target="_blank"
                         rel="noreferrer"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="clay-button-hover flex min-h-11 items-center gap-3 rounded-[1rem] px-3 text-sm font-semibold text-[var(--ink)]"
+                        className="clay-button-hover flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-(--ink)"
                       >
                         <HelpIcon />
                         <span>Help</span>
@@ -381,7 +372,7 @@ export function SiteTopNav({
                           setIsMobileMenuOpen(false);
                           helpOnClick();
                         }}
-                        className="clay-button-hover flex min-h-11 w-full items-center gap-3 rounded-[1rem] px-3 text-left text-sm font-semibold text-[var(--ink)]"
+                        className="clay-button-hover flex min-h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-semibold text-(--ink)"
                       >
                         <HelpIcon />
                         <span>Help</span>
@@ -394,14 +385,14 @@ export function SiteTopNav({
                         toggleTheme();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="clay-button-hover flex min-h-11 w-full items-center gap-3 rounded-[1rem] px-3 text-left text-sm font-semibold text-[var(--ink)]"
+                      className="clay-button-hover flex min-h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-semibold text-(--ink)"
                     >
                       {hasHydrated && theme === "dark" ? <SunIcon /> : <MoonIcon />}
                       <span>{themeLabel}</span>
                     </button>
 
                     <Show when="signed-in">
-                      <div className="flex items-center justify-between rounded-[1rem] border border-dashed border-[var(--line)] px-3 py-2 text-sm font-semibold text-[var(--ink)]">
+                      <div className="flex items-center justify-between rounded-2xl border border-dashed border-(--line) px-3 py-2 text-sm font-semibold text-(--ink)">
                         <span>Account</span>
                         <UserButton appearance={clerkUserButtonAppearance}>
                           <UserButton.MenuItems>

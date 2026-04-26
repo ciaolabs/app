@@ -32,7 +32,7 @@ describe("HomePage", () => {
     render(await HomePage());
 
     expect(screen.getByRole("button", { name: "Sign in to start" })).toBeInTheDocument();
-    expect(screen.getByTestId("clerk-sign-in")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Start a survey →" })).toBeInTheDocument();
     expect(screen.queryByText("Account menu")).not.toBeInTheDocument();
   });
 
@@ -45,7 +45,9 @@ describe("HomePage", () => {
 
     expect(screen.getByText("Account menu")).toBeInTheDocument();
     expect(screen.queryByTestId("clerk-sign-in")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "New Surveys" })).toHaveAttribute("href", "/surveys");
-    expect(screen.getByRole("link", { name: "Open your surveys" })).toHaveAttribute("href", "/surveys");
+    expect(screen.getAllByRole("link", { name: "Start a survey →" })).toHaveLength(3);
+    for (const link of screen.getAllByRole("link", { name: "Start a survey →" })) {
+      expect(link).toHaveAttribute("href", "/surveys");
+    }
   });
 });

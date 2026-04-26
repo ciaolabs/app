@@ -68,13 +68,13 @@ export function LandingFooter({ isSignedIn }: { isSignedIn: boolean }) {
     <footer className="mt-6">
       {/* Landscape container with the tulip image */}
       <div
-        className="relative h-[759px] w-full overflow-hidden rounded-t-[1.5rem] border border-[var(--line)] shadow-[var(--shadow-soft)] [html[data-theme='dark']_&]:border-[var(--line)]"
+        className="relative h-189.75 w-full overflow-hidden rounded-t-3xl border border-(--line) shadow-(--shadow-soft) [html[data-theme='dark']_&]:border-(--line)"
         style={{
           background: `var(--surface-panel) url('${footerImage}') no-repeat center top / cover`,
         }}
       >
         {/* White card pinned to the upper (white-sky) zone of the image */}
-        <div className="absolute inset-x-10 top-10 max-h-[400px] overflow-hidden rounded-[1rem] border border-[var(--line)] bg-[#f5f3ef] px-6 py-6 [html[data-theme='dark']_&]:bg-[#4B463F] sm:inset-x-12 sm:top-12 sm:px-7 sm:py-7">
+        <div className="absolute inset-x-10 top-10 max-h-100 overflow-hidden rounded-2xl border border-(--line) bg-[#f5f3ef] px-6 py-6 [html[data-theme='dark']_&]:bg-[#4B463F] sm:inset-x-12 sm:top-12 sm:px-7 sm:py-7">
 
           {/* Top row: tagline + CTAs | logo */}
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -119,7 +119,7 @@ export function LandingFooter({ isSignedIn }: { isSignedIn: boolean }) {
                 alt="Ciao!"
                 width={60}
                 height={60}
-                className="rounded-[0.75rem]"
+                className="rounded-xl"
               />
               <span className="font-display text-xl font-bold text-[#111] [html[data-theme='dark']_&]:text-[#f5f3ef]">Ciao!</span>
             </div>

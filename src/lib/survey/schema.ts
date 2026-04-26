@@ -9,9 +9,10 @@ export const questionIdSchema = z.string().min(1, "Question id is required.");
 export const likertValueSchema = z
   .number()
   .int()
-  .refine((value) => isLikertValue(value), { message: "Answer must be between 1 and 7." });
+  .refine((value) => isLikertValue(value), { message: "Answer must be between 1 and 6." });
 
 export const answerPayloadSchema = z.object({
+  submissionId: z.string().min(1, "Submission id is required.").optional(),
   questionId: questionIdSchema,
   value: likertValueSchema,
 });

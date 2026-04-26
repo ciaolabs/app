@@ -47,13 +47,19 @@ export async function PUT(request: Request, context: SurveyRouteContext) {
       return NextResponse.json({ error: FINAL_ATTEMPT_MESSAGE }, { status: 403 });
     }
 
-    const draft = await repository.upsertAnswer({
+    const upsertParams: Parameters<typeof repository.upsertAnswer>[0] = {
       userId,
       surveyType: definition.type,
       questionId: payload.questionId,
       questionOrder: question.order,
       value: payload.value,
-    });
+    };
+
+    if (payload.submissionId) {
+      upsertParams.submissionId = payload.submissionId;
+    }
+
+    const draft = await repository.upsertAnswer(upsertParams);
 
     return NextResponse.json({ draft });
   } catch (error) {

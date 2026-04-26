@@ -201,6 +201,21 @@ body {
     color 180ms ease;
 }
 
+::selection {
+  background: #000000;
+  color: #ffffff;
+}
+
+html[data-theme="dark"] ::selection {
+  background: #ffffff;
+  color: #000000;
+}
+
+[data-theme="light"] ::selection {
+  background: #000000;
+  color: #ffffff;
+}
+
 a,
 button {
   -webkit-tap-highlight-color: transparent;

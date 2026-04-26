@@ -31,16 +31,17 @@ export async function GET(request: Request, context: SurveyRouteContext) {
     );
   }
 
-  const repository = getSurveyRepository();
-  const submissions = await repository.listSubmissions(userId, definition.type);
   const requestedSubmissionId = new URL(request.url).searchParams.get("submissionId");
-  const targetSubmissionId = requestedSubmissionId ?? submissions[0]?.submissionId ?? null;
+  const repository = getSurveyRepository();
+  const submissionsPromise = repository.listSubmissions(userId, definition.type);
+  const submissionPromise = requestedSubmissionId
+    ? repository.getSubmissionById(userId, definition.type, requestedSubmissionId)
+    : repository.getLatestSubmission(userId, definition.type);
+  const [submissions, submission] = await Promise.all([submissionsPromise, submissionPromise]);
 
-  if (!targetSubmissionId) {
+  if (!requestedSubmissionId && !submission && submissions.length === 0) {
     return NextResponse.json({ results: null, submissions, selectedSubmissionId: null });
   }
-
-  const submission = await repository.getSubmissionById(userId, definition.type, targetSubmissionId);
 
   if (!submission) {
     return NextResponse.json(

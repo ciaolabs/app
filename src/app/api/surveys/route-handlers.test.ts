@@ -292,7 +292,7 @@ describe("survey route handlers", () => {
 
     getCurrentUserId.mockResolvedValue("user_123");
     repository.listSubmissions.mockResolvedValue([valuesSummary]);
-    repository.getSubmissionById.mockResolvedValue(valuesSubmission);
+    repository.getLatestSubmission.mockResolvedValue(valuesSubmission);
     const { GET } = await import("@/app/api/surveys/[surveyType]/results/route");
 
     const response = await GET(
@@ -306,6 +306,9 @@ describe("survey route handlers", () => {
       selectedSubmissionId: string | null;
     };
 
+    expect(repository.listSubmissions).toHaveBeenCalledWith("user_123", "values-beliefs");
+    expect(repository.getLatestSubmission).toHaveBeenCalledWith("user_123", "values-beliefs");
+    expect(repository.getSubmissionById).not.toHaveBeenCalled();
     expect(response.status).toBe(200);
     expect(payload.selectedSubmissionId).toBe(valuesSubmission.submissionId);
     expect(payload.results?.surveyType).toBe("values-beliefs");

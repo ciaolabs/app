@@ -1,21 +1,21 @@
 import { describe, expect, it } from "vitest";
 
-import { personalitySurveyDefinition } from "@/lib/survey/definitions";
 import { surveyQuestions } from "@/lib/survey/questions";
 import { buildSurveyResults } from "@/lib/survey/results/engine";
+import type { SurveyResults } from "@/lib/survey/results/types";
 import type { SurveyAnswers, SurveySubmission } from "@/lib/survey/types";
 
 function makeAnswers(value: SurveyAnswers[string]) {
   return Object.fromEntries(surveyQuestions.map((question) => [question.id, value] as const)) as SurveyAnswers;
 }
 
-function makeSubmission(answers: SurveyAnswers): SurveySubmission {
+function makeSubmission(answers: SurveyAnswers): SurveySubmission & { surveyType: "personality" } {
   const now = new Date().toISOString();
 
   return {
     submissionId: "submission_1",
     userId: "user_123",
-    surveyType: personalitySurveyDefinition.type,
+    surveyType: "personality",
     status: "submitted",
     answerCount: surveyQuestions.length,
     answers,
@@ -25,7 +25,7 @@ function makeSubmission(answers: SurveyAnswers): SurveySubmission {
   };
 }
 
-function findScale(results: ReturnType<typeof buildSurveyResults>, scaleNo: number) {
+function findScale(results: SurveyResults, scaleNo: number) {
   for (const framework of results.frameworks) {
     for (const section of framework.sections) {
       const match = section.items.find((item) => item.scaleNo === scaleNo);

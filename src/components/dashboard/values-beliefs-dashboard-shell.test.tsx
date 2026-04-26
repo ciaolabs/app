@@ -31,7 +31,7 @@ function makeSubmission(
   answers: SurveyAnswers,
   submissionId: string,
   submittedAt: string,
-): SurveySubmission {
+): SurveySubmission & { surveyType: "values-beliefs" } {
   return {
     submissionId,
     userId: "user_123",

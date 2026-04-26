@@ -115,6 +115,7 @@ export interface SurveyRepository {
   upsertAnswer(params: {
     userId: string;
     surveyType: SurveyType;
+    submissionId?: string;
     questionId: string;
     questionOrder: number;
     value: LikertValue;

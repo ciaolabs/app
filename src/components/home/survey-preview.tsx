@@ -142,9 +142,9 @@ export function SurveyPreview() {
       : "survey.ciaobang.com/surveys/values";
 
   return (
-    <div className="overflow-hidden rounded-[2rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] shadow-[var(--shadow-strong)] backdrop-blur">
+    <div className="overflow-hidden rounded-4xl border border-(--line) bg-(--surface-panel-strong) shadow-(--shadow-strong) backdrop-blur">
       {/* Safari-style mac toolbar */}
-      <div className="flex items-center gap-3 border-b border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-3 sm:px-5">
+      <div className="flex items-center gap-3 border-b border-(--line) bg-(--surface-panel-strong) px-4 py-3 sm:px-5">
         {/* Traffic light dots */}
         <div className="flex items-center gap-1.5">
           <span className="block h-3 w-3 rounded-full" style={{ background: "#FF5F57" }} />
@@ -157,7 +157,7 @@ export function SurveyPreview() {
           <button
             type="button"
             aria-label="Toggle sidebar"
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--muted)] transition hover:bg-[var(--surface-inset)] hover:text-[var(--ink)]"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current" strokeWidth="1.6">
               <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -167,7 +167,7 @@ export function SurveyPreview() {
           <button
             type="button"
             aria-label="Sidebar options"
-            className="inline-flex h-7 w-5 items-center justify-center rounded-md text-[var(--muted)] transition hover:bg-[var(--surface-inset)] hover:text-[var(--ink)]"
+            className="inline-flex h-7 w-5 items-center justify-center rounded-md text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3 w-3 fill-current">
               <path d="M7 10l5 5 5-5z" />
@@ -176,11 +176,11 @@ export function SurveyPreview() {
         </div>
 
         {/* Back / forward arrows */}
-        <div className="flex items-center rounded-full bg-[var(--surface-inset)] p-0.5">
+        <div className="flex items-center rounded-full bg-(--surface-inset) p-0.5">
           <button
             type="button"
             aria-label="Back"
-            className="inline-flex h-7 w-8 items-center justify-center rounded-full text-[var(--muted)] transition hover:text-[var(--ink)]"
+            className="inline-flex h-7 w-8 items-center justify-center rounded-full text-(--muted) transition hover:text-(--ink)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 6l-6 6 6 6" />
@@ -189,7 +189,7 @@ export function SurveyPreview() {
           <button
             type="button"
             aria-label="Forward"
-            className="inline-flex h-7 w-8 items-center justify-center rounded-full text-[var(--muted)] transition hover:text-[var(--ink)]"
+            className="inline-flex h-7 w-8 items-center justify-center rounded-full text-(--muted) transition hover:text-(--ink)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 fill-none stroke-current" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 6l6 6-6 6" />
@@ -198,7 +198,7 @@ export function SurveyPreview() {
         </div>
 
         {/* URL bar */}
-        <div className="flex flex-1 items-center justify-center rounded-full bg-[var(--surface-inset)] px-4 py-1.5 text-xs text-[var(--ink-soft)]">
+        <div className="flex flex-1 items-center justify-center rounded-full bg-(--surface-inset) px-4 py-1.5 text-xs text-(--ink-soft)">
           <span className="truncate">{previewUrl}</span>
         </div>
 
@@ -207,7 +207,7 @@ export function SurveyPreview() {
           <button
             type="button"
             aria-label="New tab"
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--muted)] transition hover:bg-[var(--surface-inset)] hover:text-[var(--ink)]"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current" strokeWidth="2" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -217,7 +217,7 @@ export function SurveyPreview() {
           <button
             type="button"
             aria-label="Show all tabs"
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--muted)] transition hover:bg-[var(--surface-inset)] hover:text-[var(--ink)]"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 fill-none stroke-current" strokeWidth="1.6">
               <rect x="4" y="6" width="11" height="12" rx="1.5" />
@@ -228,14 +228,14 @@ export function SurveyPreview() {
       </div>
 
       {/* Survey body */}
-      <div className="bg-[var(--surface-panel)] p-3 sm:p-4">
-      <div className="grid min-h-[34rem] gap-4 lg:grid-cols-[19rem_minmax(0,1fr)]">
-        <aside className="flex min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] p-5 shadow-[var(--shadow-soft)]">
+      <div className="bg-(--surface-panel) p-3 sm:p-4">
+      <div className="grid min-h-136 gap-4 lg:grid-cols-[19rem_minmax(0,1fr)]">
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-(--line) bg-(--surface-panel-strong) p-5 shadow-(--shadow-soft)">
           <div className="flex items-start justify-between gap-3">
             <p className="clay-label">
               Survey progress
             </p>
-            <div className="flex rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel)] p-1 shadow-[var(--shadow-soft)]">
+            <div className="flex rounded-full border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft)">
               {(["personality", "values"] as PreviewSurvey[]).map((item) => (
                 <button
                   key={item}
@@ -250,8 +250,8 @@ export function SurveyPreview() {
                   className={[
                     "rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition",
                     survey === item
-                      ? "bg-[var(--accent-blue)] text-[var(--selected-contrast)]"
-                      : "text-[var(--muted)] hover:text-[var(--ink)]",
+                      ? "bg-(--accent-blue) text-(--selected-contrast)"
+                      : "text-(--muted) hover:text-(--ink)",
                   ].join(" ")}
                 >
                   {item === "personality" ? "P" : "V"}
@@ -262,19 +262,19 @@ export function SurveyPreview() {
 
           <div className="mt-6 flex items-end justify-between gap-4">
             <div>
-              <p className="font-display text-6xl leading-none text-[var(--ink)]">{answeredCount}</p>
-              <p className="mt-2 text-sm text-[var(--ink-soft)]">
+              <p className="font-display text-6xl leading-none text-(--ink)">{answeredCount}</p>
+              <p className="mt-2 text-sm text-(--ink-soft)">
                 of {meta.total} prompts answered
               </p>
             </div>
-            <p className="rounded-full border border-black bg-[var(--accent-blue)] px-4 py-2 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
+            <p className="rounded-full border border-black bg-(--accent-blue) px-4 py-2 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)">
               {completion}%
             </p>
           </div>
 
-          <div className="mt-5 h-2 overflow-hidden rounded-full bg-[var(--surface-inset)]">
+          <div className="mt-5 h-2 overflow-hidden rounded-full bg-(--surface-inset)">
             <div
-              className="h-full rounded-full bg-[var(--accent-mint)] transition-all duration-300"
+              className="h-full rounded-full bg-(--accent-mint) transition-all duration-300"
               style={{ width: `${completion}%` }}
             />
           </div>
@@ -284,7 +284,7 @@ export function SurveyPreview() {
               aria-hidden="true"
               className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-[linear-gradient(0deg,var(--surface-panel-strong)_0%,rgba(255,255,255,0)_100%)] [html[data-theme='dark']_&]:bg-[linear-gradient(0deg,var(--surface-panel-strong)_0%,rgba(0,0,0,0)_100%)]"
             />
-            <ol className="flex max-h-[26rem] flex-col gap-3 overflow-hidden pr-1">
+            <ol className="flex max-h-104 flex-col gap-3 overflow-hidden pr-1">
               {visibleProgressItems.map((question, index) => {
                 const answer = answers[survey][question.id];
                 const isActive = index === activeIndex;
@@ -296,30 +296,30 @@ export function SurveyPreview() {
                       onClick={() => index < questions.length && setActiveIndex(index)}
                       disabled={index >= questions.length}
                       className={[
-                        "w-full rounded-[1rem] border px-4 py-3 text-left shadow-[var(--shadow-soft)] transition",
+                        "w-full rounded-2xl border px-4 py-3 text-left shadow-(--shadow-soft) transition",
                         isActive
-                          ? "border-black bg-[var(--accent-soft)]"
-                          : "border-[var(--line)] bg-[var(--surface-panel)]",
-                        index >= questions.length ? "opacity-45" : "hover:border-[var(--line-strong)]",
+                          ? "border-black bg-(--accent-soft)"
+                          : "border-(--line) bg-(--surface-panel)",
+                        index >= questions.length ? "opacity-45" : "hover:border-(--line-strong)",
                       ].join(" ")}
                     >
                       <div className="flex items-start gap-3">
                         <span
                           className={[
                             "mt-1 h-2.5 w-2.5 shrink-0 rounded-full",
-                            answer ? "bg-[var(--accent-mint)]" : "bg-[var(--line-strong)]",
+                            answer ? "bg-(--accent-mint)" : "bg-(--line-strong)",
                           ].join(" ")}
                         />
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center justify-between gap-3">
-                            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+                            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-(--muted)">
                               {formatQuestionNumber(index)}
                             </span>
-                            <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                            <span className="text-[10px] uppercase tracking-[0.18em] text-(--muted)">
                               {answer ? scale.options[answer - 1]?.label : "Not answered"}
                             </span>
                           </span>
-                          <span className="mt-2 line-clamp-2 block text-sm leading-6 text-[var(--ink)]">
+                          <span className="mt-2 line-clamp-2 block text-sm leading-6 text-(--ink)">
                             {question.prompt}
                           </span>
                         </span>
@@ -332,14 +332,14 @@ export function SurveyPreview() {
           </div>
         </aside>
 
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel-strong)] shadow-[var(--shadow-soft)]">
-          <div className="border-b border-[var(--line)] px-5 py-5 sm:px-7">
+        <section className="flex min-h-0 flex-col overflow-hidden rounded-3xl border border-(--line) bg-(--surface-panel-strong) shadow-(--shadow-soft)">
+          <div className="border-b border-(--line) px-5 py-5 sm:px-7">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-3">
                 <p className="clay-label">
                   Question {activeIndex + 1} of {meta.total}
                 </p>
-                <span className="rounded-full border border-dashed border-[var(--line)] bg-[var(--surface-panel)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink)]">
+                <span className="rounded-full border border-dashed border-(--line) bg-(--surface-panel) px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-(--ink)">
                   {meta.label}
                 </span>
               </div>
@@ -348,7 +348,7 @@ export function SurveyPreview() {
                   type="button"
                   onClick={goPrevious}
                   aria-label="Preview previous question"
-                  className="inline-flex h-8 min-w-[2.2rem] items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-2.5 text-[var(--ink)] shadow-[var(--keycap-shadow)] transition hover:border-[var(--ink)]"
+                  className="inline-flex h-8 min-w-[2.2rem] items-center justify-center rounded-xl border border-(--line-strong) bg-(--surface-panel-strong) px-2.5 text-(--ink) shadow-(--keycap-shadow) transition hover:border-(--ink)"
                 >
                   ‹
                 </button>
@@ -356,19 +356,19 @@ export function SurveyPreview() {
                   type="button"
                   onClick={goNext}
                   aria-label="Preview next question"
-                  className="inline-flex h-8 min-w-[2.2rem] items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-2.5 text-[var(--ink)] shadow-[var(--keycap-shadow)] transition hover:border-[var(--ink)]"
+                  className="inline-flex h-8 min-w-[2.2rem] items-center justify-center rounded-xl border border-(--line-strong) bg-(--surface-panel-strong) px-2.5 text-(--ink) shadow-(--keycap-shadow) transition hover:border-(--ink)"
                 >
                   ›
                 </button>
               </div>
             </div>
-            <h2 className="mt-4 font-display text-[2.35rem] leading-tight text-[var(--ink)] sm:text-[3.25rem]">
+            <h2 className="mt-4 font-display text-[2.35rem] leading-tight text-(--ink) sm:text-[3.25rem]">
               {activeQuestion.prompt}
             </h2>
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col px-5 py-5 sm:px-7">
-            <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+            <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.2em] text-(--muted)">
               <span>{scale.leftAnchor}</span>
               <span>{scale.rightAnchor}</span>
             </div>
@@ -383,18 +383,18 @@ export function SurveyPreview() {
                     onClick={() => selectAnswer(option.value)}
                     aria-pressed={selected}
                     className={[
-                      "group flex min-h-[9.5rem] flex-col items-center justify-center rounded-[1.25rem] border px-3 py-5 text-center transition duration-200 sm:min-h-[11rem]",
+                      "group flex min-h-38 flex-col items-center justify-center rounded-[1.25rem] border px-3 py-5 text-center transition duration-200 sm:min-h-44",
                       selected
-                        ? "-rotate-2 border-black bg-[var(--accent-coral)] text-[var(--selected-contrast)] shadow-[var(--clay-hard-shadow)]"
-                        : "border-[var(--line)] bg-[var(--surface-panel)] text-[var(--ink)] shadow-[var(--shadow-soft)] hover:-translate-y-1 hover:border-[var(--ink)] hover:bg-[var(--accent-soft)]",
+                        ? "-rotate-2 border-black bg-(--accent-coral) text-(--selected-contrast) shadow-(--clay-hard-shadow)"
+                        : "border-(--line) bg-(--surface-panel) text-(--ink) shadow-(--shadow-soft) hover:-translate-y-1 hover:border-(--ink) hover:bg-(--accent-soft)",
                     ].join(" ")}
                   >
                     <span
                       className={[
-                        "inline-flex h-12 min-w-[3.1rem] items-center justify-center rounded-[0.75rem] border px-3 text-lg font-semibold shadow-[var(--keycap-shadow)]",
+                        "inline-flex h-12 min-w-[3.1rem] items-center justify-center rounded-xl border px-3 text-lg font-semibold shadow-(--keycap-shadow)",
                         selected
-                          ? "border-black/10 bg-white/60 text-[var(--selected-contrast)]"
-                          : "border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-[var(--ink)]",
+                          ? "border-black/10 bg-white/60 text-(--selected-contrast)"
+                          : "border-(--line-strong) bg-(--surface-panel-strong) text-(--ink)",
                       ].join(" ")}
                     >
                       {option.value}
@@ -402,7 +402,7 @@ export function SurveyPreview() {
                     <span
                       className={[
                         "mt-4 text-base font-semibold leading-6 sm:text-lg",
-                        selected ? "text-[var(--selected-contrast)]" : "text-[var(--ink-soft)]",
+                        selected ? "text-(--selected-contrast)" : "text-(--ink-soft)",
                       ].join(" ")}
                     >
                       {option.label}

@@ -95,9 +95,15 @@ export function createMemorySurveyRepository(): SurveyRepository {
       return draft ? cloneRecord(draft) : null;
     },
 
-    async upsertAnswer({ userId, surveyType, questionId, value }) {
+    async upsertAnswer({ userId, surveyType, submissionId, questionId, value }) {
       const stateKey = getStateKey(userId, surveyType);
-      const draft = state.drafts.get(stateKey) ?? createDraft(userId, surveyType);
+      const existingDraft = state.drafts.get(stateKey);
+
+      if (submissionId && existingDraft?.submissionId !== submissionId) {
+        throw new Error("Unable to load the active draft.");
+      }
+
+      const draft = existingDraft ?? createDraft(userId, surveyType);
       const nextAnswers = {
         ...draft.answers,
         [questionId]: value,
