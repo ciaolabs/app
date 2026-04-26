@@ -252,30 +252,23 @@ export function SurveyPreview() {
                   {meta.label}
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                <span>Keys</span>
-                <span className="inline-flex h-8 min-w-[3.3rem] items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-black shadow-[var(--keycap-shadow)]">
-                  1-6
-                </span>
-                <span>Answer</span>
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={goPrevious}
                   aria-label="Preview previous question"
-                  className="inline-flex h-8 min-w-[2.2rem] items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 text-black shadow-[var(--keycap-shadow)] transition hover:border-black"
+                  className="inline-flex h-8 min-w-[2.2rem] items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-2.5 text-[var(--ink)] shadow-[var(--keycap-shadow)] transition hover:border-[var(--ink)]"
                 >
                   ‹
                 </button>
-                <span>Previous</span>
                 <button
                   type="button"
                   onClick={goNext}
                   aria-label="Preview next question"
-                  className="inline-flex h-8 min-w-[2.2rem] items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 text-black shadow-[var(--keycap-shadow)] transition hover:border-black"
+                  className="inline-flex h-8 min-w-[2.2rem] items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-2.5 text-[var(--ink)] shadow-[var(--keycap-shadow)] transition hover:border-[var(--ink)]"
                 >
                   ›
                 </button>
-                <span>Next</span>
               </div>
             </div>
             <h2 className="mt-4 font-display text-[2.35rem] leading-tight text-[var(--ink)] sm:text-[3.25rem]">
@@ -302,7 +295,7 @@ export function SurveyPreview() {
                       "group flex min-h-[9.5rem] flex-col items-center justify-center rounded-[1.25rem] border px-3 py-5 text-center transition duration-200 sm:min-h-[11rem]",
                       selected
                         ? "-rotate-2 border-black bg-[var(--accent-coral)] text-[var(--selected-contrast)] shadow-[var(--clay-hard-shadow)]"
-                        : "border-[var(--line)] bg-[var(--surface-panel)] text-[var(--ink)] shadow-[var(--shadow-soft)] hover:-translate-y-1 hover:border-black hover:bg-[var(--accent-soft)]",
+                        : "border-[var(--line)] bg-[var(--surface-panel)] text-[var(--ink)] shadow-[var(--shadow-soft)] hover:-translate-y-1 hover:border-[var(--ink)] hover:bg-[var(--accent-soft)]",
                     ].join(" ")}
                   >
                     <span
@@ -310,7 +303,7 @@ export function SurveyPreview() {
                         "inline-flex h-12 min-w-[3.1rem] items-center justify-center rounded-[0.75rem] border px-3 text-lg font-semibold shadow-[var(--keycap-shadow)]",
                         selected
                           ? "border-black/10 bg-white/60 text-[var(--selected-contrast)]"
-                          : "border-[var(--line)] bg-[var(--keycap-bg)] text-[var(--muted)]",
+                          : "border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-[var(--ink)]",
                       ].join(" ")}
                     >
                       {option.value}
