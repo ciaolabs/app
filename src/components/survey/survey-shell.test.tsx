@@ -1,4 +1,4 @@
-import React from "react";
+import React, { act } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -17,12 +17,22 @@ import {
   SurveyDraft,
 } from "@/lib/survey/types";
 
-const { navigateWithReload } = vi.hoisted(() => ({
-  navigateWithReload: vi.fn(),
-}));
+const { routerMock, routerPushMock, routerPrefetchMock } = vi.hoisted(() => {
+  const push = vi.fn();
+  const prefetch = vi.fn();
 
-vi.mock("@/lib/browser-navigation", () => ({
-  navigateWithReload,
+  return {
+    routerMock: {
+      push,
+      prefetch,
+    },
+    routerPushMock: push,
+    routerPrefetchMock: prefetch,
+  };
+});
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => routerMock,
 }));
 
 const labels = [
@@ -109,7 +119,8 @@ describe("SurveyShell", () => {
   beforeEach(() => {
     vi.useRealTimers();
     (globalThis as { __clerkTestSignedIn?: boolean }).__clerkTestSignedIn = true;
-    navigateWithReload.mockReset();
+    routerPushMock.mockReset();
+    routerPrefetchMock.mockReset();
     fetchMock = vi.fn(async (input) => {
       if (typeof input === "string" && input.includes("/submit")) {
         return new Response(JSON.stringify({ submission: { submittedAt: new Date().toISOString() } }));
@@ -220,7 +231,7 @@ describe("SurveyShell", () => {
     await user.click(screen.getByRole("button", { name: "Submit survey" }));
 
     await waitFor(() => {
-      expect(navigateWithReload).toHaveBeenCalledWith(personalitySurveyDefinition.dashboardRoute);
+      expect(routerPushMock).toHaveBeenCalledWith(personalitySurveyDefinition.dashboardRoute);
     });
   });
 
@@ -239,8 +250,14 @@ describe("SurveyShell", () => {
     );
 
     await waitFor(() => {
-      expect(navigateWithReload).toHaveBeenCalledWith(personalitySurveyDefinition.dashboardRoute);
+      expect(routerPushMock).toHaveBeenCalledWith(personalitySurveyDefinition.dashboardRoute);
     });
+  });
+
+  it("prefetches the survey dashboard route", () => {
+    render(React.createElement(SurveyShell, { survey: personalitySurveyDefinition, questions, initialDraft }));
+
+    expect(routerPrefetchMock).toHaveBeenCalledWith(personalitySurveyDefinition.dashboardRoute);
   });
 
   it("autosaves through same-origin requests without attaching an authorization header", async () => {
@@ -248,7 +265,9 @@ describe("SurveyShell", () => {
     render(React.createElement(SurveyShell, { survey: personalitySurveyDefinition, questions, initialDraft }));
 
     fireEvent.click(screen.getByRole("button", { name: /Slightly accurate/i }));
-    await vi.advanceTimersByTimeAsync(500);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
 
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining("/api/surveys/personality/answer"),

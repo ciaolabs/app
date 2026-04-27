@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import {
   startTransition,
   useCallback,
@@ -20,7 +21,6 @@ import {
   ShortcutKey,
 } from "@/components/survey/survey-keycaps";
 import { ViolinPlot } from "@/components/survey/violin-plot";
-import { navigateWithReload } from "@/lib/browser-navigation";
 import { formatTime } from "@/lib/date-format";
 import {
   getPendingResultsKey,
@@ -129,6 +129,7 @@ function describeSaveState(
 }
 
 export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProps) {
+  const router = useRouter();
   const [answers, setAnswers] = useState<SurveyAnswers>(initialDraft.answers);
   const [activeIndex, setActiveIndex] = useState(() =>
     findFirstUnansweredIndex(questions, initialDraft.answers),
@@ -268,8 +269,12 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   );
 
   useEffect(() => {
+    router.prefetch(survey.dashboardRoute);
+  }, [router, survey.dashboardRoute]);
+
+  useEffect(() => {
     if (hasPendingResults(pendingResultsKey)) {
-      navigateWithReload(survey.dashboardRoute);
+      router.push(survey.dashboardRoute);
       return;
     }
 
@@ -289,7 +294,14 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
       controllerMap.forEach((controller) => controller.abort());
       controllerMap.clear();
     };
-  }, [initialDraft.answers, pendingResultsKey, questions, storedAnswersKey, survey.dashboardRoute]);
+  }, [
+    initialDraft.answers,
+    pendingResultsKey,
+    questions,
+    router,
+    storedAnswersKey,
+    survey.dashboardRoute,
+  ]);
 
   const queueSave = useCallback(
     (questionId: string, questionOrder: number, value: LikertValue) => {
@@ -452,7 +464,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
       }
 
       markPendingResults(pendingResultsKey, payload.submission.submittedAt ?? null);
-      navigateWithReload(survey.dashboardRoute);
+      router.push(survey.dashboardRoute);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Unable to submit your survey.";

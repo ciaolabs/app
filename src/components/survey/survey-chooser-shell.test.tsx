@@ -7,12 +7,22 @@ import { SurveyChooserShell } from "@/components/survey/survey-chooser-shell";
 import { surveyDefinitions } from "@/lib/survey/definitions";
 import { type SurveyUserStatus } from "@/lib/survey/types";
 
-const { navigateWithReload } = vi.hoisted(() => ({
-  navigateWithReload: vi.fn(),
-}));
+const { routerMock, routerPushMock, routerPrefetchMock } = vi.hoisted(() => {
+  const push = vi.fn();
+  const prefetch = vi.fn();
 
-vi.mock("@/lib/browser-navigation", () => ({
-  navigateWithReload,
+  return {
+    routerMock: {
+      push,
+      prefetch,
+    },
+    routerPushMock: push,
+    routerPrefetchMock: prefetch,
+  };
+});
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => routerMock,
 }));
 
 function makeStatus(overrides?: Partial<SurveyUserStatus>): SurveyUserStatus {
@@ -31,7 +41,8 @@ describe("SurveyChooserShell", () => {
   let valuesStatus: SurveyUserStatus;
 
   beforeEach(() => {
-    navigateWithReload.mockReset();
+    routerPushMock.mockReset();
+    routerPrefetchMock.mockReset();
     personalityStatus = makeStatus();
     valuesStatus = {
       surveyType: "values-beliefs",
@@ -62,7 +73,7 @@ describe("SurveyChooserShell", () => {
     expect(personalityCard).not.toBeNull();
     await user.click(within(personalityCard!).getByRole("button", { name: "Start survey" }));
 
-    expect(navigateWithReload).toHaveBeenCalledWith("/surveys/personality");
+    expect(routerPushMock).toHaveBeenCalledWith("/surveys/personality");
   });
 
   it("requires confirmation before starting the final repeat attempt", async () => {
@@ -93,7 +104,7 @@ describe("SurveyChooserShell", () => {
     await user.click(screen.getByRole("button", { name: "Yes" }));
 
     await waitFor(() => {
-      expect(navigateWithReload).toHaveBeenCalledWith("/surveys/personality");
+      expect(routerPushMock).toHaveBeenCalledWith("/surveys/personality");
     });
   });
 
@@ -142,7 +153,7 @@ describe("SurveyChooserShell", () => {
 
     await user.click(screen.getByRole("button", { name: "Review results" }));
 
-    expect(navigateWithReload).toHaveBeenCalledWith("/surveys/personality/dashboard");
+    expect(routerPushMock).toHaveBeenCalledWith("/surveys/personality/dashboard");
   });
 
   it("renders resolved survey status immediately without a client-side loading placeholder", () => {
@@ -158,5 +169,22 @@ describe("SurveyChooserShell", () => {
 
     expect(screen.getAllByText("0 of 2 submissions used")).toHaveLength(2);
     expect(screen.queryByText("Loading your survey status...")).not.toBeInTheDocument();
+  });
+
+  it("prefetches active survey and dashboard routes", () => {
+    render(
+      React.createElement(SurveyChooserShell, {
+        surveys: surveyDefinitions,
+        initialStatuses: {
+          personality: personalityStatus,
+          "values-beliefs": valuesStatus,
+        },
+      }),
+    );
+
+    expect(routerPrefetchMock).toHaveBeenCalledWith("/surveys/personality");
+    expect(routerPrefetchMock).toHaveBeenCalledWith("/surveys/personality/dashboard");
+    expect(routerPrefetchMock).toHaveBeenCalledWith("/surveys/values-beliefs");
+    expect(routerPrefetchMock).toHaveBeenCalledWith("/surveys/values-beliefs/dashboard");
   });
 });

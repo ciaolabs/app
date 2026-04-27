@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { navigateWithReload } from "@/lib/browser-navigation";
 import { formatSubmittedAt } from "@/lib/date-format";
 import { type ActiveSurveyDefinition, type SurveyDefinition } from "@/lib/survey/definitions";
 import { type SurveyType, type SurveyUserStatus } from "@/lib/survey/types";
@@ -140,13 +140,44 @@ function shouldOfferRepeatAction(survey: SurveyDefinition, status: SurveyUserSta
 }
 
 export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserShellProps) {
+  const router = useRouter();
   const [navigatingPath, setNavigatingPath] = useState<string | null>(null);
   const [repeatSurvey, setRepeatSurvey] = useState<ActiveSurveyDefinition | null>(null);
+  const prefetchPaths = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          surveys.flatMap((survey) => {
+            if (survey.availability !== "active") {
+              return [survey.route];
+            }
+
+            return [survey.route, survey.dashboardRoute];
+          }),
+        ),
+      ),
+    [surveys],
+  );
+
+  const prefetchPath = useCallback(
+    (path: string | null) => {
+      if (!path) {
+        return;
+      }
+
+      router.prefetch(path);
+    },
+    [router],
+  );
+
+  useEffect(() => {
+    prefetchPaths.forEach(prefetchPath);
+  }, [prefetchPath, prefetchPaths]);
 
   const handleNavigate = useCallback((path: string) => {
     setNavigatingPath(path);
-    navigateWithReload(path);
-  }, []);
+    router.push(path);
+  }, [router]);
 
   const handleConfirmRepeat = useCallback(() => {
     if (!repeatSurvey) {
@@ -221,6 +252,8 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                 <button
                   type="button"
                   onClick={() => handleNavigate(primaryAction.href)}
+                  onPointerEnter={() => prefetchPath(primaryAction.href)}
+                  onFocus={() => prefetchPath(primaryAction.href)}
                   disabled={primaryAction.disabled || navigatingPath !== null}
                   className={primaryActionClassName(primaryAction.label)}
                 >
@@ -231,6 +264,8 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                   <button
                     type="button"
                     onClick={() => setRepeatSurvey(repeatActionSurvey)}
+                    onPointerEnter={() => prefetchPath(repeatActionSurvey.route)}
+                    onFocus={() => prefetchPath(repeatActionSurvey.route)}
                     disabled={navigatingPath !== null}
                     className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold uppercase tracking-[0.16em] text-(--ink) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50"
                   >
@@ -242,6 +277,8 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                   <button
                     type="button"
                     onClick={() => handleNavigate(reviewHref)}
+                    onPointerEnter={() => prefetchPath(reviewHref)}
+                    onFocus={() => prefetchPath(reviewHref)}
                     disabled={navigatingPath !== null}
                     className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold uppercase tracking-[0.16em] text-(--ink) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50"
                   >
