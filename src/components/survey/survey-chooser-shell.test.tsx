@@ -98,7 +98,7 @@ describe("SurveyChooserShell", () => {
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(
-      screen.getByText(/This repeat will be your last chance to complete Measures of Your Personality/i),
+      screen.getByText(/This repeat will be your second attempt at Measures of Your Personality/i),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Yes" }));
@@ -126,7 +126,7 @@ describe("SurveyChooserShell", () => {
       }),
     );
 
-    expect(screen.getByRole("button", { name: "Continue final attempt" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Continue second attempt" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Review results" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Repeat" })).not.toBeInTheDocument();
   });

@@ -107,29 +107,44 @@ export function DashboardGauge({
         />
         {[0, 10, 20, 30, 40, 50].map((tick) => {
           const angle = Math.PI * (1 - tick / 50);
-          const outerX = polarX(centerX, angle, radius + 4);
-          const outerY = polarY(centerY, angle, radius + 4);
-          const innerX = polarX(centerX, angle, radius - 6);
-          const innerY = polarY(centerY, angle, radius - 6);
-          const labelX = polarX(centerX, angle, radius - 28);
-          const labelY = roundSvgCoordinate(polarY(centerY, angle, radius - 28) + 6);
+          const isEdge = tick === 0 || tick === 50;
+          const tickInner = radius - 12;
+          const tickOuter = radius - 8;
+          const labelRadius = radius - 22;
+          const innerX = polarX(centerX, angle, tickInner);
+          const innerY = polarY(centerY, angle, tickInner);
+          const outerX = polarX(centerX, angle, tickOuter);
+          const outerY = polarY(centerY, angle, tickOuter);
+          const edgeOffset = tick === 0 ? -10 : 10;
+          const labelX = isEdge
+            ? roundSvgCoordinate(polarX(centerX, angle, radius) + edgeOffset)
+            : polarX(centerX, angle, labelRadius);
+          const labelY = isEdge
+            ? roundSvgCoordinate(centerY + 16)
+            : roundSvgCoordinate(polarY(centerY, angle, labelRadius) + 3.5);
 
           return (
             <g key={tick}>
-              <line
-                x1={innerX}
-                y1={innerY}
-                x2={outerX}
-                y2={outerY}
-                stroke="var(--line-strong)"
-                strokeWidth="1.5"
-              />
+              {!isEdge ? (
+                <line
+                  x1={innerX}
+                  y1={innerY}
+                  x2={outerX}
+                  y2={outerY}
+                  stroke="var(--ink-soft)"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  opacity="0.55"
+                />
+              ) : null}
               <text
                 x={labelX}
                 y={labelY}
-                fill="var(--muted)"
+                fill="var(--ink-soft)"
                 fontSize="9"
+                fontWeight="500"
                 textAnchor="middle"
+                opacity="0.85"
               >
                 {tick}
               </text>

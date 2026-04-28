@@ -64,7 +64,7 @@ describe("DashboardShell", () => {
   const submissions = [toSubmissionSummary(latestSubmission), toSubmissionSummary(earlierSubmission)];
 
   beforeEach(() => {
-    (globalThis as { __clerkTestSignedIn?: boolean }).__clerkTestSignedIn = true;
+    (globalThis as { __authTestSignedIn?: boolean }).__authTestSignedIn = true;
     fetchMock = vi.fn(async (input: string | URL | Request) => {
         const href =
           typeof input === "string"
@@ -90,7 +90,7 @@ describe("DashboardShell", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    (globalThis as { __clerkTestSignedIn?: boolean }).__clerkTestSignedIn = false;
+    (globalThis as { __authTestSignedIn?: boolean }).__authTestSignedIn = false;
   });
 
   it("renders the tabbed framework dashboard from the composed results payload", async () => {
@@ -111,7 +111,7 @@ describe("DashboardShell", () => {
       "href",
       "/surveys/personality",
     );
-    expect(screen.getByRole("link", { name: "New Surveys" })).toHaveAttribute("href", SURVEYS_ROUTE);
+    expect(screen.getByRole("link", { name: "Start a survey →" })).toHaveAttribute("href", SURVEYS_ROUTE);
     expect(screen.getAllByText("Survey Results").length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "HEXACO" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "JPIR" })).toBeInTheDocument();

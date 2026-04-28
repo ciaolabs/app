@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useRouter } from "next/navigation";
 
 type ProtectedRouteProps = {
@@ -39,16 +39,17 @@ export function ProtectedRoute({
   redirectingTitle = "Returning to sign in",
   redirectingBody = "Your session is not available on this page yet, so we are sending you back to the sign-in panel.",
 }: ProtectedRouteProps) {
-  const { isLoaded, isSignedIn } = useAuth({ treatPendingAsSignedOut: false });
+  const { user, loading } = useAuth();
   const router = useRouter();
+  const isSignedIn = Boolean(user);
 
   useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.replace("/#auth-panel");
+    if (!loading && !isSignedIn) {
+      router.replace("/");
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [loading, isSignedIn, router]);
 
-  if (!isLoaded) {
+  if (loading) {
     return (
       <StatusPanel
         eyebrow="Loading account"

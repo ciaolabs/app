@@ -1,7 +1,7 @@
 "use client";
 
 import { type MouseEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useRouter } from "next/navigation";
 
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
@@ -17,10 +17,12 @@ export function StartSurveyButton({
   className,
   pendingLabel = "Opening surveys...",
 }: StartSurveyButtonProps) {
-  const { isLoaded, isSignedIn } = useAuth({ treatPendingAsSignedOut: false });
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);
   const didPointerNavigate = useRef(false);
+  const isLoaded = !loading;
+  const isSignedIn = Boolean(user);
 
   const prefetchSurveyRoute = useCallback(() => {
     if (!isLoaded || !isSignedIn) {
@@ -41,7 +43,7 @@ export function StartSurveyButton({
     }
 
     if (!isSignedIn) {
-      router.push("/#auth-panel");
+      router.push("/");
       return;
     }
 

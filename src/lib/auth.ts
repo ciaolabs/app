@@ -1,14 +1,14 @@
-import { auth, getAuth, verifyToken } from "@clerk/nextjs/server";
+import { getTokenClaims, withAuth } from "@workos-inc/authkit-nextjs";
 import { redirect } from "next/navigation";
-
-import { getClerkSecretKey, isClerkConfigured } from "@/lib/clerk.server";
 
 type GetCurrentUserIdOptions = {
   acceptsSessionToken?: boolean;
   request?: Request;
 };
 
-type ClerkRequest = Parameters<typeof getAuth>[0];
+export function isWorkOSConfigured() {
+  return Boolean(process.env.WORKOS_API_KEY && process.env.WORKOS_CLIENT_ID);
+}
 
 function getBearerToken(request: Request) {
   const authorization = request.headers.get("authorization");
@@ -20,45 +20,10 @@ function getBearerToken(request: Request) {
   return authorization.slice("Bearer ".length).trim() || null;
 }
 
-function getSessionCookieToken(request: Request) {
-  const cookieHeader = request.headers.get("cookie");
-
-  if (!cookieHeader) {
-    return null;
-  }
-
-  for (const cookie of cookieHeader.split(";")) {
-    const [rawName, ...rawValue] = cookie.trim().split("=");
-
-    if (rawName === "__session") {
-      return decodeURIComponent(rawValue.join("="));
-    }
-  }
-
-  return null;
-}
-
-async function verifyRequestToken(request: Request) {
-  const token = getBearerToken(request) ?? getSessionCookieToken(request);
-
-  if (!token) {
-    return null;
-  }
-
-  const secretKey = getClerkSecretKey();
-  const jwtKey = process.env.CLERK_JWT_KEY;
-
-  if (!secretKey && !jwtKey) {
-    return null;
-  }
-
+async function verifyBearerToken(token: string) {
   try {
-    const verified = await verifyToken(token, {
-      secretKey: secretKey ?? undefined,
-      jwtKey,
-    });
-
-    return typeof verified?.sub === "string" ? verified.sub : null;
+    const claims = await getTokenClaims(token);
+    return typeof claims?.sub === "string" ? claims.sub : null;
   } catch {
     return null;
   }
@@ -68,63 +33,32 @@ export async function getCurrentUserId({
   acceptsSessionToken = false,
   request,
 }: GetCurrentUserIdOptions = {}) {
-  if (!isClerkConfigured()) {
+  if (!isWorkOSConfigured()) {
     return null;
   }
 
-  if (request) {
-    const standardSession = getAuth(request as ClerkRequest, {
-      treatPendingAsSignedOut: false,
-    });
+  const { user } = await withAuth();
 
-    if (standardSession.userId) {
-      return standardSession.userId;
-    }
-
-    if (!acceptsSessionToken) {
-      return null;
-    }
-
-    const tokenSession = getAuth(request as ClerkRequest, {
-      acceptsToken: "session_token",
-      treatPendingAsSignedOut: false,
-    });
-
-    if (tokenSession.userId) {
-      return tokenSession.userId;
-    }
-
-    return verifyRequestToken(request);
+  if (user?.id) {
+    return user.id;
   }
 
-  const standardSession = await auth({ treatPendingAsSignedOut: false });
+  if (acceptsSessionToken && request) {
+    const token = getBearerToken(request);
 
-  if (standardSession.userId) {
-    return standardSession.userId;
+    if (token) {
+      return verifyBearerToken(token);
+    }
   }
 
-  if (!acceptsSessionToken) {
-    return null;
-  }
-
-  const tokenSession = await auth({
-    acceptsToken: "session_token",
-    treatPendingAsSignedOut: false,
-  });
-
-  return tokenSession.userId;
+  return null;
 }
 
 export async function requireCurrentUserId() {
-  if (!isClerkConfigured()) {
-    redirect("/#auth-panel");
+  if (!isWorkOSConfigured()) {
+    redirect("/");
   }
 
-  const { userId } = await auth({ treatPendingAsSignedOut: false });
-
-  if (!userId) {
-    redirect("/#auth-panel");
-  }
-
-  return userId;
+  const { user } = await withAuth({ ensureSignedIn: true });
+  return user.id;
 }

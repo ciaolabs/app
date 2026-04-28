@@ -2,65 +2,49 @@ import React from "react";
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
-Object.defineProperty(globalThis, "__clerkTestSignedIn", {
+Object.defineProperty(globalThis, "__authTestSignedIn", {
   value: false,
   writable: true,
 });
 
-vi.mock("@clerk/nextjs", () => ({
-  ClerkProvider: ({ children }: { children: React.ReactNode }) =>
-    React.createElement(React.Fragment, null, children),
-  useAuth: () => {
-    const signedIn = Boolean((globalThis as { __clerkTestSignedIn?: boolean }).__clerkTestSignedIn);
+const testUser = {
+  id: "user_test",
+  firstName: "Test",
+  lastName: "User",
+  email: "test@example.com",
+};
 
-    return {
-      isLoaded: true,
-      isSignedIn: signedIn,
-      getToken: vi.fn().mockResolvedValue(signedIn ? "test_token" : null),
-    };
-  },
-  Show: ({
-    when,
-    children,
-  }: {
-    when: "signed-in" | "signed-out";
-    children: React.ReactNode;
-  }) => {
-    const signedIn = Boolean((globalThis as { __clerkTestSignedIn?: boolean }).__clerkTestSignedIn);
+function isSignedIn() {
+  return Boolean((globalThis as { __authTestSignedIn?: boolean }).__authTestSignedIn);
+}
 
-    if ((when === "signed-in" && signedIn) || (when === "signed-out" && !signedIn)) {
-      return React.createElement(React.Fragment, null, children);
-    }
+vi.mock("@workos-inc/authkit-nextjs", () => ({
+  withAuth: vi.fn(async () => (isSignedIn() ? { user: testUser } : { user: null })),
+  getSignInUrl: vi.fn(async () => "https://workos.example/sign-in"),
+  getSignUpUrl: vi.fn(async () => "https://workos.example/sign-up"),
+  signOut: vi.fn(),
+  getTokenClaims: vi.fn(),
+  handleAuth: vi.fn(),
+  authkitMiddleware: vi.fn(),
+}));
 
-    return null;
-  },
-  SignInButton: ({ children }: { children: React.ReactNode }) =>
+vi.mock("@workos-inc/authkit-nextjs/components", () => ({
+  AuthKitProvider: ({ children }: { children: React.ReactNode }) =>
     React.createElement(React.Fragment, null, children),
-  SignUpButton: ({ children }: { children: React.ReactNode }) =>
-    React.createElement(React.Fragment, null, children),
-  UserButton: Object.assign(
-    ({ children }: { children?: React.ReactNode }) =>
-      React.createElement(
-        "div",
-        { "data-testid": "clerk-user-button" },
-        React.createElement("span", null, "Account menu"),
-        children,
-      ),
-    {
-      MenuItems: ({ children }: { children: React.ReactNode }) =>
-        React.createElement("div", { "data-testid": "clerk-user-menu-items" }, children),
-      Link: ({
-        href,
-        label,
-        labelIcon,
-      }: {
-        href: string;
-        label: string;
-        labelIcon?: React.ReactNode;
-      }) => React.createElement("a", { href }, labelIcon, React.createElement("span", null, label)),
-    },
-  ),
-  SignIn: () => React.createElement("div", { "data-testid": "clerk-sign-in" }, "Clerk Sign In"),
+  useAuth: () => ({
+    user: isSignedIn() ? testUser : null,
+    loading: false,
+    signOut: vi.fn(),
+    refreshAuth: vi.fn(),
+    switchToOrganization: vi.fn(),
+  }),
+  useAccessToken: () => ({
+    accessToken: isSignedIn() ? "test_token" : null,
+    loading: false,
+    error: null,
+    refresh: vi.fn(),
+    getAccessToken: vi.fn(async () => (isSignedIn() ? "test_token" : null)),
+  }),
 }));
 
 vi.mock("next/navigation", () => ({

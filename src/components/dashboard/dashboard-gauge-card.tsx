@@ -29,7 +29,7 @@ export function DashboardGaugeCard({
   children,
 }: DashboardGaugeCardProps) {
   return (
-    <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+    <section data-pdf-capture className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_18rem] xl:items-start">
         <div>
           <h2 className="font-display text-3xl text-[var(--ink)]">{title}</h2>

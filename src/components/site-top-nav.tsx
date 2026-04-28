@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Show, UserButton } from "@clerk/nextjs";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { clerkUserButtonAppearance } from "@/lib/clerk";
+import { UserMenu } from "@/components/auth/user-menu";
 import { SiteBreadcrumb } from "@/components/ui/site-breadcrumb";
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
 
@@ -273,17 +272,7 @@ export function SiteTopNav({
             {hasHydrated && theme === "dark" ? <SunIcon /> : <MoonIcon />}
           </button>
 
-          <Show when="signed-in">
-            <UserButton appearance={clerkUserButtonAppearance}>
-              <UserButton.MenuItems>
-                <UserButton.Link
-                  href={SURVEYS_ROUTE}
-                  label="Dashboard"
-                  labelIcon={<DashboardIcon />}
-                />
-              </UserButton.MenuItems>
-            </UserButton>
-          </Show>
+          <UserMenu />
 
           {action}
         </div>
@@ -391,20 +380,7 @@ export function SiteTopNav({
                       <span>{themeLabel}</span>
                     </button>
 
-                    <Show when="signed-in">
-                      <div className="flex items-center justify-between rounded-2xl border border-dashed border-(--line) px-3 py-2 text-sm font-semibold text-(--ink)">
-                        <span>Account</span>
-                        <UserButton appearance={clerkUserButtonAppearance}>
-                          <UserButton.MenuItems>
-                            <UserButton.Link
-                              href={SURVEYS_ROUTE}
-                              label="Dashboard"
-                              labelIcon={<DashboardIcon />}
-                            />
-                          </UserButton.MenuItems>
-                        </UserButton>
-                      </div>
-                    </Show>
+                    <UserMenu trigger="row" />
                   </div>
                 </div>
               </div>

@@ -44,7 +44,12 @@ function GitHubIcon() {
   );
 }
 
-export function LandingFooter({ isSignedIn }: { isSignedIn: boolean }) {
+type LandingFooterProps = {
+  isSignedIn: boolean;
+  signInHref?: string;
+};
+
+export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterProps) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
@@ -93,12 +98,12 @@ export function LandingFooter({ isSignedIn }: { isSignedIn: boolean }) {
                     Start a survey →
                   </Link>
                 ) : (
-                  <Link
-                    href="/#auth-panel"
+                  <a
+                    href={signInHref}
                     className="inline-flex h-10 items-center gap-2 rounded-full bg-black px-6 text-sm font-semibold text-white transition hover:bg-neutral-800"
                   >
                     Start a survey →
-                  </Link>
+                  </a>
                 )}
                 <a
                   href="https://github.com/ciaobang/surveys"
@@ -165,16 +170,7 @@ export function LandingFooter({ isSignedIn }: { isSignedIn: boolean }) {
           {/* Bottom bar */}
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-4">
             <p className="text-xs text-neutral-400 [html[data-theme='dark']_&]:text-neutral-500">
-              © AMBI Survey {new Date().getFullYear()} — Built on Tal Yarkoni&apos;s{" "}
-              <a
-                href="https://doi.org/10.1016/j.jrp.2010.01.002"
-                target="_blank"
-                rel="noreferrer"
-                className="underline underline-offset-2 hover:text-neutral-600"
-              >
-                abbreviated personality inventory
-              </a>
-              .
+              Ciao! — Personality and Beliefs Survey
             </p>
             <a
               href="https://github.com/ciaobang/surveys"

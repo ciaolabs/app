@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from "react";
 
 import { BeliefsLevelSummaryViolin } from "@/components/dashboard/beliefs-level-summary-violin";
 import { DashboardGaugeCard } from "@/components/dashboard/dashboard-gauge-card";
+import { DashboardPdfButton } from "@/components/dashboard/dashboard-pdf-button";
+import { DashboardPrintHeader } from "@/components/dashboard/dashboard-print-header";
 import { SegmentedScoreRow } from "@/components/dashboard/segmented-score-row";
 import { SiteTopNav } from "@/components/site-top-nav";
 import { formatSubmittedAt } from "@/lib/date-format";
@@ -183,7 +185,7 @@ function EmptyDashboard({ ctaHref }: { ctaHref: string }) {
         href={ctaHref}
         className="clay-button-hover mt-8 inline-flex rounded-full border border-black bg-[var(--accent-blue)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
       >
-        New Surveys
+        Start a survey →
       </Link>
     </section>
   );
@@ -203,7 +205,7 @@ function SubmissionHistoryList({
   onSelect: (submissionId: string) => void;
 }) {
   return (
-    <div className="mt-6">
+    <div data-print-hide className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="clay-label">
@@ -347,7 +349,7 @@ function TabReferences({
   references: readonly { citation: string; href: string }[];
 }) {
   return (
-    <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+    <section data-print-hide className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
         More information about the science behind this survey can be found here:
       </p>
@@ -372,7 +374,7 @@ function TabReferences({
 
 function BeliefsIntro({ results }: { results: ValuesBeliefsResults["beliefs"] }) {
   return (
-    <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+    <section data-print-hide className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
         Showing score estimates for Beliefs.
       </p>
@@ -418,7 +420,7 @@ function BeliefsIntro({ results }: { results: ValuesBeliefsResults["beliefs"] })
 
 function ValuesIntro({ results }: { results: ValuesBeliefsResults["values"] }) {
   return (
-    <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+    <section data-print-hide className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
         Showing score estimates for Values.
       </p>
@@ -539,7 +541,7 @@ export function ValuesBeliefsDashboardShell({
             href={SURVEYS_ROUTE}
             className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-blue)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
           >
-            New Surveys
+            Start a survey →
           </Link>
         }
       />
@@ -565,7 +567,14 @@ export function ValuesBeliefsDashboardShell({
 
       {!error && results ? (
         <div className="mt-6 space-y-6">
+          <DashboardPrintHeader
+            surveyTitle={survey.title}
+            resultsTitle={survey.resultsTitle}
+            submittedAt={results.submission.submittedAt}
+            answerCount={results.submission.answerCount}
+          />
           <section
+            data-print-hide
             className="clay-section overflow-hidden px-5 py-6 sm:px-8 sm:py-8"
             style={{ background: "var(--hero-gradient)" }}
           >
@@ -601,6 +610,9 @@ export function ValuesBeliefsDashboardShell({
                   stored on this account.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
+                  <DashboardPdfButton
+                    fileName={`Ciao - ${survey.title} - ${formatSubmittedAt(results.submission.submittedAt)}.pdf`}
+                  />
                   <a
                     href="https://doi.org/10.1037/pas0000639"
                     target="_blank"
@@ -630,7 +642,7 @@ export function ValuesBeliefsDashboardShell({
             </div>
           </section>
 
-          <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
+          <section data-print-hide className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
             <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
               {(["beliefs", "values"] as const).map((tab) => (
                 <button
@@ -717,7 +729,7 @@ export function ValuesBeliefsDashboardShell({
                 </DashboardGaugeCard>
               ))}
 
-              <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+              <section data-pdf-capture className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
                 <h2 className="font-display text-3xl text-[var(--ink)]">Neutral Primals</h2>
                 <p className="mt-3 max-w-4xl text-base leading-7 text-[var(--ink-soft)]">
                   Several primal beliefs are unrelated to the 3 secondary dimensions described above.
@@ -770,7 +782,7 @@ export function ValuesBeliefsDashboardShell({
                 </DashboardGaugeCard>
               ))}
 
-              <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+              <section data-pdf-capture className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
                 <h2 className="font-display text-3xl text-[var(--ink)]">Other values</h2>
                 <p className="mt-3 max-w-4xl text-base leading-7 text-[var(--ink-soft)]">
                   These values are not included in any of the sections above.

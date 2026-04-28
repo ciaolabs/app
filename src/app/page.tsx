@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { SignInButton } from "@clerk/nextjs";
 
 import { LandingFooter } from "@/components/landing-footer";
 import { SurveyPreview } from "@/components/home/survey-preview";
 import { SiteTopNav } from "@/components/site-top-nav";
 import { getCurrentUserId } from "@/lib/auth";
-import { clerkSignInAppearance } from "@/lib/clerk";
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+
+const SIGN_IN_ROUTE = "/sign-in";
 
 function primaryActionClassName() {
   return "clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)";
@@ -14,30 +14,23 @@ function primaryActionClassName() {
 
 export default async function HomePage() {
   const isSignedIn = Boolean(await getCurrentUserId());
+  const signInUrl = isSignedIn ? null : SIGN_IN_ROUTE;
+
+  const heroAction = isSignedIn ? (
+    <Link href={SURVEYS_ROUTE} className={primaryActionClassName()}>
+      Start a survey →
+    </Link>
+  ) : (
+    <a href={signInUrl ?? "#"} className={primaryActionClassName()}>
+      Sign in to start
+    </a>
+  );
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-360 flex-col px-6 pt-0 sm:px-10 lg:px-12">
       <SiteTopNav
         helpHref="https://doi.org/10.1016/j.jrp.2010.01.002"
-        action={
-          isSignedIn ? (
-            <Link href={SURVEYS_ROUTE} className={primaryActionClassName()}>
-              Start a survey →
-            </Link>
-          ) : (
-            <SignInButton
-              mode="modal"
-              withSignUp
-              fallbackRedirectUrl={SURVEYS_ROUTE}
-              forceRedirectUrl={SURVEYS_ROUTE}
-              appearance={clerkSignInAppearance}
-            >
-              <button type="button" className={primaryActionClassName()}>
-                Sign in to start
-              </button>
-            </SignInButton>
-          )
-        }
+        action={heroAction}
       />
 
       <section
@@ -64,20 +57,12 @@ export default async function HomePage() {
                   Start a survey →
                 </Link>
               ) : (
-                <SignInButton
-                  mode="modal"
-                  withSignUp
-                  fallbackRedirectUrl={SURVEYS_ROUTE}
-                  forceRedirectUrl={SURVEYS_ROUTE}
-                  appearance={clerkSignInAppearance}
+                <a
+                  href={signInUrl ?? "#"}
+                  className="clay-button-hover inline-flex h-12 items-center gap-2 rounded-full border border-black bg-(--accent-blue) px-6 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)"
                 >
-                  <button
-                    type="button"
-                    className="clay-button-hover inline-flex h-12 items-center gap-2 rounded-full border border-black bg-(--accent-blue) px-6 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)"
-                  >
-                    Start a survey →
-                  </button>
-                </SignInButton>
+                  Start a survey →
+                </a>
               )}
 
               <a
@@ -128,7 +113,7 @@ export default async function HomePage() {
         ))}
       </section>
 
-      <LandingFooter isSignedIn={isSignedIn} />
+      <LandingFooter isSignedIn={isSignedIn} signInHref={signInUrl ?? "/"} />
     </main>
   );
 }

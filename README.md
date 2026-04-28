@@ -21,8 +21,8 @@ A greenfield Next.js 15 application for phase one of the AMBI personality survey
 
 1. Copy `.env.example` to `.env.local`.
 2. Keep `SURVEY_STORAGE=memory` for local contributor work without a database, or set `DATABASE_URL` to your Supabase Postgres connection string and use `SURVEY_STORAGE=postgres`.
-3. Add your Clerk keys when you need to test authenticated survey flows.
-4. Enable GitHub, Google, LinkedIn, and email/password in the Clerk dashboard.
+3. Add your WorkOS AuthKit keys (`WORKOS_API_KEY`, `WORKOS_CLIENT_ID`) when you need to test authenticated survey flows. Generate `WORKOS_COOKIE_PASSWORD` via `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`.
+4. In the WorkOS dashboard, add `http://localhost:3000/callback` as an allowed redirect URI and enable the social providers (GitHub, Google, LinkedIn) plus email/password under AuthKit.
 5. Run `pnpm install`.
 6. Start the app with `pnpm dev`.
 
@@ -30,13 +30,13 @@ Do not commit `.env.local` or any other file containing real credentials. The co
 
 If `DATABASE_URL` is omitted, the app automatically falls back to in-memory storage. That mode is useful for local UI work and automated tests, but it is not durable and should not be used for real survey data.
 
-If the Clerk keys are missing, the public home page still loads and the embedded auth panel shows setup guidance, but protected survey routes will remain unavailable until auth is configured.
+If the WorkOS keys are missing, the public home page still loads, but protected survey routes will redirect to the home page until auth is configured.
 
 ## Database
 
 The canonical schema lives in [db/schema.sql](./db/schema.sql). Survey data is stored in:
 
-- `survey_submissions` for draft and submitted survey sessions keyed by the Clerk `user_id`
+- `survey_submissions` for draft and submitted survey sessions keyed by the WorkOS `user_id`
 - `survey_answers` for one normalized row per answered question per submission
 
 The Postgres repository bootstraps these tables automatically on first use, so a Supabase Postgres database can be used without a separate migration step.

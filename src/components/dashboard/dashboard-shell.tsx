@@ -8,6 +8,8 @@ import {
   DashboardGauge,
   SegmentedScoreBar,
 } from "@/components/dashboard/dashboard-metrics";
+import { DashboardPdfButton } from "@/components/dashboard/dashboard-pdf-button";
+import { DashboardPrintHeader } from "@/components/dashboard/dashboard-print-header";
 import { SiteTopNav } from "@/components/site-top-nav";
 import { formatSubmittedAt } from "@/lib/date-format";
 import {
@@ -248,7 +250,7 @@ function DetailBars({ items }: { items: DashboardScaleLike[] }) {
 
 function FrameworkPanel({ framework }: { framework: SurveyResults["frameworks"][number] }) {
   return (
-    <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+    <section data-pdf-capture className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
       <div className="mx-auto max-w-5xl text-center">
         <p className="text-sm uppercase tracking-[0.2em] text-[var(--muted)]">
           Score estimates comparable to
@@ -358,7 +360,7 @@ function EmptyDashboard({ ctaHref }: { ctaHref: string }) {
         href={ctaHref}
         className="clay-button-hover mt-8 inline-flex rounded-full border border-black bg-[var(--accent-blue)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
       >
-        New Surveys
+        Start a survey →
       </Link>
     </section>
   );
@@ -378,7 +380,7 @@ function SubmissionHistoryList({
   onSelect: (submissionId: string) => void;
 }) {
   return (
-    <div className="mt-6">
+    <div data-print-hide className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="clay-label">
@@ -584,7 +586,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
             href={SURVEYS_ROUTE}
             className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-blue)] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
           >
-            New Surveys
+            Start a survey →
           </Link>
         }
       />
@@ -610,7 +612,14 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
 
       {!error && results ? (
         <div className="mt-6 space-y-6">
+          <DashboardPrintHeader
+            surveyTitle={survey.title}
+            resultsTitle={survey.resultsTitle}
+            submittedAt={results.submission.submittedAt}
+            answerCount={results.submission.answerCount}
+          />
           <section
+            data-print-hide
             className="clay-section overflow-hidden px-5 py-6 sm:px-8 sm:py-8"
             style={{ background: "var(--hero-gradient)" }}
           >
@@ -646,6 +655,9 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
                   stored on this account.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
+                  <DashboardPdfButton
+                    fileName={`Ciao - ${survey.title} - ${formatSubmittedAt(results.submission.submittedAt)}.pdf`}
+                  />
                   <a
                     href={activeFramework?.readMoreHref ?? "https://doi.org/10.1016/j.jrp.2010.01.002"}
                     target="_blank"
@@ -654,12 +666,6 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
                   >
                     Read the source
                   </a>
-                  <button
-                    type="button"
-                    className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] opacity-80 shadow-[var(--shadow-soft)]"
-                  >
-                    Share your results
-                  </button>
                 </div>
 
                 <SubmissionHistoryList
@@ -677,10 +683,10 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
             </div>
           </section>
 
-          <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6">
+          <section data-pdf-capture className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <h2 className="font-display text-3xl text-[var(--ink)]">Your Scores</h2>
-              <div className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] p-1 shadow-[var(--shadow-soft)]">
+              <div data-print-hide className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-panel-strong)] p-1 shadow-[var(--shadow-soft)]">
                 {(["highest", "lowest"] as const).map((mode) => (
                   <button
                     key={mode}
@@ -723,7 +729,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
 
             {((leftRankings?.length ?? 0) > DEFAULT_VISIBLE_ROWS ||
               (rightRankings?.length ?? 0) > DEFAULT_VISIBLE_ROWS) && (
-              <div className="mt-8 flex justify-center">
+              <div data-print-hide className="mt-8 flex justify-center">
                 <button
                   type="button"
                   onClick={() => setShowAllRankings((current) => !current)}
@@ -735,7 +741,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
             )}
           </section>
 
-          <section className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
+          <section data-print-hide className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
             <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
               {results.frameworks.map((framework) => (
                 <button
@@ -756,6 +762,26 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
           </section>
 
           {activeFramework ? <FrameworkPanel framework={activeFramework} /> : null}
+
+          <section data-print-hide className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+              More information about the science behind this survey can be found here:
+            </p>
+            <div className="mt-5 space-y-5 text-[15px] leading-7 text-[var(--ink-soft)]">
+              <p>
+                Yarkoni, T. (2010). The abbreviation of personality, or how to measure 200 personality scales with 200 items. <em>Journal of research in personality</em>, 44(2), 180-198.{" "}
+                <a
+                  href="https://doi.org/10.1016/j.jrp.2010.01.002"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--accent-coral)]"
+                >
+                  https://doi.org/10.1016/j.jrp.2010.01.002
+                </a>
+              </p>
+            </div>
+          </section>
+
           {hoveredScale && hoveredRect ? <HoverPopover item={hoveredScale} rect={hoveredRect} /> : null}
         </div>
       ) : null}

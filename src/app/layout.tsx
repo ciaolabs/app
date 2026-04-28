@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
+import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import { Manrope, Space_Mono } from "next/font/google";
 
-import { clerkAppName, clerkLocalization, clerkProviderAppearance } from "@/lib/clerk";
+import { APP_NAME } from "@/lib/app-config";
 import { InteractiveDotBackground } from "@/components/interactive-dot-background";
 
 import "./globals.css";
@@ -23,7 +23,7 @@ const monoFont = Space_Mono({
 
 export const metadata: Metadata = {
   title: "AMBI Survey MVP",
-  applicationName: clerkAppName,
+  applicationName: APP_NAME,
   description: "A modern intake experience for the 181-item AMBI personality survey.",
 };
 
@@ -50,14 +50,14 @@ export default function RootLayout({
         />
       </head>
       <body className={`${manrope.variable} ${monoFont.variable} antialiased`}>
-        <ClerkProvider dynamic appearance={clerkProviderAppearance} localization={clerkLocalization}>
+        <AuthKitProvider>
           <div className="app-shell">
             <InteractiveDotBackground />
             <div className="app-glow app-glow-left" />
             <div className="app-glow app-glow-right" />
             {children}
           </div>
-        </ClerkProvider>
+        </AuthKitProvider>
       </body>
     </html>
   );

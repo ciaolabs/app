@@ -10,41 +10,47 @@ vi.mock("@/lib/auth", () => ({
 }));
 
 describe("HomePage", () => {
-  const originalPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const originalSecretKey = process.env.CLERK_SECRET_KEY;
+  const originalApiKey = process.env.WORKOS_API_KEY;
+  const originalClientId = process.env.WORKOS_CLIENT_ID;
 
   beforeEach(() => {
-    (globalThis as { __clerkTestSignedIn?: boolean }).__clerkTestSignedIn = false;
+    (globalThis as { __authTestSignedIn?: boolean }).__authTestSignedIn = false;
     getCurrentUserIdMock.mockReset();
     getCurrentUserIdMock.mockResolvedValue(null);
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "test_publishable_key";
-    process.env.CLERK_SECRET_KEY = "test_secret_key";
+    process.env.WORKOS_API_KEY = "sk_test_workos";
+    process.env.WORKOS_CLIENT_ID = "client_test";
   });
 
   afterEach(() => {
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = originalPublishableKey;
-    process.env.CLERK_SECRET_KEY = originalSecretKey;
+    process.env.WORKOS_API_KEY = originalApiKey;
+    process.env.WORKOS_CLIENT_ID = originalClientId;
   });
 
-  it("shows the embedded Clerk sign-in panel for signed-out visitors", async () => {
+  it("shows WorkOS sign-in links for signed-out visitors", async () => {
     const { default: HomePage } = await import("@/app/page");
 
     render(await HomePage());
 
-    expect(screen.getByRole("button", { name: "Sign in to start" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Start a survey →" })).toBeInTheDocument();
-    expect(screen.queryByText("Account menu")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Sign in to start" })).toHaveAttribute(
+      "href",
+      "/sign-in",
+    );
+    const startLinks = screen.getAllByRole("link", { name: "Start a survey →" });
+    expect(startLinks).toHaveLength(2);
+    for (const link of startLinks) {
+      expect(link).toHaveAttribute("href", "/sign-in");
+    }
+    expect(screen.queryByRole("button", { name: "Account menu" })).not.toBeInTheDocument();
   });
 
   it("shows direct survey links for signed-in users", async () => {
-    (globalThis as { __clerkTestSignedIn?: boolean }).__clerkTestSignedIn = true;
+    (globalThis as { __authTestSignedIn?: boolean }).__authTestSignedIn = true;
     getCurrentUserIdMock.mockResolvedValue("user_123");
     const { default: HomePage } = await import("@/app/page");
 
     render(await HomePage());
 
-    expect(screen.getByText("Account menu")).toBeInTheDocument();
-    expect(screen.queryByTestId("clerk-sign-in")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Account menu" })).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Start a survey →" })).toHaveLength(3);
     for (const link of screen.getAllByRole("link", { name: "Start a survey →" })) {
       expect(link).toHaveAttribute("href", "/surveys");

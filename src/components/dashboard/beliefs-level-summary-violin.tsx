@@ -134,6 +134,7 @@ function SummaryRow({ item }: { item: PolarScaleResult }) {
 export function BeliefsLevelSummaryViolin({ groups }: BeliefsLevelSummaryViolinProps) {
   return (
     <section
+      data-pdf-capture
       aria-label="Beliefs level summary violin"
       className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7"
     >

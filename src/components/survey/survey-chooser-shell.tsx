@@ -42,7 +42,7 @@ function buildSurveyBadge(survey: SurveyDefinition, status: SurveyUserStatus | n
   }
 
   if (status.submittedCount === 1 && status.hasActiveDraft) {
-    return "Final attempt in progress";
+    return "Second attempt in progress";
   }
 
   if (status.submittedCount === 1) {
@@ -83,7 +83,7 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
 
   if (status.submittedCount === 1 && status.hasActiveDraft) {
     return {
-      label: "Continue final attempt",
+      label: "Continue second attempt",
       href: survey.route,
       disabled: false,
     };
@@ -118,7 +118,7 @@ function primaryActionClassName(label: string) {
 
   // Make start / continue actions blue like other primary CTAs
   if (
-    label === "Continue final attempt" ||
+    label === "Continue second attempt" ||
     label === "View details" ||
     label === "Start survey" ||
     label === "Continue survey" ||
@@ -299,14 +299,14 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
             className="w-full max-w-xl rounded-3xl border border-(--line-strong) bg-(--surface-panel-strong) p-6 shadow-(--shadow-strong)"
           >
             <p className="clay-label">
-              Final attempt
+              Second attempt
             </p>
             <h2 className="mt-3 font-display text-4xl text-(--ink)">
-              This repeat will be your last chance to complete {repeatSurvey.title}.
+              This repeat will be your second attempt at {repeatSurvey.title}.
             </h2>
             <p className="mt-4 text-base leading-8 text-(--ink-soft)">
-              If you continue, the next submission you make for this survey will use your final
-              available attempt. You can still review your saved results afterward.
+              If you continue, the next submission you make for this survey will be your second
+              attempt. You can still review your saved results afterward.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <button

@@ -118,7 +118,7 @@ describe("SurveyShell", () => {
 
   beforeEach(() => {
     vi.useRealTimers();
-    (globalThis as { __clerkTestSignedIn?: boolean }).__clerkTestSignedIn = true;
+    (globalThis as { __authTestSignedIn?: boolean }).__authTestSignedIn = true;
     routerPushMock.mockReset();
     routerPrefetchMock.mockReset();
     fetchMock = vi.fn(async (input) => {
@@ -133,7 +133,7 @@ describe("SurveyShell", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    (globalThis as { __clerkTestSignedIn?: boolean }).__clerkTestSignedIn = false;
+    (globalThis as { __authTestSignedIn?: boolean }).__authTestSignedIn = false;
     window.sessionStorage.clear();
   });
 
