@@ -1,4 +1,4 @@
-# AMBI Survey MVP
+# Ciao! Survey
 
 A greenfield Next.js 15 application for phase one of the AMBI personality survey flow:
 

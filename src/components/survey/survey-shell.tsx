@@ -479,6 +479,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
       }
 
       markPendingResults(pendingResultsKey, payload.submission.submittedAt ?? null);
+      router.refresh();
       router.push(survey.dashboardRoute);
     } catch (error) {
       const message =

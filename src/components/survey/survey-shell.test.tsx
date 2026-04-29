@@ -20,11 +20,13 @@ import {
 const { routerMock, routerPushMock, routerPrefetchMock } = vi.hoisted(() => {
   const push = vi.fn();
   const prefetch = vi.fn();
+  const refresh = vi.fn();
 
   return {
     routerMock: {
       push,
       prefetch,
+      refresh,
     },
     routerPushMock: push,
     routerPrefetchMock: prefetch,

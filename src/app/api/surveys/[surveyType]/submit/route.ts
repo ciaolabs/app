@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { getCurrentUserId } from "@/lib/auth";
@@ -43,6 +44,9 @@ export async function POST(request: Request, context: SurveyRouteContext) {
       surveyType: definition.type,
       answers,
     });
+
+    revalidatePath(definition.dashboardRoute);
+    revalidatePath("/surveys");
 
     return NextResponse.json({ submission });
   } catch (error) {

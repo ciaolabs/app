@@ -15,6 +15,11 @@ vi.mock("@/lib/survey/repository", () => ({
   getSurveyRepository,
 }));
 
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
+}));
+
 const draftFixture: SurveyDraft = {
   submissionId: "draft-1",
   userId: "user_123",
