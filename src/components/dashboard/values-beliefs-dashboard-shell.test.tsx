@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ValuesBeliefsDashboardShell } from "@/components/dashboard/values-beliefs-dashboard-shell";
 import { formatSubmittedAt } from "@/lib/date-format";
-import { valuesBeliefsSurveyDefinition } from "@/lib/survey/definitions";
+import { getPendingResultsKey, valuesBeliefsSurveyDefinition } from "@/lib/survey/definitions";
 import { getSurveyQuestions } from "@/lib/survey/questions";
 import { buildSurveyResults } from "@/lib/survey/results/engine";
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
@@ -99,6 +99,7 @@ describe("ValuesBeliefsDashboardShell", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    window.sessionStorage.clear();
   });
 
   it("renders the tabbed beliefs and values dashboard and switches tabs", async () => {
@@ -173,7 +174,75 @@ describe("ValuesBeliefsDashboardShell", () => {
     });
   });
 
-  it("shows the empty state when no results are available", () => {
+  it("recovers from a stale empty dashboard payload by fetching the latest results", async () => {
+    if (latestResults.surveyType !== "values-beliefs") {
+      throw new Error("Expected values-beliefs results.");
+    }
+
+    render(
+      React.createElement(ValuesBeliefsDashboardShell, {
+        survey: valuesBeliefsSurveyDefinition,
+        initialPayload: {
+          results: null,
+          submissions: [],
+          selectedSubmissionId: null,
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Viewing saved results")).toBeInTheDocument();
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/surveys/values-beliefs/results",
+      expect.objectContaining({
+        cache: "no-store",
+        credentials: "include",
+      }),
+    );
+    expect(screen.getAllByText(formatSubmittedAt(latestSubmission.submittedAt)).length).toBeGreaterThan(0);
+  });
+
+  it("refreshes stale initial results after a pending submission", async () => {
+    if (earlierResults.surveyType !== "values-beliefs" || latestResults.surveyType !== "values-beliefs") {
+      throw new Error("Expected values-beliefs results.");
+    }
+
+    window.sessionStorage.setItem(
+      getPendingResultsKey(valuesBeliefsSurveyDefinition.type),
+      latestSubmission.submittedAt,
+    );
+
+    render(
+      React.createElement(ValuesBeliefsDashboardShell, {
+        survey: valuesBeliefsSurveyDefinition,
+        initialPayload: {
+          results: earlierResults,
+          submissions: [toSummary(earlierSubmission)],
+          selectedSubmissionId: earlierResults.submission.submissionId,
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByText(formatSubmittedAt(latestSubmission.submittedAt)).length).toBeGreaterThan(0);
+    });
+
+    expect(window.sessionStorage.getItem(getPendingResultsKey(valuesBeliefsSurveyDefinition.type))).toBeNull();
+  });
+
+  it("shows the empty state when no results are available", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          results: null,
+          submissions: [],
+          selectedSubmissionId: null,
+        }),
+      ),
+    );
+
     render(
       React.createElement(ValuesBeliefsDashboardShell, {
         survey: valuesBeliefsSurveyDefinition,
@@ -188,5 +257,15 @@ describe("ValuesBeliefsDashboardShell", () => {
     expect(
       screen.getByText("Your results dashboard appears after you submit the survey."),
     ).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/surveys/values-beliefs/results",
+        expect.objectContaining({
+          cache: "no-store",
+          credentials: "include",
+        }),
+      );
+    });
   });
 });

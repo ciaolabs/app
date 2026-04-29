@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   DashboardGauge,
@@ -476,6 +476,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
   const pendingResultsKey = getPendingResultsKey(survey.type);
   const storedAnswersKey = getStoredAnswersKey(survey.type);
   const surveyApiBasePath = getSurveyApiBasePath(survey.type);
+  const hasSyncedLatestResults = useRef(false);
 
   useEffect(() => {
     function handleViewportChange() {
@@ -497,7 +498,10 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
       return;
     }
 
-    window.sessionStorage.removeItem(pendingResultsKey);
+    if (window.sessionStorage.getItem(pendingResultsKey)) {
+      return;
+    }
+
     window.sessionStorage.removeItem(storedAnswersKey);
   }, [pendingResultsKey, results, storedAnswersKey]);
 
@@ -531,6 +535,45 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
 
     return payload;
   }, [surveyApiBasePath]);
+
+  useEffect(() => {
+    if (error || hasSyncedLatestResults.current) {
+      return;
+    }
+
+    const hasPendingSubmission = Boolean(window.sessionStorage.getItem(pendingResultsKey));
+
+    if (results && !hasPendingSubmission) {
+      return;
+    }
+
+    hasSyncedLatestResults.current = true;
+    let isMounted = true;
+
+    void (async () => {
+      try {
+        const payload = await fetchResultsPayload();
+
+        if (isMounted) {
+          applyResultsPayload(payload);
+        }
+      } catch (fetchError) {
+        if (!isMounted) {
+          return;
+        }
+
+        setError(
+          fetchError instanceof Error
+            ? fetchError.message
+            : "Unable to load the saved survey results.",
+        );
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [applyResultsPayload, error, fetchResultsPayload, pendingResultsKey, results]);
 
   const handleSelectSubmission = useCallback(
     (submissionId: string) => {

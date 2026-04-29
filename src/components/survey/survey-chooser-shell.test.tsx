@@ -171,7 +171,13 @@ describe("SurveyChooserShell", () => {
     expect(screen.queryByText("Loading your survey status...")).not.toBeInTheDocument();
   });
 
-  it("prefetches active survey and dashboard routes", () => {
+  it("prefetches survey routes and only prefetches dashboards after a submission exists", () => {
+    personalityStatus = makeStatus({
+      submittedCount: 1,
+      latestSubmissionAt: "2026-04-08T09:30:00.000Z",
+      latestSubmissionId: "submission_1",
+    });
+
     render(
       React.createElement(SurveyChooserShell, {
         surveys: surveyDefinitions,
@@ -185,6 +191,6 @@ describe("SurveyChooserShell", () => {
     expect(routerPrefetchMock).toHaveBeenCalledWith("/surveys/personality");
     expect(routerPrefetchMock).toHaveBeenCalledWith("/surveys/personality/dashboard");
     expect(routerPrefetchMock).toHaveBeenCalledWith("/surveys/values-beliefs");
-    expect(routerPrefetchMock).toHaveBeenCalledWith("/surveys/values-beliefs/dashboard");
+    expect(routerPrefetchMock).not.toHaveBeenCalledWith("/surveys/values-beliefs/dashboard");
   });
 });

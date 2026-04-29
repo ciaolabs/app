@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { BeliefsLevelSummaryViolin } from "@/components/dashboard/beliefs-level-summary-violin";
 import { DashboardGaugeCard } from "@/components/dashboard/dashboard-gauge-card";
@@ -463,13 +463,17 @@ export function ValuesBeliefsDashboardShell({
   const pendingResultsKey = getPendingResultsKey(survey.type);
   const storedAnswersKey = getStoredAnswersKey(survey.type);
   const surveyApiBasePath = getSurveyApiBasePath(survey.type);
+  const hasSyncedLatestResults = useRef(false);
 
   useEffect(() => {
     if (!results) {
       return;
     }
 
-    window.sessionStorage.removeItem(pendingResultsKey);
+    if (window.sessionStorage.getItem(pendingResultsKey)) {
+      return;
+    }
+
     window.sessionStorage.removeItem(storedAnswersKey);
   }, [pendingResultsKey, results, storedAnswersKey]);
 
@@ -500,6 +504,45 @@ export function ValuesBeliefsDashboardShell({
 
     return payload;
   }, [surveyApiBasePath]);
+
+  useEffect(() => {
+    if (error || hasSyncedLatestResults.current) {
+      return;
+    }
+
+    const hasPendingSubmission = Boolean(window.sessionStorage.getItem(pendingResultsKey));
+
+    if (results && !hasPendingSubmission) {
+      return;
+    }
+
+    hasSyncedLatestResults.current = true;
+    let isMounted = true;
+
+    void (async () => {
+      try {
+        const payload = await fetchResultsPayload();
+
+        if (isMounted) {
+          applyResultsPayload(payload);
+        }
+      } catch (fetchError) {
+        if (!isMounted) {
+          return;
+        }
+
+        setError(
+          fetchError instanceof Error
+            ? fetchError.message
+            : "Unable to load the saved survey results.",
+        );
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [applyResultsPayload, error, fetchResultsPayload, pendingResultsKey, results]);
 
   const handleSelectSubmission = useCallback(
     (submissionId: string) => {

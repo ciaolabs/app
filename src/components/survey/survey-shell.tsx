@@ -284,10 +284,6 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   );
 
   useEffect(() => {
-    router.prefetch(survey.dashboardRoute);
-  }, [router, survey.dashboardRoute]);
-
-  useEffect(() => {
     if (hasPendingResults(pendingResultsKey)) {
       router.push(survey.dashboardRoute);
       return;

@@ -167,11 +167,18 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
               return [survey.route];
             }
 
-            return [survey.route, survey.dashboardRoute];
+            const status = initialStatuses[survey.type] ?? null;
+            const paths = [survey.route];
+
+            if ((status?.submittedCount ?? 0) > 0) {
+              paths.push(survey.dashboardRoute);
+            }
+
+            return paths;
           }),
         ),
       ),
-    [surveys],
+    [initialStatuses, surveys],
   );
 
   const prefetchPath = useCallback(

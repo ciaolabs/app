@@ -256,10 +256,10 @@ describe("SurveyShell", () => {
     });
   });
 
-  it("prefetches the survey dashboard route", () => {
+  it("does not prefetch the dashboard before a valid submission exists", () => {
     render(React.createElement(SurveyShell, { survey: personalitySurveyDefinition, questions, initialDraft }));
 
-    expect(routerPrefetchMock).toHaveBeenCalledWith(personalitySurveyDefinition.dashboardRoute);
+    expect(routerPrefetchMock).not.toHaveBeenCalled();
   });
 
   it("autosaves through same-origin requests without attaching an authorization header", async () => {
