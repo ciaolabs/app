@@ -41,6 +41,7 @@ type DraftIdRow = {
 type SurveyStatusRow = {
   submitted_count: number;
   has_active_draft: boolean;
+  active_draft_answer_count: number | null;
   latest_submission_at: string | Date | null;
   latest_submission_id: string | null;
 };
@@ -287,6 +288,7 @@ async function selectSurveyStatus(sql: SqlExecutor, userId: string, surveyType: 
     select
       count(*) filter (where status = 'submitted')::int as submitted_count,
       coalesce(bool_or(status = 'draft'), false) as has_active_draft,
+      coalesce(max(answer_count) filter (where status = 'draft'), 0)::int as active_draft_answer_count,
       max(submitted_at) filter (where status = 'submitted') as latest_submission_at,
       (array_agg(id order by submitted_at desc) filter (where status = 'submitted'))[1]::text as latest_submission_id
     from survey_submissions
@@ -297,6 +299,7 @@ async function selectSurveyStatus(sql: SqlExecutor, userId: string, surveyType: 
     surveyType,
     submittedCount: row?.submitted_count ?? 0,
     hasActiveDraft: row?.has_active_draft ?? false,
+    activeDraftAnswerCount: row?.active_draft_answer_count ?? 0,
     latestSubmissionAt: toIsoString(row?.latest_submission_at ?? null),
     latestSubmissionId: row?.latest_submission_id ?? null,
   };

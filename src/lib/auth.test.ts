@@ -22,6 +22,7 @@ describe("auth helpers", () => {
     redirectMock.mockReset();
     process.env.WORKOS_API_KEY = "sk_test_workos";
     process.env.WORKOS_CLIENT_ID = "client_test";
+    process.env.WORKOS_COOKIE_PASSWORD = "test_cookie_password_32_characters";
   });
 
   it("returns the signed-in user id from the WorkOS session cookie", async () => {
@@ -36,6 +37,15 @@ describe("auth helpers", () => {
 
   it("returns null when no session cookie and no Bearer token are present", async () => {
     withAuthMock.mockResolvedValue({ user: null });
+
+    const { getCurrentUserId } = await import("@/lib/auth");
+
+    await expect(getCurrentUserId({ acceptsSessionToken: true })).resolves.toBeNull();
+    expect(getTokenClaimsMock).not.toHaveBeenCalled();
+  });
+
+  it("returns null when the WorkOS session cannot be read", async () => {
+    withAuthMock.mockRejectedValue(new Error("Unable to read session"));
 
     const { getCurrentUserId } = await import("@/lib/auth");
 
@@ -90,6 +100,16 @@ describe("auth helpers", () => {
   it("returns null when WorkOS env vars are missing", async () => {
     delete process.env.WORKOS_API_KEY;
     delete process.env.WORKOS_CLIENT_ID;
+    delete process.env.WORKOS_COOKIE_PASSWORD;
+
+    const { getCurrentUserId } = await import("@/lib/auth");
+
+    await expect(getCurrentUserId()).resolves.toBeNull();
+    expect(withAuthMock).not.toHaveBeenCalled();
+  });
+
+  it("returns null when the WorkOS cookie password is too short", async () => {
+    process.env.WORKOS_COOKIE_PASSWORD = "too-short";
 
     const { getCurrentUserId } = await import("@/lib/auth");
 

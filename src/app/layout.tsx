@@ -4,6 +4,7 @@ import { Manrope, Space_Mono } from "next/font/google";
 
 import { APP_NAME } from "@/lib/app-config";
 import { InteractiveDotBackground } from "@/components/interactive-dot-background";
+import { getInitialAuth } from "@/lib/auth";
 
 import "./globals.css";
 
@@ -27,11 +28,13 @@ export const metadata: Metadata = {
   description: "A modern intake experience for the 181-item AMBI personality survey.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialAuth = await getInitialAuth();
+
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
@@ -50,7 +53,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${manrope.variable} ${monoFont.variable} antialiased`}>
-        <AuthKitProvider>
+        <AuthKitProvider initialAuth={initialAuth}>
           <div className="app-shell">
             <InteractiveDotBackground />
             <div className="app-glow app-glow-left" />

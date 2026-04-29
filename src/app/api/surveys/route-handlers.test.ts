@@ -56,6 +56,7 @@ const statusFixture: SurveyUserStatus = {
   surveyType: personalitySurveyDefinition.type,
   submittedCount: 1,
   hasActiveDraft: false,
+  activeDraftAnswerCount: 0,
   latestSubmissionAt: submissionFixture.submittedAt,
   latestSubmissionId: submissionFixture.submissionId,
 };

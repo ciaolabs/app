@@ -69,6 +69,7 @@ describe("createMemorySurveyRepository", () => {
       surveyType: personalitySurveyDefinition.type,
       submittedCount: 2,
       hasActiveDraft: false,
+      activeDraftAnswerCount: 0,
       latestSubmissionAt: secondSubmission.submittedAt,
       latestSubmissionId: secondSubmission.submissionId,
     });
@@ -76,6 +77,7 @@ describe("createMemorySurveyRepository", () => {
       surveyType: "values-beliefs",
       submittedCount: 0,
       hasActiveDraft: true,
+      activeDraftAnswerCount: valuesDraft.answerCount,
       latestSubmissionAt: null,
       latestSubmissionId: null,
     });

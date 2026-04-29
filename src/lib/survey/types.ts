@@ -105,6 +105,7 @@ export type SurveyUserStatus = {
   surveyType: SurveyType;
   submittedCount: number;
   hasActiveDraft: boolean;
+  activeDraftAnswerCount: number;
   latestSubmissionAt: string | null;
   latestSubmissionId: string | null;
 };

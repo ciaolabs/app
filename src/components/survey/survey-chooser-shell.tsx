@@ -41,7 +41,7 @@ function buildSurveyBadge(survey: SurveyDefinition, status: SurveyUserStatus | n
     return "All attempts used";
   }
 
-  if (status.submittedCount === 1 && status.hasActiveDraft) {
+  if (status.submittedCount === 1 && status.hasActiveDraft && status.activeDraftAnswerCount > 0) {
     return "Second attempt in progress";
   }
 
@@ -56,11 +56,24 @@ function buildSurveyBadge(survey: SurveyDefinition, status: SurveyUserStatus | n
   return "Ready to start";
 }
 
-function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus | null) {
+type ButtonIntent = "primary" | "secondary";
+
+type SurveyAction = {
+  label: string;
+  href: string;
+  intent: ButtonIntent;
+  disabled: boolean;
+};
+
+function buildPrimaryAction(
+  survey: SurveyDefinition,
+  status: SurveyUserStatus | null,
+): SurveyAction {
   if (survey.availability === "coming-soon") {
     return {
       label: "Start survey →",
       href: survey.route,
+      intent: "primary",
       disabled: false,
     };
   }
@@ -69,6 +82,7 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
     return {
       label: "Loading...",
       href: survey.route,
+      intent: "secondary",
       disabled: true,
     };
   }
@@ -77,22 +91,25 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
     return {
       label: "Review results →",
       href: survey.dashboardRoute,
+      intent: "secondary",
       disabled: false,
     };
   }
 
-  if (status.submittedCount === 1 && status.hasActiveDraft) {
+  if (status.submittedCount === 1 && status.hasActiveDraft && status.activeDraftAnswerCount > 0) {
     return {
       label: "Continue second attempt →",
       href: survey.route,
+      intent: "primary",
       disabled: false,
     };
   }
 
   if (status.submittedCount === 1) {
     return {
-      label: "Review results →",
-      href: survey.dashboardRoute,
+      label: "Repeat survey",
+      href: survey.route,
+      intent: "primary",
       disabled: false,
     };
   }
@@ -101,6 +118,7 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
     return {
       label: "Continue survey →",
       href: survey.route,
+      intent: "primary",
       disabled: false,
     };
   }
@@ -108,26 +126,20 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
   return {
     label: "Start survey →",
     href: survey.route,
+    intent: "primary",
     disabled: false,
   };
 }
 
-function primaryActionClassName(label: string) {
+function buttonClassName(intent: ButtonIntent) {
   const baseClassName =
-    "clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50";
+    "clay-button-hover inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50";
 
-  // Make start / continue actions blue like other primary CTAs
-  if (
-    label === "Continue second attempt →" ||
-    label === "View details →" ||
-    label === "Start survey →" ||
-    label === "Continue survey →" ||
-    label === "Start a survey →"
-  ) {
-    return `${baseClassName} bg-(--accent-blue)`;
+  if (intent === "primary") {
+    return `${baseClassName} border border-black bg-(--accent-blue) text-(--selected-contrast)`;
   }
 
-  return `${baseClassName} bg-(--accent-coral)`;
+  return `${baseClassName} border border-(--line-strong) bg-(--surface-panel-strong) text-(--ink)`;
 }
 
 function RepeatIcon() {
@@ -150,7 +162,7 @@ function shouldOfferRepeatAction(survey: SurveyDefinition, status: SurveyUserSta
     survey.availability === "active" &&
     status !== null &&
     status.submittedCount === 1 &&
-    !status.hasActiveDraft
+    (!status.hasActiveDraft || status.activeDraftAnswerCount === 0)
   );
 }
 
@@ -235,12 +247,9 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
           const showRepeatAction = shouldOfferRepeatAction(survey, status);
           const repeatActionSurvey = showRepeatAction ? survey : null;
           const hasSingleSubmission = status?.submittedCount === 1;
-          const hasDraftInProgress = status?.hasActiveDraft === true;
           const reviewHref = survey.availability === "active" ? survey.dashboardRoute : null;
           const showReviewAction =
-            survey.availability === "active" &&
-            hasSingleSubmission &&
-            hasDraftInProgress;
+            survey.availability === "active" && hasSingleSubmission;
 
           return (
             <article
@@ -273,28 +282,28 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={() => handleNavigate(primaryAction.href)}
+                  onClick={() => {
+                    if (repeatActionSurvey) {
+                      setRepeatSurvey(repeatActionSurvey);
+                      return;
+                    }
+
+                    handleNavigate(primaryAction.href);
+                  }}
                   onPointerEnter={() => prefetchPath(primaryAction.href)}
                   onFocus={() => prefetchPath(primaryAction.href)}
                   disabled={primaryAction.disabled || navigatingPath !== null}
-                  className={primaryActionClassName(primaryAction.label)}
+                  className={buttonClassName(primaryAction.intent)}
                 >
-                  {navigatingPath === primaryAction.href ? "Opening..." : primaryAction.label}
+                  {navigatingPath === primaryAction.href ? (
+                    "Opening..."
+                  ) : (
+                    <>
+                      {primaryAction.label === "Repeat survey" ? <RepeatIcon /> : null}
+                      {primaryAction.label}
+                    </>
+                  )}
                 </button>
-
-                {repeatActionSurvey ? (
-                  <button
-                    type="button"
-                    onClick={() => setRepeatSurvey(repeatActionSurvey)}
-                    onPointerEnter={() => prefetchPath(repeatActionSurvey.route)}
-                    onFocus={() => prefetchPath(repeatActionSurvey.route)}
-                    disabled={navigatingPath !== null}
-                    className="clay-button-hover inline-flex h-11 items-center justify-center gap-2 rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold text-(--ink) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <RepeatIcon />
-                    Repeat
-                  </button>
-                ) : null}
 
                 {showReviewAction && reviewHref ? (
                   <button
@@ -303,7 +312,7 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                     onPointerEnter={() => prefetchPath(reviewHref)}
                     onFocus={() => prefetchPath(reviewHref)}
                     disabled={navigatingPath !== null}
-                    className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold text-(--ink) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50"
+                    className={buttonClassName("secondary")}
                   >
                     Review results →
                   </button>
@@ -335,14 +344,14 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
               <button
                 type="button"
                 onClick={handleConfirmRepeat}
-                className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-(--accent-coral) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)"
+                className={buttonClassName("primary")}
               >
                 Yes
               </button>
               <button
                 type="button"
                 onClick={() => setRepeatSurvey(null)}
-                className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel) px-5 text-sm font-semibold text-(--ink) shadow-(--shadow-soft)"
+                className={buttonClassName("secondary")}
               >
                 No
               </button>

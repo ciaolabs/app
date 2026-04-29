@@ -20,6 +20,7 @@ function makeStatus(
     surveyType,
     submittedCount: 0,
     hasActiveDraft: false,
+    activeDraftAnswerCount: 0,
     latestSubmissionAt: null,
     latestSubmissionId: null,
     ...overrides,

@@ -178,6 +178,7 @@ export function createMemorySurveyRepository(): SurveyRepository {
         surveyType,
         submittedCount: submissions.length,
         hasActiveDraft: state.drafts.has(stateKey),
+        activeDraftAnswerCount: state.drafts.get(stateKey)?.answerCount ?? 0,
         latestSubmissionAt: submissions[0]?.submittedAt ?? null,
         latestSubmissionId: submissions[0]?.submissionId ?? null,
       } satisfies SurveyUserStatus;

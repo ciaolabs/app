@@ -30,6 +30,7 @@ function makeStatus(overrides?: Partial<SurveyUserStatus>): SurveyUserStatus {
     surveyType: "personality",
     submittedCount: 0,
     hasActiveDraft: false,
+    activeDraftAnswerCount: 0,
     latestSubmissionAt: null,
     latestSubmissionId: null,
     ...overrides,
@@ -48,6 +49,7 @@ describe("SurveyChooserShell", () => {
       surveyType: "values-beliefs",
       submittedCount: 0,
       hasActiveDraft: false,
+      activeDraftAnswerCount: 0,
       latestSubmissionAt: null,
       latestSubmissionId: null,
     };
@@ -94,7 +96,7 @@ describe("SurveyChooserShell", () => {
       }),
     );
 
-    await user.click(screen.getByRole("button", { name: "Repeat" }));
+    await user.click(screen.getByRole("button", { name: "Repeat survey" }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(
@@ -112,6 +114,7 @@ describe("SurveyChooserShell", () => {
     personalityStatus = makeStatus({
       submittedCount: 1,
       hasActiveDraft: true,
+      activeDraftAnswerCount: 12,
       latestSubmissionAt: "2026-04-08T09:30:00.000Z",
       latestSubmissionId: "submission_1",
     });
@@ -128,7 +131,31 @@ describe("SurveyChooserShell", () => {
 
     expect(screen.getByRole("button", { name: "Continue second attempt →" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Review results →" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Repeat" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Repeat survey" })).not.toBeInTheDocument();
+  });
+
+  it("shows repeat survey when the final draft exists but has not been started", async () => {
+    personalityStatus = makeStatus({
+      submittedCount: 1,
+      hasActiveDraft: true,
+      activeDraftAnswerCount: 0,
+      latestSubmissionAt: "2026-04-08T09:30:00.000Z",
+      latestSubmissionId: "submission_1",
+    });
+
+    render(
+      React.createElement(SurveyChooserShell, {
+        surveys: surveyDefinitions,
+        initialStatuses: {
+          personality: personalityStatus,
+          "values-beliefs": valuesStatus,
+        },
+      }),
+    );
+
+    expect(screen.getByRole("button", { name: "Repeat survey" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Continue second attempt →" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Review results →" })).toBeInTheDocument();
   });
 
   it("removes repeat access after the second submission", async () => {
@@ -149,7 +176,7 @@ describe("SurveyChooserShell", () => {
       }),
     );
 
-    expect(screen.queryByRole("button", { name: "Repeat" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Repeat survey" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Review results →" }));
 
