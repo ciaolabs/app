@@ -1,7 +1,6 @@
 "use client";
 
 import { type MouseEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useRouter } from "next/navigation";
 
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
@@ -9,56 +8,49 @@ import { SURVEYS_ROUTE } from "@/lib/survey/routes";
 type StartSurveyButtonProps = {
   children: ReactNode;
   className: string;
+  href?: string;
   pendingLabel?: string;
 };
 
 export function StartSurveyButton({
   children,
   className,
-  pendingLabel = "Opening surveys...",
+  href = SURVEYS_ROUTE,
+  pendingLabel = "Opening",
 }: StartSurveyButtonProps) {
-  const { user, loading } = useAuth();
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);
   const didPointerNavigate = useRef(false);
-  const isLoaded = !loading;
-  const isSignedIn = Boolean(user);
 
   const prefetchSurveyRoute = useCallback(() => {
-    if (!isLoaded || !isSignedIn) {
-      return;
-    }
-
-    router.prefetch(SURVEYS_ROUTE);
-  }, [isLoaded, isSignedIn, router]);
+    router.prefetch(href);
+  }, [href, router]);
 
   useEffect(() => {
     prefetchSurveyRoute();
   }, [prefetchSurveyRoute]);
 
-  async function handleClick(event: MouseEvent<HTMLButtonElement>) {
+  const startNavigation = useCallback(() => {
+    if (isNavigating) {
+      return;
+    }
+
+    setIsNavigating(true);
+    router.push(href);
+  }, [href, isNavigating, router]);
+
+  function handleClick(event: MouseEvent<HTMLButtonElement>) {
     if (event.detail > 0 && didPointerNavigate.current) {
       didPointerNavigate.current = false;
       return;
     }
 
-    if (!isSignedIn) {
-      router.push("/");
-      return;
-    }
-
-    setIsNavigating(true);
-    router.push(SURVEYS_ROUTE);
+    startNavigation();
   }
 
   function handleMouseDown() {
-    if (!isLoaded || !isSignedIn) {
-      return;
-    }
-
     didPointerNavigate.current = true;
-    setIsNavigating(true);
-    router.push(SURVEYS_ROUTE);
+    startNavigation();
   }
 
   return (
@@ -68,10 +60,25 @@ export function StartSurveyButton({
       onMouseDown={handleMouseDown}
       onPointerEnter={prefetchSurveyRoute}
       onFocus={prefetchSurveyRoute}
-      disabled={!isLoaded || !isSignedIn || isNavigating}
+      disabled={isNavigating}
+      aria-busy={isNavigating}
+      aria-label={isNavigating ? `${pendingLabel}...` : undefined}
       className={className}
     >
-      {isNavigating ? pendingLabel : children}
+      <span className="inline-flex min-w-36 items-center justify-center">
+        {isNavigating ? (
+          <>
+            <span>{pendingLabel}</span>
+            <span className="opening-dots" aria-hidden="true">
+              <span>.</span>
+              <span>.</span>
+              <span>.</span>
+            </span>
+          </>
+        ) : (
+          children
+        )}
+      </span>
     </button>
   );
 }

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { getCurrentUserIdMock } = vi.hoisted(() => ({
@@ -51,9 +51,13 @@ describe("HomePage", () => {
     render(await HomePage());
 
     expect(screen.getByRole("button", { name: "Account menu" })).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "Start a survey →" })).toHaveLength(3);
-    for (const link of screen.getAllByRole("link", { name: "Start a survey →" })) {
-      expect(link).toHaveAttribute("href", "/surveys");
-    }
+    const startButtons = screen.getAllByRole("button", { name: "Start a survey →" });
+    expect(startButtons).toHaveLength(3);
+
+    fireEvent.mouseDown(startButtons[0]);
+
+    const openingButton = screen.getByRole("button", { name: "Opening..." });
+    expect(openingButton).toBeDisabled();
+    expect(openingButton.querySelectorAll(".opening-dots span")).toHaveLength(3);
   });
 });

@@ -511,6 +511,17 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
   to { --dot-spin-angle: 380deg; }
 }
 
+@keyframes openingDot {
+  0%, 80%, 100% {
+    opacity: 0.32;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-0.12rem);
+  }
+}
+
 @keyframes mobileNavBackdropIn {
   from {
     opacity: 0;
@@ -547,6 +558,27 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
   animation: mobileNavSheetIn 240ms cubic-bezier(0.22, 0.88, 0.3, 1.08) both;
 }
 
+.opening-dots {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1em;
+  margin-left: 0.08em;
+}
+
+.opening-dots span {
+  animation: openingDot 900ms ease-in-out infinite;
+  line-height: 1;
+}
+
+.opening-dots span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.opening-dots span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
 .loading-skeleton {
   background:
     linear-gradient(
@@ -564,8 +596,14 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
 @media (prefers-reduced-motion: reduce) {
   .mobile-nav-backdrop,
   .mobile-nav-sheet,
+  .opening-dots span,
   .loading-skeleton {
     animation: none;
+  }
+
+  .opening-dots span {
+    opacity: 1;
+    transform: none;
   }
 }
 

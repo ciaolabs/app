@@ -59,7 +59,7 @@ function buildSurveyBadge(survey: SurveyDefinition, status: SurveyUserStatus | n
 function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus | null) {
   if (survey.availability === "coming-soon") {
     return {
-      label: survey.ctaLabel,
+      label: "Start survey →",
       href: survey.route,
       disabled: false,
     };
@@ -75,7 +75,7 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
 
   if (status.submittedCount >= (survey.maxSubmissions ?? Number.MAX_SAFE_INTEGER)) {
     return {
-      label: "Review results",
+      label: "Review results →",
       href: survey.dashboardRoute,
       disabled: false,
     };
@@ -83,7 +83,7 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
 
   if (status.submittedCount === 1 && status.hasActiveDraft) {
     return {
-      label: "Continue second attempt",
+      label: "Continue second attempt →",
       href: survey.route,
       disabled: false,
     };
@@ -91,7 +91,7 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
 
   if (status.submittedCount === 1) {
     return {
-      label: "Review results",
+      label: "Review results →",
       href: survey.dashboardRoute,
       disabled: false,
     };
@@ -99,14 +99,14 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
 
   if (status.hasActiveDraft) {
     return {
-      label: "Continue survey",
+      label: "Continue survey →",
       href: survey.route,
       disabled: false,
     };
   }
 
   return {
-    label: survey.ctaLabel,
+    label: "Start survey →",
     href: survey.route,
     disabled: false,
   };
@@ -114,20 +114,35 @@ function buildPrimaryAction(survey: SurveyDefinition, status: SurveyUserStatus |
 
 function primaryActionClassName(label: string) {
   const baseClassName =
-    "clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black px-5 text-sm font-semibold uppercase tracking-[0.16em] text-(--selected-contrast) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50";
+    "clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50";
 
   // Make start / continue actions blue like other primary CTAs
   if (
-    label === "Continue second attempt" ||
-    label === "View details" ||
-    label === "Start survey" ||
-    label === "Continue survey" ||
+    label === "Continue second attempt →" ||
+    label === "View details →" ||
+    label === "Start survey →" ||
+    label === "Continue survey →" ||
     label === "Start a survey →"
   ) {
     return `${baseClassName} bg-(--accent-blue)`;
   }
 
   return `${baseClassName} bg-(--accent-coral)`;
+}
+
+function RepeatIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
+      <path
+        d="M5.5 5.5h7.25A3.75 3.75 0 0 1 16.5 9.25v.25M5.5 5.5 8 3M5.5 5.5 8 8M14.5 14.5H7.25A3.75 3.75 0 0 1 3.5 10.75v-.25M14.5 14.5 12 12M14.5 14.5 12 17"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.55"
+      />
+    </svg>
+  );
 }
 
 function shouldOfferRepeatAction(survey: SurveyDefinition, status: SurveyUserStatus | null): survey is ActiveSurveyDefinition {
@@ -267,8 +282,9 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                     onPointerEnter={() => prefetchPath(repeatActionSurvey.route)}
                     onFocus={() => prefetchPath(repeatActionSurvey.route)}
                     disabled={navigatingPath !== null}
-                    className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold uppercase tracking-[0.16em] text-(--ink) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50"
+                    className="clay-button-hover inline-flex h-11 items-center justify-center gap-2 rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold text-(--ink) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50"
                   >
+                    <RepeatIcon />
                     Repeat
                   </button>
                 ) : null}
@@ -280,9 +296,9 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                     onPointerEnter={() => prefetchPath(reviewHref)}
                     onFocus={() => prefetchPath(reviewHref)}
                     disabled={navigatingPath !== null}
-                    className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold uppercase tracking-[0.16em] text-(--ink) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50"
+                    className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold text-(--ink) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Review results
+                    Review results →
                   </button>
                 ) : null}
               </div>
@@ -312,14 +328,14 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
               <button
                 type="button"
                 onClick={handleConfirmRepeat}
-                className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-(--accent-coral) px-5 text-sm font-semibold uppercase tracking-[0.16em] text-(--selected-contrast) shadow-(--shadow-soft)"
+                className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-(--accent-coral) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)"
               >
                 Yes
               </button>
               <button
                 type="button"
                 onClick={() => setRepeatSurvey(null)}
-                className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel) px-5 text-sm font-semibold uppercase tracking-[0.16em] text-(--ink) shadow-(--shadow-soft)"
+                className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel) px-5 text-sm font-semibold text-(--ink) shadow-(--shadow-soft)"
               >
                 No
               </button>

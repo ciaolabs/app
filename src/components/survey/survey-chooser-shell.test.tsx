@@ -71,7 +71,7 @@ describe("SurveyChooserShell", () => {
       .closest("article");
 
     expect(personalityCard).not.toBeNull();
-    await user.click(within(personalityCard!).getByRole("button", { name: "Start survey" }));
+    await user.click(within(personalityCard!).getByRole("button", { name: "Start survey →" }));
 
     expect(routerPushMock).toHaveBeenCalledWith("/surveys/personality");
   });
@@ -126,8 +126,8 @@ describe("SurveyChooserShell", () => {
       }),
     );
 
-    expect(screen.getByRole("button", { name: "Continue second attempt" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Review results" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Continue second attempt →" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Review results →" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Repeat" })).not.toBeInTheDocument();
   });
 
@@ -151,7 +151,7 @@ describe("SurveyChooserShell", () => {
 
     expect(screen.queryByRole("button", { name: "Repeat" })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Review results" }));
+    await user.click(screen.getByRole("button", { name: "Review results →" }));
 
     expect(routerPushMock).toHaveBeenCalledWith("/surveys/personality/dashboard");
   });

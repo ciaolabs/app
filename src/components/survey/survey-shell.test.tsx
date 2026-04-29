@@ -142,7 +142,7 @@ describe("SurveyShell", () => {
     render(React.createElement(SurveyShell, { survey: personalitySurveyDefinition, questions, initialDraft }));
 
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Submit survey" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Submit survey →" })).toBeDisabled();
 
     await user.keyboard("4");
 
@@ -151,7 +151,7 @@ describe("SurveyShell", () => {
 
     await user.keyboard("{ArrowRight}5{ArrowRight}6");
 
-    expect(screen.getByRole("button", { name: "Submit survey" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Submit survey →" })).toBeEnabled();
   });
 
   it("lets respondents jump back through the log and revise an earlier answer", async () => {
@@ -209,12 +209,12 @@ describe("SurveyShell", () => {
 
     expect(screen.getByText(/Question 3 of 3/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "First unanswered" }));
+    await user.click(screen.getByRole("button", { name: "Find first unanswered" }));
 
     expect(screen.getByText(/Question 3 of 3/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /I rarely worry/i }));
-    await user.click(screen.getByRole("button", { name: "First unanswered" }));
+    await user.click(screen.getByRole("button", { name: "Find first unanswered" }));
 
     expect(screen.getByText(/Question 3 of 3/i)).toBeInTheDocument();
   });
@@ -228,7 +228,7 @@ describe("SurveyShell", () => {
     await user.click(screen.getByRole("button", { name: /Moderately accurate/i }));
     await user.click(screen.getByRole("button", { name: "Go to next question" }));
     await user.click(screen.getByRole("button", { name: /Very accurate/i }));
-    await user.click(screen.getByRole("button", { name: "Submit survey" }));
+    await user.click(screen.getByRole("button", { name: "Submit survey →" }));
 
     await waitFor(() => {
       expect(routerPushMock).toHaveBeenCalledWith(personalitySurveyDefinition.dashboardRoute);

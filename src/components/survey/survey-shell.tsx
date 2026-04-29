@@ -128,6 +128,21 @@ function describeSaveState(
   return "Autosaves to your account.";
 }
 
+function UpArrowIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
+      <path
+        d="M10 15.5v-11M5.5 9 10 4.5 14.5 9"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.7"
+      />
+    </svg>
+  );
+}
+
 export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProps) {
   const router = useRouter();
   const [answers, setAnswers] = useState<SurveyAnswers>(initialDraft.answers);
@@ -503,7 +518,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
               disabled={answeredCount !== questions.length || isSubmitting}
               className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-sand)] px-5 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {isSubmitting ? "Submitting..." : "Submit survey"}
+              {isSubmitting ? "Submitting..." : "Submit survey →"}
             </button>
           }
         />
@@ -520,9 +535,10 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                     type="button"
                     onClick={goToFirstUnansweredQuestion}
                     disabled={!hasUnansweredQuestions || isSubmitting}
-                    className="clay-button-hover inline-flex rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ink)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="clay-button-hover inline-flex items-center gap-1.5 rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-3 py-1.5 text-[10px] font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    First unanswered
+                    <UpArrowIcon />
+                    Find first unanswered
                   </button>
                 </div>
                 <div className="flex items-end justify-between gap-4">

@@ -1,10 +1,8 @@
-import Link from "next/link";
-
+import { StartSurveyButton } from "@/components/auth/start-survey-button";
 import { LandingFooter } from "@/components/landing-footer";
 import { SurveyPreview } from "@/components/home/survey-preview";
 import { SiteTopNav } from "@/components/site-top-nav";
 import { getCurrentUserId } from "@/lib/auth";
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
 
 const SIGN_IN_ROUTE = "/sign-in";
 
@@ -17,9 +15,9 @@ export default async function HomePage() {
   const signInUrl = isSignedIn ? null : SIGN_IN_ROUTE;
 
   const heroAction = isSignedIn ? (
-    <Link href={SURVEYS_ROUTE} className={primaryActionClassName()}>
+    <StartSurveyButton className={primaryActionClassName()}>
       Start a survey →
-    </Link>
+    </StartSurveyButton>
   ) : (
     <a href={signInUrl ?? "#"} className={primaryActionClassName()}>
       Sign in to start
@@ -50,12 +48,11 @@ export default async function HomePage() {
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               {isSignedIn ? (
-                <Link
-                  href={SURVEYS_ROUTE}
+                <StartSurveyButton
                   className="clay-button-hover inline-flex h-12 items-center gap-2 rounded-full border border-black bg-(--accent-blue) px-6 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)"
                 >
                   Start a survey →
-                </Link>
+                </StartSurveyButton>
               ) : (
                 <a
                   href={signInUrl ?? "#"}

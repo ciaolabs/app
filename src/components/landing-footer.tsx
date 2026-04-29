@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { StartSurveyButton } from "@/components/auth/start-survey-button";
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
 
 type NavLink = { label: string; href: string; external?: boolean };
@@ -91,12 +92,11 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
 
               <div className="mt-5 flex flex-wrap gap-3">
                 {isSignedIn ? (
-                  <Link
-                    href={SURVEYS_ROUTE}
+                  <StartSurveyButton
                     className="inline-flex h-10 items-center gap-2 rounded-full bg-black px-6 text-sm font-semibold text-white transition hover:bg-neutral-800"
                   >
                     Start a survey →
-                  </Link>
+                  </StartSurveyButton>
                 ) : (
                   <a
                     href={signInHref}

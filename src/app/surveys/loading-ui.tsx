@@ -89,6 +89,43 @@ function SurveyTakingSkeleton() {
   );
 }
 
+function LoadingHeaderSection({
+  title,
+  description,
+}: Pick<SurveyLoadingFallbackProps, "title" | "description">) {
+  return (
+    <section
+      className="clay-section mt-6 px-6 py-8 sm:px-8 sm:py-10"
+      style={{ background: "var(--hero-gradient)" }}
+    >
+      <p className="clay-label">Loading</p>
+      <h1 className="mt-4 font-display text-4xl text-(--ink) sm:text-5xl">
+        {title}
+      </h1>
+      <p className="mt-5 max-w-3xl text-base leading-8 text-(--ink-soft)">
+        {description}
+      </p>
+      <LoadingBar className="mt-7 max-w-md" />
+    </section>
+  );
+}
+
+export function SurveyChooserLoadingContent({
+  title,
+  description,
+}: Pick<SurveyLoadingFallbackProps, "title" | "description">) {
+  return (
+    <>
+      <LoadingHeaderSection title={title} description={description} />
+
+      <section className="mt-4 grid gap-6 lg:grid-cols-2">
+        <SurveyCardSkeleton />
+        <SurveyCardSkeleton />
+      </section>
+    </>
+  );
+}
+
 export function SurveyLoadingFallback({
   title,
   description,
@@ -100,29 +137,15 @@ export function SurveyLoadingFallback({
       aria-live="polite"
       className="mx-auto min-h-screen w-full max-w-[1440px] px-6 pt-0 pb-16 sm:px-10 lg:px-12"
     >
-      <section
-        className="clay-section mt-6 px-6 py-8 sm:px-8 sm:py-10"
-        style={{ background: "var(--hero-gradient)" }}
-      >
-        <p className="clay-label">Loading</p>
-        <h1 className="mt-4 font-display text-4xl text-(--ink) sm:text-5xl">
-          {title}
-        </h1>
-        <p className="mt-5 max-w-3xl text-base leading-8 text-(--ink-soft)">
-          {description}
-        </p>
-        <LoadingBar className="mt-7 max-w-md" />
-      </section>
-
       {variant === "survey" ? (
-        <div className="mt-6">
-          <SurveyTakingSkeleton />
-        </div>
+        <>
+          <LoadingHeaderSection title={title} description={description} />
+          <div className="mt-6">
+            <SurveyTakingSkeleton />
+          </div>
+        </>
       ) : (
-        <section className="mt-4 grid gap-6 lg:grid-cols-2">
-          <SurveyCardSkeleton />
-          <SurveyCardSkeleton />
-        </section>
+        <SurveyChooserLoadingContent title={title} description={description} />
       )}
     </main>
   );

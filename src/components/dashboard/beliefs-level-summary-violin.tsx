@@ -27,6 +27,8 @@ const PLOT_HEIGHT = 40;
 const PLOT_LEFT = 10;
 const PLOT_RIGHT = PLOT_WIDTH - 10;
 const CENTER_Y = PLOT_HEIGHT / 2;
+const SUMMARY_GRID_COLUMNS =
+  "minmax(0,5.75rem)_minmax(0,1fr)_minmax(0,5.75rem)_3.75rem";
 
 function clamp(value: number, minValue: number, maxValue: number) {
   return Math.min(maxValue, Math.max(minValue, value));
@@ -118,7 +120,7 @@ function SummaryRow({ item }: { item: PolarScaleResult }) {
   const highlightHigh = item.percentileDirection === "higher";
 
   return (
-    <li className="grid grid-cols-[minmax(0,5.75rem)_minmax(0,1fr)_minmax(0,5.75rem)_3.75rem] items-center gap-3">
+    <li className={`grid grid-cols-[${SUMMARY_GRID_COLUMNS}] items-center gap-3`}>
       <span className={highlightHigh ? "text-sm text-[var(--ink-soft)]" : "text-sm font-semibold text-[var(--ink)]"}>
         {item.lowLabel}
       </span>
@@ -138,17 +140,15 @@ export function BeliefsLevelSummaryViolin({ groups }: BeliefsLevelSummaryViolinP
       aria-label="Beliefs level summary violin"
       className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7"
     >
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+      <div className={`grid gap-4 lg:grid-cols-[${SUMMARY_GRID_COLUMNS}] lg:items-end`}>
+        <div className="lg:col-span-2">
           <p className="clay-label">
             Beliefs summary
           </p>
           <h2 className="mt-2 font-display text-4xl text-[var(--ink)]">I believe the world is...</h2>
         </div>
-        <div className="hidden min-w-[26rem] grid-cols-[minmax(0,5.75rem)_minmax(0,1fr)_minmax(0,5.75rem)_3.75rem] gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)] lg:grid">
-          <span />
-          <span className="text-center">My score</span>
-          <span />
+        <div className="hidden contents text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)] lg:contents">
+          <span className="text-right">My score</span>
           <span className="text-right">Percentile</span>
         </div>
       </div>

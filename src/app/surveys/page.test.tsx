@@ -1,3 +1,4 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -30,21 +31,27 @@ describe("SurveysPage", () => {
     getInitialSurveyStatusesMock.mockReset();
   });
 
-  it("redirects at the server boundary when survey access is unavailable", async () => {
-    getInitialSurveyStatusesMock.mockRejectedValue(new Error("redirected"));
+  it("renders the surveys shell immediately while status data is pending", async () => {
+    const statusesPromise = new Promise<Record<SurveyUserStatus["surveyType"], SurveyUserStatus>>(
+      () => undefined,
+    );
+    getInitialSurveyStatusesMock.mockReturnValue(statusesPromise);
     const { default: SurveysPage } = await import("@/app/surveys/page");
 
-    await expect(SurveysPage()).rejects.toThrow("redirected");
+    render(React.createElement(SurveysPage));
+
+    expect(screen.getByText("Preparing your surveys")).toBeInTheDocument();
+    expect(getInitialSurveyStatusesMock).toHaveBeenCalled();
   });
 
-  it("renders the chooser directly without the old protected-route loading panel", async () => {
-    getInitialSurveyStatusesMock.mockResolvedValue({
+  it("renders the chooser after the streamed status data resolves", async () => {
+    const initialStatuses = {
       personality: makeStatus("personality"),
       "values-beliefs": makeStatus("values-beliefs"),
-    });
-    const { default: SurveysPage } = await import("@/app/surveys/page");
+    };
+    const { ResolvedSurveyChooserContent } = await import("@/app/surveys/survey-page-content");
 
-    render(await SurveysPage());
+    render(React.createElement(ResolvedSurveyChooserContent, { initialStatuses }));
 
     expect(screen.getByText("Choose which survey you want to take next.")).toBeInTheDocument();
     expect(screen.queryByText("Preparing your survey")).not.toBeInTheDocument();
