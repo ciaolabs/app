@@ -23,9 +23,12 @@ const monoFont = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AMBI Survey MVP",
+  title: "Ciao! Surveys",
   applicationName: APP_NAME,
-  description: "A modern intake experience for the 181-item AMBI personality survey.",
+  description: "Surveys to discover your personality and beliefs by Ciao!.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default async function RootLayout({
