@@ -32,7 +32,7 @@ const NAV_COLUMNS: NavColumn[] = [
     heading: "Project",
     links: [
       { label: "GitHub", href: "https://github.com/ciaobang/surveys", external: true },
-      { label: "Open an issue", href: "https://github.com/ciaobang/surveys/issues", external: true },
+      { label: "Join Slack", href: "https://join.slack.com/t/ciaobang/shared_invite/zt-3wywab1kx-Bv0ttYA93npMA0qtoUgEmA", external: true },
       { label: "Star the repo", href: "https://github.com/ciaobang/surveys/stargazers", external: true },
     ],
   },
