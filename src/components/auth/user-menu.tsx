@@ -49,6 +49,10 @@ function getInitials(firstName: string | null | undefined, lastName: string | nu
   return email?.trim()?.[0]?.toUpperCase() ?? "?";
 }
 
+function getSignOutReturnTo() {
+  return window.location.origin;
+}
+
 type UserMenuProps = {
   trigger?: "avatar" | "row";
   rowLabel?: ReactNode;
@@ -185,7 +189,7 @@ export function UserMenu({ trigger = "avatar", rowLabel = "Account" }: UserMenuP
           role="menuitem"
           onClick={() => {
             setIsOpen(false);
-            void signOut({ returnTo: "/" });
+            void signOut({ returnTo: getSignOutReturnTo() });
           }}
           className="clay-button-hover flex min-h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold text-(--ink)"
         >

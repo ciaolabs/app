@@ -7,6 +7,11 @@ Object.defineProperty(globalThis, "__authTestSignedIn", {
   writable: true,
 });
 
+Object.defineProperty(globalThis, "__authTestSignOut", {
+  value: vi.fn(),
+  writable: true,
+});
+
 const testUser = {
   id: "user_test",
   firstName: "Test",
@@ -16,6 +21,10 @@ const testUser = {
 
 function isSignedIn() {
   return Boolean((globalThis as { __authTestSignedIn?: boolean }).__authTestSignedIn);
+}
+
+function getSignOutMock() {
+  return (globalThis as { __authTestSignOut?: ReturnType<typeof vi.fn> }).__authTestSignOut ?? vi.fn();
 }
 
 vi.mock("@workos-inc/authkit-nextjs", () => ({
@@ -34,7 +43,7 @@ vi.mock("@workos-inc/authkit-nextjs/components", () => ({
   useAuth: () => ({
     user: isSignedIn() ? testUser : null,
     loading: false,
-    signOut: vi.fn(),
+    signOut: getSignOutMock(),
     refreshAuth: vi.fn(),
     switchToOrganization: vi.fn(),
   }),
