@@ -120,9 +120,9 @@ describe("ValuesBeliefsDashboardShell", () => {
     );
 
     expect(screen.getByRole("link", { name: "Surveys" })).toHaveAttribute("href", SURVEYS_ROUTE);
-    expect(screen.getByRole("link", { name: "Go to survey →" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Start a survey →" })).toHaveAttribute(
       "href",
-      valuesBeliefsSurveyDefinition.route,
+      SURVEYS_ROUTE,
     );
     expect(screen.getByRole("button", { name: "beliefs" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "values" })).toBeInTheDocument();
@@ -301,10 +301,10 @@ describe("ValuesBeliefsDashboardShell", () => {
       expect(fetchMock).toHaveBeenCalled();
     });
     expect(window.sessionStorage.getItem(pendingResultsKey)).toBeNull();
-    const goToSurveyLinks = screen.getAllByRole("link", { name: "Go to survey →" });
+    const goToSurveyLinks = screen.getAllByRole("link", { name: "Start a survey →" });
     expect(goToSurveyLinks.length).toBeGreaterThan(0);
     goToSurveyLinks.forEach((link) => {
-      expect(link).toHaveAttribute("href", valuesBeliefsSurveyDefinition.route);
+      expect(link).toHaveAttribute("href", SURVEYS_ROUTE);
     });
   });
 });

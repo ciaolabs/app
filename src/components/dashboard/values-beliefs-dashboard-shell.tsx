@@ -185,7 +185,7 @@ function EmptyDashboard({ ctaHref }: { ctaHref: string }) {
         href={ctaHref}
         className="clay-button-hover mt-8 inline-flex rounded-full border border-black bg-[var(--accent-blue)] px-5 py-3 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
       >
-        Go to survey →
+        Start a survey →
       </Link>
     </section>
   );
@@ -582,10 +582,10 @@ export function ValuesBeliefsDashboardShell({
         ]}
         action={
           <Link
-            href={survey.route}
+            href={SURVEYS_ROUTE}
             className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-blue)] px-5 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
           >
-            Go to survey →
+            Start a survey →
           </Link>
         }
       />
@@ -607,7 +607,7 @@ export function ValuesBeliefsDashboardShell({
         </section>
       ) : null}
 
-      {!error && !results ? <EmptyDashboard ctaHref={survey.route} /> : null}
+      {!error && !results ? <EmptyDashboard ctaHref={SURVEYS_ROUTE} /> : null}
 
       {!error && results ? (
         <div className="mt-6 space-y-6">
