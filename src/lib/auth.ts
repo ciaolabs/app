@@ -76,7 +76,18 @@ export async function requireCurrentUserId() {
     redirect("/");
   }
 
-  const { user } = await withAuth({ ensureSignedIn: true });
+  let user: Awaited<ReturnType<typeof withAuth>>["user"];
+
+  try {
+    ({ user } = await withAuth());
+  } catch {
+    redirect("/");
+  }
+
+  if (!user?.id) {
+    redirect("/");
+  }
+
   return user.id;
 }
 

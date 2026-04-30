@@ -3,10 +3,11 @@
 A greenfield Next.js 15 application for phase one of the AMBI personality survey flow:
 
 - intro page at `/`
-- 181-item survey experience at `/personalitysurvey` (with `/survey` preserved as a compatibility redirect)
+- survey chooser at `/surveys`, with the AMBI personality survey at `/surveys/personality`
+- legacy `/personalitysurvey` and `/survey` paths preserved as compatibility redirects
 - per-question violin plot revealed after every answer
 - account-based autosaved drafts plus final submission
-- scored dashboard at `/personalitysurvey/dashboard` (with `/dashboard` preserved as a compatibility redirect)
+- scored dashboards at `/surveys/personality/dashboard` and `/surveys/values-beliefs/dashboard`, with legacy dashboard redirects preserved
 
 ## Stack
 

@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 
 import { isWorkOSConfigured } from "@/lib/auth";
 
-function missingAuthConfigResponse() {
+function missingAuthConfigResponse(origin: string) {
+  const redirectUri = `${origin}/callback`;
+
   return new Response(
     `<!doctype html>
 <html lang="en">
@@ -59,7 +61,7 @@ function missingAuthConfigResponse() {
         <li><code>WORKOS_CLIENT_ID</code></li>
         <li><code>WORKOS_API_KEY</code></li>
         <li><code>WORKOS_COOKIE_PASSWORD</code> with at least 32 characters</li>
-        <li><code>NEXT_PUBLIC_WORKOS_REDIRECT_URI=http://localhost:3001/callback</code></li>
+        <li><code>NEXT_PUBLIC_WORKOS_REDIRECT_URI=${redirectUri}</code></li>
       </ul>
       <p>You can generate a cookie password with <code>openssl rand -base64 32</code>.</p>
       <p><a href="/">Return home</a></p>
@@ -77,7 +79,7 @@ function missingAuthConfigResponse() {
 
 export const GET = async (request: NextRequest) => {
   if (!isWorkOSConfigured()) {
-    return missingAuthConfigResponse();
+    return missingAuthConfigResponse(request.nextUrl.origin);
   }
 
   const redirectUri =
