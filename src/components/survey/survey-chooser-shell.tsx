@@ -4,7 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { formatSubmittedAt } from "@/lib/date-format";
-import { type ActiveSurveyDefinition, type SurveyDefinition } from "@/lib/survey/definitions";
+import {
+  getPendingResultsKey,
+  type ActiveSurveyDefinition,
+  type SurveyDefinition,
+} from "@/lib/survey/definitions";
 import { type SurveyType, type SurveyUserStatus } from "@/lib/survey/types";
 
 type SurveyChooserShellProps = {
@@ -49,14 +53,18 @@ function buildSurveyBadge(survey: SurveyDefinition, status: SurveyUserStatus | n
     return "Last available attempt";
   }
 
-  if (status.hasActiveDraft) {
+  if (
+    status.submittedCount === 0 &&
+    status.hasActiveDraft &&
+    status.activeDraftAnswerCount > 0
+  ) {
     return "Draft in progress";
   }
 
   return "Ready to start";
 }
 
-type ButtonIntent = "primary" | "secondary";
+type ButtonIntent = "primary" | "secondary" | "danger";
 
 type SurveyAction = {
   label: string;
@@ -91,16 +99,16 @@ function buildPrimaryAction(
     return {
       label: "Review results →",
       href: survey.dashboardRoute,
-      intent: "secondary",
+      intent: "primary",
       disabled: false,
     };
   }
 
   if (status.submittedCount === 1 && status.hasActiveDraft && status.activeDraftAnswerCount > 0) {
     return {
-      label: "Continue second attempt →",
+      label: "Continue retry →",
       href: survey.route,
-      intent: "primary",
+      intent: "danger",
       disabled: false,
     };
   }
@@ -109,12 +117,12 @@ function buildPrimaryAction(
     return {
       label: "Repeat survey",
       href: survey.route,
-      intent: "primary",
+      intent: "danger",
       disabled: false,
     };
   }
 
-  if (status.hasActiveDraft) {
+  if (status.hasActiveDraft && status.activeDraftAnswerCount > 0) {
     return {
       label: "Continue survey →",
       href: survey.route,
@@ -137,6 +145,10 @@ function buttonClassName(intent: ButtonIntent) {
 
   if (intent === "primary") {
     return `${baseClassName} border border-black bg-(--accent-blue) text-(--selected-contrast)`;
+  }
+
+  if (intent === "danger") {
+    return `${baseClassName} border border-(--accent-coral) bg-(--surface-panel-strong) text-(--accent-coral)`;
   }
 
   return `${baseClassName} border border-(--line-strong) bg-(--surface-panel-strong) text-(--ink)`;
@@ -218,6 +230,10 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
       return;
     }
 
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem(getPendingResultsKey(repeatSurvey.type));
+    }
+
     setRepeatSurvey(null);
     handleNavigate(repeatSurvey.route);
   }, [handleNavigate, repeatSurvey]);
@@ -248,8 +264,7 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
           const repeatActionSurvey = showRepeatAction ? survey : null;
           const hasSingleSubmission = status?.submittedCount === 1;
           const reviewHref = survey.availability === "active" ? survey.dashboardRoute : null;
-          const showReviewAction =
-            survey.availability === "active" && hasSingleSubmission;
+          const showReviewAction = survey.availability === "active" && hasSingleSubmission;
 
           return (
             <article
@@ -280,6 +295,19 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
               </div>
 
               <div className="mt-6 flex flex-wrap gap-3">
+                {showReviewAction && reviewHref ? (
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate(reviewHref)}
+                    onPointerEnter={() => prefetchPath(reviewHref)}
+                    onFocus={() => prefetchPath(reviewHref)}
+                    disabled={navigatingPath !== null}
+                    className={buttonClassName("primary")}
+                  >
+                    Review results →
+                  </button>
+                ) : null}
+
                 <button
                   type="button"
                   onClick={() => {
@@ -304,19 +332,6 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                     </>
                   )}
                 </button>
-
-                {showReviewAction && reviewHref ? (
-                  <button
-                    type="button"
-                    onClick={() => handleNavigate(reviewHref)}
-                    onPointerEnter={() => prefetchPath(reviewHref)}
-                    onFocus={() => prefetchPath(reviewHref)}
-                    disabled={navigatingPath !== null}
-                    className={buttonClassName("secondary")}
-                  >
-                    Review results →
-                  </button>
-                ) : null}
               </div>
             </article>
           );

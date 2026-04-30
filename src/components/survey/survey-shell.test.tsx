@@ -256,6 +256,49 @@ describe("SurveyShell", () => {
     });
   });
 
+  it("stays on the survey when the pending-results marker is stale and the draft already has answers", async () => {
+    const answeredDraft: SurveyDraft = {
+      ...initialDraft,
+      answerCount: 1,
+      answers: { Q1: 4 },
+    };
+    const staleTimestamp = new Date(Date.now() - (6 * 60 * 1000)).toISOString();
+    window.sessionStorage.setItem(getPendingResultsKey(personalitySurveyDefinition.type), staleTimestamp);
+
+    render(
+      React.createElement(SurveyShell, {
+        survey: personalitySurveyDefinition,
+        questions,
+        initialDraft: answeredDraft,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Submit survey →" })).toBeInTheDocument();
+    });
+    expect(routerPushMock).not.toHaveBeenCalledWith(personalitySurveyDefinition.dashboardRoute);
+    expect(window.sessionStorage.getItem(getPendingResultsKey(personalitySurveyDefinition.type))).toBeNull();
+  });
+
+  it("redirects to the dashboard when the pending-results marker is fresh and the draft has zero answers", async () => {
+    window.sessionStorage.setItem(
+      getPendingResultsKey(personalitySurveyDefinition.type),
+      new Date(Date.now() - (2 * 60 * 1000)).toISOString(),
+    );
+
+    render(
+      React.createElement(SurveyShell, {
+        survey: personalitySurveyDefinition,
+        questions,
+        initialDraft,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(routerPushMock).toHaveBeenCalledWith(personalitySurveyDefinition.dashboardRoute);
+    });
+  });
+
   it("does not prefetch the dashboard before a valid submission exists", () => {
     render(React.createElement(SurveyShell, { survey: personalitySurveyDefinition, questions, initialDraft }));
 

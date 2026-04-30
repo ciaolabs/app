@@ -120,6 +120,10 @@ describe("ValuesBeliefsDashboardShell", () => {
     );
 
     expect(screen.getByRole("link", { name: "Surveys" })).toHaveAttribute("href", SURVEYS_ROUTE);
+    expect(screen.getByRole("link", { name: "Go to survey →" })).toHaveAttribute(
+      "href",
+      valuesBeliefsSurveyDefinition.route,
+    );
     expect(screen.getByRole("button", { name: "beliefs" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "values" })).toBeInTheDocument();
     expect(screen.getByLabelText("Beliefs level summary violin")).toBeInTheDocument();
@@ -266,6 +270,41 @@ describe("ValuesBeliefsDashboardShell", () => {
           credentials: "include",
         }),
       );
+    });
+  });
+
+  it("clears pending-results markers after a refresh even when results are null", async () => {
+    const pendingResultsKey = getPendingResultsKey(valuesBeliefsSurveyDefinition.type);
+    window.sessionStorage.setItem(pendingResultsKey, new Date().toISOString());
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          results: null,
+          submissions: [],
+          selectedSubmissionId: null,
+        }),
+      ),
+    );
+
+    render(
+      React.createElement(ValuesBeliefsDashboardShell, {
+        survey: valuesBeliefsSurveyDefinition,
+        initialPayload: {
+          results: null,
+          submissions: [],
+          selectedSubmissionId: null,
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalled();
+    });
+    expect(window.sessionStorage.getItem(pendingResultsKey)).toBeNull();
+    const goToSurveyLinks = screen.getAllByRole("link", { name: "Go to survey →" });
+    expect(goToSurveyLinks.length).toBeGreaterThan(0);
+    goToSurveyLinks.forEach((link) => {
+      expect(link).toHaveAttribute("href", valuesBeliefsSurveyDefinition.route);
     });
   });
 });

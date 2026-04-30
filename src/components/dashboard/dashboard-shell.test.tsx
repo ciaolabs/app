@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { formatSubmittedAt } from "@/lib/date-format";
-import { personalitySurveyDefinition } from "@/lib/survey/definitions";
+import { getPendingResultsKey, personalitySurveyDefinition } from "@/lib/survey/definitions";
 import { surveyQuestions } from "@/lib/survey/questions";
 import { buildSurveyResults } from "@/lib/survey/results/engine";
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
@@ -196,5 +196,40 @@ describe("DashboardShell", () => {
 
     expect(screen.getByText("Please refresh the page and try again.")).toBeInTheDocument();
     expect(screen.queryByText("Authentication required.")).not.toBeInTheDocument();
+  });
+
+  it("clears pending-results markers after a refresh even when results are null", async () => {
+    const pendingResultsKey = getPendingResultsKey(personalitySurveyDefinition.type);
+    window.sessionStorage.setItem(pendingResultsKey, new Date().toISOString());
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          results: null,
+          submissions: [],
+          selectedSubmissionId: null,
+        }),
+      ),
+    );
+
+    render(
+      React.createElement(DashboardShell, {
+        survey: personalitySurveyDefinition,
+        initialPayload: {
+          results: null,
+          submissions: [],
+          selectedSubmissionId: null,
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalled();
+    });
+    expect(window.sessionStorage.getItem(pendingResultsKey)).toBeNull();
+    const startSurveyLinks = screen.getAllByRole("link", { name: "Start a survey →" });
+    expect(startSurveyLinks.length).toBeGreaterThan(0);
+    startSurveyLinks.forEach((link) => {
+      expect(link).toHaveAttribute("href", SURVEYS_ROUTE);
+    });
   });
 });

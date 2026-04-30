@@ -78,6 +78,32 @@ describe("SurveyChooserShell", () => {
     expect(routerPushMock).toHaveBeenCalledWith("/surveys/personality");
   });
 
+  it("shows ready-to-start state for a zero-answer first draft", () => {
+    personalityStatus = makeStatus({
+      hasActiveDraft: true,
+      activeDraftAnswerCount: 0,
+    });
+
+    render(
+      React.createElement(SurveyChooserShell, {
+        surveys: surveyDefinitions,
+        initialStatuses: {
+          personality: personalityStatus,
+          "values-beliefs": valuesStatus,
+        },
+      }),
+    );
+
+    const personalityCard = screen
+      .getByRole("heading", { name: "Measures of Your Personality" })
+      .closest("article");
+
+    expect(personalityCard).not.toBeNull();
+    expect(within(personalityCard!).getByText("Ready to start")).toBeInTheDocument();
+    expect(within(personalityCard!).getByRole("button", { name: "Start survey →" })).toBeInTheDocument();
+    expect(within(personalityCard!).queryByRole("button", { name: "Continue survey →" })).not.toBeInTheDocument();
+  });
+
   it("requires confirmation before starting the final repeat attempt", async () => {
     const user = userEvent.setup();
     personalityStatus = makeStatus({
@@ -129,7 +155,18 @@ describe("SurveyChooserShell", () => {
       }),
     );
 
-    expect(screen.getByRole("button", { name: "Continue second attempt →" })).toBeInTheDocument();
+    const personalityCard = screen
+      .getByRole("heading", { name: "Measures of Your Personality" })
+      .closest("article");
+
+    expect(personalityCard).not.toBeNull();
+    const buttons = within(personalityCard!).getAllByRole("button");
+
+    expect(buttons.map((button) => button.textContent)).toEqual([
+      "Review results →",
+      "Continue retry →",
+    ]);
+    expect(screen.getByRole("button", { name: "Continue retry →" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Review results →" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Repeat survey" })).not.toBeInTheDocument();
   });
@@ -153,8 +190,16 @@ describe("SurveyChooserShell", () => {
       }),
     );
 
+    const personalityCard = screen
+      .getByRole("heading", { name: "Measures of Your Personality" })
+      .closest("article");
+
+    expect(personalityCard).not.toBeNull();
+    const buttons = within(personalityCard!).getAllByRole("button");
+
+    expect(buttons.map((button) => button.textContent)).toEqual(["Review results →", "Repeat survey"]);
     expect(screen.getByRole("button", { name: "Repeat survey" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Continue second attempt →" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Continue retry →" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Review results →" })).toBeInTheDocument();
   });
 

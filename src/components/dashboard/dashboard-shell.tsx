@@ -506,8 +506,9 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
   }, [pendingResultsKey, results, storedAnswersKey]);
 
   const applyResultsPayload = useCallback((payload: ResultsPayload<SurveyResults>) => {
+    window.sessionStorage.removeItem(pendingResultsKey);
+
     if (payload.results) {
-      window.sessionStorage.removeItem(pendingResultsKey);
       window.sessionStorage.removeItem(storedAnswersKey);
     }
 

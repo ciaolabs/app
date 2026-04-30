@@ -88,12 +88,30 @@ function markPendingResults(storageKey: string, submittedAt: string | null) {
   );
 }
 
-function hasPendingResults(storageKey: string) {
+const PENDING_RESULTS_WINDOW_MS = 5 * 60 * 1000;
+
+function shouldRedirectToDashboard(pendingResultsKey: string, answerCount: number) {
   if (typeof window === "undefined") {
     return false;
   }
 
-  return Boolean(window.sessionStorage.getItem(storageKey));
+  const pendingMarker = window.sessionStorage.getItem(pendingResultsKey);
+
+  if (!pendingMarker) {
+    return false;
+  }
+
+  const markerTimestamp = Date.parse(pendingMarker);
+  const isMarkerFresh =
+    Number.isFinite(markerTimestamp) && Date.now() - markerTimestamp <= PENDING_RESULTS_WINDOW_MS;
+  const hasUnansweredDraft = answerCount === 0;
+
+  if (isMarkerFresh && hasUnansweredDraft) {
+    return true;
+  }
+
+  window.sessionStorage.removeItem(pendingResultsKey);
+  return false;
 }
 
 function findFirstUnansweredIndex(
@@ -284,7 +302,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   );
 
   useEffect(() => {
-    if (hasPendingResults(pendingResultsKey)) {
+    if (shouldRedirectToDashboard(pendingResultsKey, initialDraft.answerCount)) {
       router.push(survey.dashboardRoute);
       return;
     }
@@ -306,6 +324,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
       controllerMap.clear();
     };
   }, [
+    initialDraft.answerCount,
     initialDraft.answers,
     pendingResultsKey,
     questions,
