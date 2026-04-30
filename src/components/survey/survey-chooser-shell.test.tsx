@@ -136,7 +136,7 @@ describe("SurveyChooserShell", () => {
     });
   });
 
-  it("shows resume and review actions when the final draft is already in progress", async () => {
+  it("still offers review and repeat actions when a final draft already has answers", async () => {
     personalityStatus = makeStatus({
       submittedCount: 1,
       hasActiveDraft: true,
@@ -162,13 +162,11 @@ describe("SurveyChooserShell", () => {
     expect(personalityCard).not.toBeNull();
     const buttons = within(personalityCard!).getAllByRole("button");
 
-    expect(buttons.map((button) => button.textContent)).toEqual([
-      "Review results →",
-      "Continue retry →",
-    ]);
-    expect(screen.getByRole("button", { name: "Continue retry →" })).toBeInTheDocument();
+    expect(within(personalityCard!).getByText("Last available attempt")).toBeInTheDocument();
+    expect(buttons.map((button) => button.textContent)).toEqual(["Review results →", "Repeat survey"]);
+    expect(screen.getByRole("button", { name: "Repeat survey" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Continue retry →" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Review results →" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Repeat survey" })).not.toBeInTheDocument();
   });
 
   it("shows repeat survey when the final draft exists but has not been started", async () => {

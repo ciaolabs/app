@@ -45,10 +45,6 @@ function buildSurveyBadge(survey: SurveyDefinition, status: SurveyUserStatus | n
     return "All attempts used";
   }
 
-  if (status.submittedCount === 1 && status.hasActiveDraft && status.activeDraftAnswerCount > 0) {
-    return "Second attempt in progress";
-  }
-
   if (status.submittedCount === 1) {
     return "Last available attempt";
   }
@@ -100,15 +96,6 @@ function buildPrimaryAction(
       label: "Review results →",
       href: survey.dashboardRoute,
       intent: "primary",
-      disabled: false,
-    };
-  }
-
-  if (status.submittedCount === 1 && status.hasActiveDraft && status.activeDraftAnswerCount > 0) {
-    return {
-      label: "Continue retry →",
-      href: survey.route,
-      intent: "danger",
       disabled: false,
     };
   }
@@ -173,8 +160,7 @@ function shouldOfferRepeatAction(survey: SurveyDefinition, status: SurveyUserSta
   return (
     survey.availability === "active" &&
     status !== null &&
-    status.submittedCount === 1 &&
-    (!status.hasActiveDraft || status.activeDraftAnswerCount === 0)
+    status.submittedCount === 1
   );
 }
 
