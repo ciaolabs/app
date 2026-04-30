@@ -73,6 +73,22 @@ function buildAggregatedRow(database: MockDatabase, submission: MockSubmissionRo
   };
 }
 
+function participantIdForUserId(userId: string) {
+  return `participant:${userId}`;
+}
+
+function userIdFromParticipantId(participantId: string) {
+  return participantId.replace(/^participant:/, "");
+}
+
+function surveyVersionIdForSurveyType(surveyType: "personality" | "values-beliefs") {
+  return `version:${surveyType}`;
+}
+
+function surveyTypeFromVersionId(surveyVersionId: string) {
+  return surveyVersionId.replace(/^version:/, "") as "personality" | "values-beliefs";
+}
+
 function isTemplateStringsArray(value: unknown): value is TemplateStringsArray {
   return Array.isArray(value) && "raw" in value;
 }
@@ -129,8 +145,36 @@ function createMockSql(database: MockDatabase) {
 
     const query = normalizeQuery(strings);
 
+    if (query.startsWith("insert into app_private.user_accounts")) {
+      const [, userId] = values as [string, string];
+      return Promise.resolve([{ id: `account:${userId}` }]);
+    }
+
+    if (query.startsWith("insert into research.participants")) {
+      const [accountId] = values as [string, string];
+      return Promise.resolve([{ id: participantIdForUserId(accountId.replace(/^account:/, "")) }]);
+    }
+
+    if (query.startsWith("insert into research.surveys")) {
+      const [surveyType] = values as ["personality" | "values-beliefs", string];
+      return Promise.resolve([{ id: `survey:${surveyType}` }]);
+    }
+
+    if (query.startsWith("insert into research.survey_versions")) {
+      const [surveyId] = values as [string];
+      return Promise.resolve([
+        { id: surveyVersionIdForSurveyType(surveyId.replace(/^survey:/, "") as "personality" | "values-beliefs") },
+      ]);
+    }
+
+    if (query.startsWith("insert into research.question_items")) {
+      return Promise.resolve([]);
+    }
+
     if (query.startsWith("select count(*) filter")) {
-      const [userId, surveyType] = values as [string, "personality" | "values-beliefs"];
+      const [participantId, surveyVersionId] = values as [string, string];
+      const userId = userIdFromParticipantId(participantId);
+      const surveyType = surveyTypeFromVersionId(surveyVersionId);
       const submissions = database.submissions.filter(
         (submission) => submission.user_id === userId && submission.survey_type === surveyType,
       );
@@ -148,32 +192,18 @@ function createMockSql(database: MockDatabase) {
       ]);
     }
 
-    if (query.startsWith("select id from survey_submissions") && query.includes("s.status = 'draft'")) {
-      const [userId, surveyType] = values as [string, "personality" | "values-beliefs"];
+    if (query.startsWith("select id from research.submissions") && query.includes("status = 'draft'")) {
+      const hasSubmissionIdFilter = query.includes("where id =");
+      const [submissionId, participantId, surveyVersionId] = values as [string, string, string];
+      const [resolvedParticipantId, resolvedSurveyVersionId] = hasSubmissionIdFilter
+        ? [participantId, surveyVersionId]
+        : (values as [string, string]);
+      const userId = userIdFromParticipantId(resolvedParticipantId);
+      const surveyType = surveyTypeFromVersionId(resolvedSurveyVersionId);
       const draft = database.submissions.find(
         (submission) =>
           submission.user_id === userId &&
           submission.survey_type === surveyType &&
-          submission.status === "draft",
-      );
-
-      return Promise.resolve(draft ? [{ id: draft.id }] : []);
-    }
-
-    if (query.startsWith("select id from survey_submissions") && query.includes("status = 'draft'")) {
-      const hasSubmissionIdFilter = query.includes("where id =");
-      const [submissionId, userId, surveyType] = values as [
-        string,
-        string,
-        "personality" | "values-beliefs",
-      ];
-      const [resolvedUserId, resolvedSurveyType] = hasSubmissionIdFilter
-        ? [userId, surveyType]
-        : (values as [string, "personality" | "values-beliefs"]);
-      const draft = database.submissions.find(
-        (submission) =>
-          submission.user_id === resolvedUserId &&
-          submission.survey_type === resolvedSurveyType &&
           submission.status === "draft" &&
           (!hasSubmissionIdFilter || submission.id === submissionId),
       );
@@ -181,8 +211,10 @@ function createMockSql(database: MockDatabase) {
       return Promise.resolve(draft ? [{ id: draft.id }] : []);
     }
 
-    if (query.includes("from survey_submissions s") && query.includes("s.status = 'draft'")) {
-      const [userId, surveyType] = values as [string, "personality" | "values-beliefs"];
+    if (query.includes("from research.submissions s") && query.includes("s.status = 'draft'")) {
+      const [participantId, surveyVersionId] = values as [string, string, string];
+      const userId = userIdFromParticipantId(participantId);
+      const surveyType = surveyTypeFromVersionId(surveyVersionId);
       const draft = database.submissions.find(
         (submission) =>
           submission.user_id === userId &&
@@ -193,12 +225,14 @@ function createMockSql(database: MockDatabase) {
     }
 
     if (
-      query.includes("from survey_submissions s") &&
+      query.includes("from research.submissions s") &&
       query.includes("s.status = 'submitted'") &&
       query.includes("order by s.submitted_at desc") &&
       query.includes("coalesce(")
     ) {
-      const [userId, surveyType] = values as [string, "personality" | "values-beliefs"];
+      const [participantId, surveyVersionId] = values as [string, string, string];
+      const userId = userIdFromParticipantId(participantId);
+      const surveyType = surveyTypeFromVersionId(surveyVersionId);
       const submission = database.submissions
         .filter(
           (row) =>
@@ -213,11 +247,13 @@ function createMockSql(database: MockDatabase) {
     }
 
     if (
-      query.includes("from survey_submissions s") &&
+      query.includes("from research.submissions s") &&
       query.includes("s.id =") &&
       query.includes("s.status = 'submitted'")
     ) {
-      const [userId, surveyType, submissionId] = values as [string, "personality" | "values-beliefs", string];
+      const [submissionId, participantId, surveyVersionId] = values as [string, string, string, string];
+      const userId = userIdFromParticipantId(participantId);
+      const surveyType = surveyTypeFromVersionId(surveyVersionId);
       const submission = database.submissions.find(
         (row) =>
           row.user_id === userId &&
@@ -256,8 +292,37 @@ function createMockSql(database: MockDatabase) {
         })));
     }
 
-    if (query.startsWith("insert into survey_submissions")) {
-      const [id, userId, surveyType] = values as [string, string, "personality" | "values-beliefs"];
+    if (
+      query.startsWith("select s.id, ua.provider_user_id as user_id, svy.slug as survey_type, s.answer_count") &&
+      query.includes("s.status = 'submitted'")
+    ) {
+      const [participantId, surveyVersionId] = values as [string, string, string];
+      const userId = userIdFromParticipantId(participantId);
+      const surveyType = surveyTypeFromVersionId(surveyVersionId);
+      return Promise.resolve(database.submissions
+        .filter(
+          (row) =>
+            row.user_id === userId &&
+            row.survey_type === surveyType &&
+            row.status === "submitted" &&
+            row.submitted_at,
+        )
+        .sort((left, right) => String(right.submitted_at).localeCompare(String(left.submitted_at)))
+        .map((submission) => ({
+          id: submission.id,
+          user_id: submission.user_id,
+          survey_type: submission.survey_type,
+          answer_count: submission.answer_count,
+          created_at: submission.created_at,
+          updated_at: submission.updated_at,
+          submitted_at: submission.submitted_at as string,
+        })));
+    }
+
+    if (query.startsWith("insert into research.submissions")) {
+      const [id, , participantId, surveyVersionId] = values as [string, string, string, string];
+      const userId = userIdFromParticipantId(participantId);
+      const surveyType = surveyTypeFromVersionId(surveyVersionId);
       const existingDraft = database.submissions.find(
         (submission) =>
           submission.user_id === userId &&
@@ -290,7 +355,7 @@ function createMockSql(database: MockDatabase) {
       return Promise.resolve([]);
     }
 
-    if (query.startsWith("insert into survey_answers")) {
+    if (query.startsWith("insert into research.answers")) {
       const insertHelper = values.find(isMockInsertHelper);
 
       if (insertHelper) {
@@ -307,10 +372,17 @@ function createMockSql(database: MockDatabase) {
         return Promise.resolve([]);
       }
 
-      const [submissionId, questionId, questionOrder, response] = values as [string, string, number, number];
-      upsertAnswerRow(database, submissionId, questionId, questionOrder, response);
+      const isCatalogInsert = query.includes("from research.question_items q");
+      const [submissionId, responseOrQuestionId, surveyVersionIdOrQuestionOrder, questionIdOrResponse, questionOrder] =
+        values as [string, number | string, string | number, string | number, number];
+      const questionId = isCatalogInsert ? (questionIdOrResponse as string) : (responseOrQuestionId as string);
+      const response = isCatalogInsert ? (responseOrQuestionId as number) : (questionIdOrResponse as number);
+      const resolvedQuestionOrder = isCatalogInsert
+        ? questionOrder
+        : (surveyVersionIdOrQuestionOrder as number);
+      upsertAnswerRow(database, submissionId, questionId, resolvedQuestionOrder, response);
 
-      return Promise.resolve([]);
+      return Promise.resolve(isCatalogInsert && query.includes("returning") ? [{ id: questionId }] : []);
     }
 
     if (query.startsWith("select count(*)::int as count")) {
@@ -322,8 +394,8 @@ function createMockSql(database: MockDatabase) {
       ]);
     }
 
-    if (query.startsWith("update survey_submissions") && query.includes("set answer_count =")) {
-      const isCountingAnswers = query.includes("select count(*)::int from survey_answers");
+    if (query.startsWith("update research.submissions") && query.includes("set answer_count =")) {
+      const isCountingAnswers = query.includes("select count(*)::int from research.answers");
       const [answerCount, submissionId] = isCountingAnswers
         ? [
             database.answers.filter((answer) => answer.submission_id === values[0]).length,
@@ -340,13 +412,13 @@ function createMockSql(database: MockDatabase) {
       return Promise.resolve([]);
     }
 
-    if (query.startsWith("delete from survey_answers")) {
+    if (query.startsWith("delete from research.answers")) {
       const submissionId = values[0] as string;
       database.answers = database.answers.filter((answer) => answer.submission_id !== submissionId);
       return Promise.resolve([]);
     }
 
-    if (query.startsWith("update survey_submissions") && query.includes("set status = 'submitted'")) {
+    if (query.startsWith("update research.submissions") && query.includes("set status = 'submitted'")) {
       const [answerCount, submissionId] = values as [number, string];
       const submission = database.submissions.find((row) => row.id === submissionId);
 
