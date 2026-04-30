@@ -45,11 +45,16 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `(() => {
               try {
-                const stored = window.localStorage.getItem("ambi-theme");
-                const theme = stored === "dark" || stored === "light" ? stored : "light";
-                document.documentElement.dataset.theme = theme;
+                const storedMode = window.localStorage.getItem("ambi-theme-mode");
+                const mode = storedMode === "dark" || storedMode === "light" || storedMode === "system" ? storedMode : "light";
+                const resolved = mode === "system"
+                  ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+                  : mode;
+                document.documentElement.dataset.theme = resolved;
+                document.documentElement.dataset.themeMode = mode;
               } catch {
                 document.documentElement.dataset.theme = "light";
+                document.documentElement.dataset.themeMode = "light";
               }
             })();`,
           }}

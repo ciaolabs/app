@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { StartSurveyButton } from "@/components/auth/start-survey-button";
+import { ThemeModeToggle } from "@/components/theme-mode-toggle";
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
 
 type NavLink = { label: string; href: string; external?: boolean };
@@ -83,14 +84,14 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
         <div className="absolute inset-x-10 top-10 max-h-100 overflow-hidden rounded-2xl border border-(--line) bg-[#f5f3ef] px-6 py-6 [html[data-theme='dark']_&]:bg-[#4B463F] sm:inset-x-12 sm:top-12 sm:px-7 sm:py-7">
 
           {/* Top row: tagline + CTAs | logo */}
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:justify-between">
             {/* Left: tagline + buttons */}
             <div>
               <p className="max-w-sm font-display text-2xl font-bold leading-snug text-[#111] [html[data-theme='dark']_&]:text-[#f5f3ef] sm:text-3xl">
                 Measure your personality.<br />Understand your beliefs.
               </p>
 
-              <div className="mt-5 flex flex-wrap gap-3">
+              <div className="mt-5 flex flex-wrap items-center gap-3">
                 {isSignedIn ? (
                   <StartSurveyButton
                     className="inline-flex h-10 items-center gap-2 rounded-full bg-black px-6 text-sm font-semibold text-white transition hover:bg-neutral-800"
@@ -102,7 +103,7 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
                     href={signInHref}
                     className="inline-flex h-10 items-center gap-2 rounded-full bg-black px-6 text-sm font-semibold text-white transition hover:bg-neutral-800"
                   >
-                    Start a survey →
+                    Sign in to start →
                   </a>
                 )}
                 <a
@@ -117,16 +118,48 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
               </div>
             </div>
 
-            {/* Right: Ciao! icon */}
-            <div className="flex shrink-0 items-center gap-3">
-              <Image
-                src="/ciao-icon.png"
-                alt="Ciao!"
-                width={60}
-                height={60}
-                className="rounded-xl"
-              />
-              <span className="font-display text-xl font-bold text-[#111] [html[data-theme='dark']_&]:text-[#f5f3ef]">Ciao!</span>
+            {/* Right: Ciao! text with animated waving hand + theme toggle */}
+            <style dangerouslySetInnerHTML={{ __html: `
+              @keyframes ciaoHandWave {
+                0%   { transform: rotate(0deg) scale(1); }
+                10%  { transform: rotate(35deg) scale(1.08); }
+                20%  { transform: rotate(-25deg) scale(0.95); }
+                30%  { transform: rotate(40deg) scale(1.1); }
+                40%  { transform: rotate(-15deg) scale(0.98); }
+                50%  { transform: rotate(30deg) scale(1.06); }
+                60%  { transform: rotate(0deg) scale(1); }
+                100% { transform: rotate(0deg) scale(1); }
+              }
+              .ciao-hand-wave {
+                animation: ciaoHandWave 1.5s ease-in-out infinite;
+                transform-origin: 70% 70%;
+                display: inline-block;
+              }
+            ` }} />
+            <div className="flex shrink-0 flex-col items-end justify-between">
+              <div className="flex items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={theme === "dark" ? "/ciao-sparkle-dark.svg" : "/ciao-sparkle.svg"}
+                  alt=""
+                  aria-hidden="true"
+                  className="ciao-hand-wave"
+                  style={{ height: 56, width: 56, objectFit: "contain" }}
+                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/ciao-text.png"
+                  alt="Ciao!"
+                  style={{
+                    height: 56,
+                    width: "auto",
+                    filter: theme === "dark" ? "invert(1)" : "none",
+                  }}
+                />
+              </div>
+              <div className="mt-2">
+                <ThemeModeToggle />
+              </div>
             </div>
           </div>
 

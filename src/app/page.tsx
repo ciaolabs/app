@@ -1,37 +1,20 @@
 import { StartSurveyButton } from "@/components/auth/start-survey-button";
 import { LandingFooter } from "@/components/landing-footer";
+import { LandingHeader } from "@/components/landing-header";
 import { SurveyPreview } from "@/components/home/survey-preview";
-import { SiteTopNav } from "@/components/site-top-nav";
 import { getCurrentUserId } from "@/lib/auth";
 
 const SIGN_IN_ROUTE = "/sign-in";
-
-function primaryActionClassName() {
-  return "clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)";
-}
 
 export default async function HomePage() {
   const isSignedIn = Boolean(await getCurrentUserId());
   const signInUrl = isSignedIn ? null : SIGN_IN_ROUTE;
 
-  const heroAction = isSignedIn ? (
-    <StartSurveyButton className={primaryActionClassName()}>
-      Start a survey →
-    </StartSurveyButton>
-  ) : (
-    <a href={signInUrl ?? "#"} className={primaryActionClassName()}>
-      Sign in to start
-    </a>
-  );
-
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-360 flex-col px-6 pt-0 sm:px-10 lg:px-12">
-      <SiteTopNav
-        helpHref="https://doi.org/10.1016/j.jrp.2010.01.002"
-        action={heroAction}
-      />
-
-      <section
+    <>
+      <LandingHeader isSignedIn={isSignedIn} signInHref={signInUrl ?? "/"} />
+      <main className="mx-auto flex min-h-screen w-full max-w-360 flex-col px-6 pt-0 sm:px-10 lg:px-12">
+        <section
         className="relative mt-6 overflow-hidden rounded-3xl border border-(--line-strong) px-4 py-10 shadow-(--shadow-soft) sm:px-8 sm:py-14 lg:px-10 lg:py-16"
         style={{ background: "var(--hero-gradient)" }}
       >
@@ -43,8 +26,12 @@ export default async function HomePage() {
         <div className="relative">
           <div className="flex flex-col items-center text-center">
             <h1 className="max-w-5xl font-display text-5xl font-black leading-tight text-(--ink) sm:text-6xl lg:text-7xl">
-              Surveys to discover your personality and beliefs.
+              A closer read of <em className="italic">who you are</em>, one question at a time.
             </h1>
+
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-(--ink-soft) sm:text-xl">
+              Surveys to discover your personality and beliefs.
+            </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               {isSignedIn ? (
@@ -58,7 +45,7 @@ export default async function HomePage() {
                   href={signInUrl ?? "#"}
                   className="clay-button-hover inline-flex h-12 items-center gap-2 rounded-full border border-black bg-(--accent-blue) px-6 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)"
                 >
-                  Start a survey →
+                  Sign in to start →
                 </a>
               )}
 
@@ -110,7 +97,8 @@ export default async function HomePage() {
         ))}
       </section>
 
-      <LandingFooter isSignedIn={isSignedIn} signInHref={signInUrl ?? "/"} />
-    </main>
+        <LandingFooter isSignedIn={isSignedIn} signInHref={signInUrl ?? "/"} />
+      </main>
+    </>
   );
 }

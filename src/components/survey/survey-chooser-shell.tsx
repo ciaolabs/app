@@ -227,12 +227,18 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
   return (
     <>
       <section
-        className="clay-section mt-6 px-6 py-8 sm:px-8 sm:py-10"
+        className="clay-section relative mt-6 overflow-hidden rounded-3xl border border-(--line-strong) px-6 py-8 sm:px-8 sm:py-10"
         style={{ background: "var(--hero-gradient)" }}
       >
-        <p className="clay-label">
-          Survey selection
-        </p>
+        <div className="hero-blob hero-blob-1" aria-hidden="true" />
+        <div className="hero-blob hero-blob-2" aria-hidden="true" />
+        <div className="hero-blob hero-blob-3" aria-hidden="true" />
+        <div className="hero-blob hero-blob-4" aria-hidden="true" />
+
+        <div className="relative">
+          <p className="clay-label">
+            Survey selection
+          </p>
         <h1 className="mt-4 font-display text-5xl text-(--ink) sm:text-6xl">
           Choose which survey you want to take next.
         </h1>
@@ -240,6 +246,7 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
           Each survey keeps its own draft, saved submissions, and attempt limit. Repeat actions stay
           available only until the final allowed submission is used.
         </p>
+        </div>
       </section>
 
       <section className="mt-4 grid gap-6 lg:grid-cols-2">

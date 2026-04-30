@@ -106,6 +106,22 @@ function MenuIcon() {
   );
 }
 
+function getSaveStatusIndicatorColor(saveStatus: string, isError: boolean): string {
+  if (isError) {
+    return "bg-(--accent-rose)";
+  }
+
+  if (saveStatus.startsWith("Saving")) {
+    return "bg-(--accent-blue)";
+  }
+
+  if (saveStatus.startsWith("Saved")) {
+    return "bg-(--accent-mint)";
+  }
+
+  return "bg-(--ink-soft)";
+}
+
 function readTheme(): ThemeMode {
   if (typeof document !== "undefined") {
     const theme = document.documentElement.dataset.theme;
@@ -230,10 +246,11 @@ export function SiteTopNav({
           {saveStatus ? (
             <div
               className={[
-                "inline-flex min-h-11 min-w-40 items-center justify-end px-1 text-sm font-semibold",
+                "inline-flex min-h-11 min-w-40 items-center justify-end gap-2 px-1 text-sm font-semibold",
                 saveStatusIsError ? "text-(--accent-rose)" : "text-(--ink-soft)",
               ].join(" ")}
             >
+              <span className={`h-2 w-2 shrink-0 rounded-full ${getSaveStatusIndicatorColor(saveStatus, saveStatusIsError)}`} />
               {saveStatus}
             </div>
           ) : null}
@@ -315,10 +332,11 @@ export function SiteTopNav({
                     {saveStatus ? (
                       <div
                         className={[
-                          "rounded-xl px-3 py-2 text-sm font-semibold",
+                          "flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold",
                           saveStatusIsError ? "text-(--accent-rose)" : "text-(--ink-soft)",
                         ].join(" ")}
                       >
+                        <span className={`h-2 w-2 shrink-0 rounded-full ${getSaveStatusIndicatorColor(saveStatus, saveStatusIsError)}`} />
                         {saveStatus}
                       </div>
                     ) : null}

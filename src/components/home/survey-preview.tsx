@@ -204,24 +204,22 @@ export function SurveyPreview() {
 
         {/* Right-side tab actions */}
         <div className="hidden items-center gap-1 sm:flex">
-          <button
-            type="button"
-            aria-label="New tab"
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current" strokeWidth="2" strokeLinecap="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </button>
+<button
+              type="button"
+              aria-label="New tab"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M6.84814 13.9785C7.25488 13.9785 7.59521 13.6548 7.59521 13.2563V7.73633H12.9575C13.356 7.73633 13.6963 7.396 13.6963 6.98926C13.6963 6.58252 13.356 6.25049 12.9575 6.25049H7.59521V0.722168C7.59521 0.32373 7.25488 0 6.84814 0C6.44141 0 6.10938 0.32373 6.10938 0.722168V6.25049H0.73877C0.340332 6.25049 0 6.58252 0 6.98926C0 7.396 0.340332 7.73633 0.73877 7.73633H6.10938V13.2563C6.10938 13.6548 6.44141 13.9785 6.84814 13.9785Z" fill="currentColor"/>
+              </svg>
+            </button>
           <button
             type="button"
             aria-label="Show all tabs"
             className="inline-flex h-7 w-7 items-center justify-center rounded-md text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 fill-none stroke-current" strokeWidth="1.6">
-              <rect x="4" y="6" width="11" height="12" rx="1.5" />
-              <rect x="9" y="3" width="11" height="12" rx="1.5" />
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M2.60645 13.5469H4.02588V14.8169C4.02588 16.5269 4.88916 17.3901 6.63232 17.3901H14.9663C16.6929 17.3901 17.5645 16.5269 17.5645 14.8169V6.4165C17.5645 4.70654 16.6929 3.84326 14.9663 3.84326H13.5386V2.57324C13.5386 0.863281 12.667 0 10.9404 0H2.60645C0.863281 0 0 0.863281 0 2.57324V10.9736C0 12.6836 0.863281 13.5469 2.60645 13.5469ZM2.62305 12.2104C1.79297 12.2104 1.33643 11.7622 1.33643 10.8989V2.64795C1.33643 1.78467 1.79297 1.33643 2.62305 1.33643H10.9155C11.7373 1.33643 12.2021 1.78467 12.2021 2.64795V3.84326H6.63232C4.88916 3.84326 4.02588 4.69824 4.02588 6.4165V12.2104H2.62305ZM6.64893 16.0537C5.82715 16.0537 5.3623 15.6055 5.3623 14.7422V6.49121C5.3623 5.62793 5.82715 5.17969 6.64893 5.17969H14.9414C15.7632 5.17969 16.228 5.62793 16.228 6.49121V14.7422C16.228 15.6055 15.7632 16.0537 14.9414 16.0537H6.64893Z" fill="currentColor"/>
             </svg>
           </button>
         </div>
