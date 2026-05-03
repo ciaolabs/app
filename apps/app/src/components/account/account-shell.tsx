@@ -17,6 +17,7 @@ type AccountShellProps = {
   chatModel: string;
   hasAnthropicKey: boolean;
   hasGoogleKey: boolean;
+  dbError?: boolean;
 };
 
 type Section = "general" | "models";
@@ -431,6 +432,7 @@ export function AccountShell({
   chatModel,
   hasAnthropicKey,
   hasGoogleKey,
+  dbError,
 }: AccountShellProps) {
   const [section, setSection] = useState<Section>("general");
 
@@ -446,6 +448,12 @@ export function AccountShell({
             ← Back to chat
           </Link>
         </div>
+
+        {dbError ? (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            Unable to connect to the database. Settings cannot be saved until the connection is restored. Check that <code className="font-mono">DATABASE_URL</code> is configured in your environment.
+          </div>
+        ) : null}
 
         <div className="flex gap-10">
           <SectionNav active={section} onSelect={setSection} />

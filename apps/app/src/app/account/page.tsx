@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 import { getInitialAuth, requireCurrentUserId } from "@ciaobang/auth";
 
 import { getApiKeyProviders, getOrCreateAccount, getPreferences } from "@/lib/account/repository";
@@ -17,16 +15,15 @@ export default async function AccountPage() {
     getPreferences(userId).catch(() => ({ chatModel: "gemini-2.5-flash" })),
   ]);
 
-  if (!account) redirect("/");
-
   return (
     <AccountShell
       email={auth.user?.email ?? ""}
-      displayName={account.display_name ?? ""}
-      organization={account.organization ?? ""}
+      displayName={account?.display_name ?? ""}
+      organization={account?.organization ?? ""}
       chatModel={preferences.chatModel}
       hasAnthropicKey={apiKeys.anthropic}
       hasGoogleKey={apiKeys.google}
+      dbError={!account}
     />
   );
 }
