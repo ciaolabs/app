@@ -8,12 +8,12 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/chat",
-        destination: `${APP_URL}/chat`,
+        destination: APP_URL,
         permanent: false,
       },
       {
         source: "/chat/:path*",
-        destination: `${APP_URL}/chat/:path*`,
+        destination: APP_URL,
         permanent: false,
       },
     ];
