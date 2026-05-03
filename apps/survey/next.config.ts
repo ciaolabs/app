@@ -7,16 +7,6 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/surveys/personality/dashboard",
-        destination: "/surveys",
-        permanent: false,
-      },
-      {
-        source: "/surveys/values-beliefs/dashboard",
-        destination: "/surveys",
-        permanent: false,
-      },
-      {
         source: "/chat",
         destination: `${APP_URL}/chat`,
         permanent: false,
