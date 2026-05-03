@@ -393,7 +393,7 @@ function ModelsSection({
             />
           </div>
           <p className="mt-1.5 text-xs text-gray-400">
-            Make sure you have an API key for the selected model's provider.
+            Make sure you have an API key for the selected model&apos;s provider.
           </p>
         </div>
       </section>

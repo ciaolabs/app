@@ -26,7 +26,42 @@ type ChatRequestBody = {
   temporary?: boolean;
 };
 
+function createDevMockResponse(): Response {
+  const chunks = [
+    "🧪 **Dev mode** — this is a simulated response. ",
+    "No API tokens were used. ",
+    "Add your Anthropic or Google API key in [Account Settings](/account) for real responses.",
+  ];
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      for (const chunk of chunks) {
+        controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`));
+        await new Promise((r) => setTimeout(r, 40));
+      }
+      controller.enqueue(
+        encoder.encode(
+          `e:${JSON.stringify({ finishReason: "stop", usage: { promptTokens: 0, completionTokens: 0 } })}\n`,
+        ),
+      );
+      controller.enqueue(
+        encoder.encode(
+          `d:${JSON.stringify({ finishReason: "stop", usage: { promptTokens: 0, completionTokens: 0 } })}\n`,
+        ),
+      );
+      controller.close();
+    },
+  });
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "X-Vercel-AI-Data-Stream": "v1",
+    },
+  });
+}
+
 async function getUserModel(userId: string): Promise<LanguageModel> {
+
   const { chatModel } = await getPreferences(userId);
   const option = MODEL_OPTIONS.find((m) => m.value === chatModel) ?? MODEL_OPTIONS[0]!;
   const apiKey = await getDecryptedApiKey(userId, option.provider);
@@ -72,6 +107,10 @@ export async function POST(request: Request) {
 
   if (!latestUserText) {
     return NextResponse.json({ error: "Message text is required." }, { status: 400 });
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    return createDevMockResponse();
   }
 
   let model: LanguageModel;

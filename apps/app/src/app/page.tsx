@@ -12,7 +12,9 @@ export default async function HomePage() {
   const [threads, surveyContext, apiKeys] = await Promise.all([
     getChatRepository().listThreads(userId).catch(() => []),
     loadSurveyChatContext(),
-    hasAnyApiKey(userId).catch(() => false),
+    process.env.NODE_ENV === "development"
+      ? Promise.resolve(true)
+      : hasAnyApiKey(userId).catch(() => false),
   ]);
 
   return <ChatShell initialThreads={threads} surveyContext={surveyContext} hasApiKeys={apiKeys} />;

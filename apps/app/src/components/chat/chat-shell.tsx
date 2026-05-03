@@ -325,51 +325,6 @@ function useSidebarLayout() {
   return { width, setWidth, collapsed, setCollapsed };
 }
 
-function SidebarResizeHandle({
-  onResize,
-}: {
-  onResize: (delta: number) => void;
-}) {
-  const onResizeRef = useRef(onResize);
-  useEffect(() => {
-    onResizeRef.current = onResize;
-  }, [onResize]);
-
-  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const startX = event.clientX;
-    let lastX = startX;
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-
-    function handleMove(moveEvent: PointerEvent) {
-      const delta = moveEvent.clientX - lastX;
-      lastX = moveEvent.clientX;
-      onResizeRef.current(delta);
-    }
-
-    function handleUp() {
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-      window.removeEventListener("pointermove", handleMove);
-      window.removeEventListener("pointerup", handleUp);
-    }
-
-    window.addEventListener("pointermove", handleMove);
-    window.addEventListener("pointerup", handleUp);
-  }, []);
-
-  return (
-    <div
-      role="separator"
-      aria-orientation="vertical"
-      onPointerDown={handlePointerDown}
-      className="group absolute top-0 right-0 z-20 flex h-full w-3 -translate-x-1/2 cursor-col-resize items-center justify-center"
-    >
-      <div className="h-full w-px bg-transparent transition group-hover:w-[2px] group-hover:bg-(--accent-blue)" />
-    </div>
-  );
-}
 
 function CollapsedSidebarToolbar({
   onExpand,
@@ -1085,17 +1040,6 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
 
   const toggleTemporaryRef = useRef<() => void>(() => {});
 
-  const handleSidebarResize = useCallback(
-    (delta: number) => {
-      sidebarLayout.setWidth((current) => {
-        const next = current + delta;
-        if (next < SIDEBAR_MIN_WIDTH) return SIDEBAR_MIN_WIDTH;
-        if (next > SIDEBAR_MAX_WIDTH) return SIDEBAR_MAX_WIDTH;
-        return next;
-      });
-    },
-    [sidebarLayout],
-  );
 
   const refreshThreads = useCallback(async () => {
     const response = await fetch("/api/chat/threads");
