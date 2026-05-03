@@ -5,7 +5,9 @@ const getChatRepository = vi.fn();
 const loadSurveyChatContext = vi.fn();
 const streamText = vi.fn();
 const convertToModelMessages = vi.fn();
-const createGateway = vi.fn();
+const getPreferences = vi.fn();
+const getDecryptedApiKey = vi.fn();
+const createAnthropic = vi.fn();
 
 vi.mock("@ciaobang/auth", () => ({
   getCurrentUserId,
@@ -19,13 +21,27 @@ vi.mock("@/lib/chat/survey-context.server", () => ({
   loadSurveyChatContext,
 }));
 
-vi.mock("@ai-sdk/gateway", () => ({
-  createGateway,
+vi.mock("@/lib/account/repository", () => ({
+  getPreferences,
+  getDecryptedApiKey,
+}));
+
+vi.mock("@ai-sdk/anthropic", () => ({
+  createAnthropic,
 }));
 
 vi.mock("ai", () => ({
   convertToModelMessages,
   streamText,
+  stepCountIs: vi.fn(),
+}));
+
+vi.mock("@ciaobang/db", () => ({
+  getReadyDb: vi.fn().mockResolvedValue({}),
+}));
+
+vi.mock("@ciaobang/rag", () => ({
+  makeSearchDocsTool: vi.fn().mockReturnValue({}),
 }));
 
 const surveyContext = {
@@ -58,7 +74,9 @@ describe("POST /api/chat", () => {
     loadSurveyChatContext.mockReset();
     streamText.mockReset();
     convertToModelMessages.mockReset();
-    createGateway.mockReset();
+    getPreferences.mockReset();
+    getDecryptedApiKey.mockReset();
+    createAnthropic.mockReset();
     repository.getThread.mockReset();
     repository.createThread.mockReset();
     repository.appendMessage.mockReset();
@@ -68,7 +86,9 @@ describe("POST /api/chat", () => {
     getChatRepository.mockReturnValue(repository);
     loadSurveyChatContext.mockResolvedValue(surveyContext);
     convertToModelMessages.mockResolvedValue([{ role: "user", content: "Hello" }]);
-    createGateway.mockReturnValue(() => "mock-model");
+    getPreferences.mockResolvedValue({ chatModel: "claude-sonnet-4-6" });
+    getDecryptedApiKey.mockResolvedValue("sk-test-key");
+    createAnthropic.mockReturnValue(() => "mock-model");
     repository.getThread.mockResolvedValue(null);
     repository.createThread.mockResolvedValue({
       id: "thread_1",

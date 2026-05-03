@@ -195,3 +195,26 @@ export const SHARED_SCHEMA_SQL = `
   alter table app_private.user_api_keys enable row level security;
   alter table app_private.user_preferences enable row level security;
 `;
+
+export const RAG_SCHEMA_SQL = `
+  create extension if not exists vector;
+
+  create table if not exists research.doc_chunks (
+    id uuid primary key default gen_random_uuid(),
+    doc_id text not null,
+    title text not null,
+    content text not null,
+    embedding vector(768),
+    chunk_index integer not null,
+    metadata jsonb not null default '{}'::jsonb,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    unique (doc_id, chunk_index)
+  );
+
+  create index if not exists research_doc_chunks_embedding_idx
+    on research.doc_chunks using ivfflat (embedding vector_cosine_ops)
+    with (lists = 100);
+
+  alter table research.doc_chunks enable row level security
+`;

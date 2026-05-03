@@ -22,11 +22,8 @@ import {
 } from "@/components/survey/survey-keycaps";
 import { ViolinPlot } from "@/components/survey/violin-plot";
 import { formatTime } from "@/lib/date-format";
-import {
-  getPendingResultsKey,
-  getStoredAnswersKey,
-  type ActiveSurveyDefinition,
-} from "@/lib/survey/definitions";
+import { sessionDraftStorage } from "@/lib/survey/draft-storage";
+import { type ActiveSurveyDefinition } from "@/lib/survey/definitions";
 import { getSurveyApiBasePath, SURVEYS_ROUTE } from "@/lib/survey/routes";
 import { LikertValue, QuestionItem, SurveyAnswers, SurveyDraft } from "@/lib/survey/types";
 
@@ -42,77 +39,6 @@ type SurveyShellProps = {
   questions: readonly QuestionItem[];
   initialDraft: SurveyDraft;
 };
-
-function readStoredAnswers(storageKey: string) {
-  if (typeof window === "undefined") {
-    return {};
-  }
-
-  const rawAnswers = window.sessionStorage.getItem(storageKey);
-
-  if (!rawAnswers) {
-    return {};
-  }
-
-  try {
-    const parsed = JSON.parse(rawAnswers) as Record<string, number>;
-    return Object.fromEntries(
-      Object.entries(parsed).map(([questionId, value]) => [questionId, Number(value)]),
-    ) as SurveyAnswers;
-  } catch {
-    return {};
-  }
-}
-
-function writeStoredAnswers(storageKey: string, answers: SurveyAnswers) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  if (Object.keys(answers).length === 0) {
-    window.sessionStorage.removeItem(storageKey);
-    return;
-  }
-
-  window.sessionStorage.setItem(storageKey, JSON.stringify(answers));
-}
-
-function markPendingResults(storageKey: string, submittedAt: string | null) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.sessionStorage.setItem(
-    storageKey,
-    submittedAt ?? new Date().toISOString(),
-  );
-}
-
-const PENDING_RESULTS_WINDOW_MS = 5 * 60 * 1000;
-
-function shouldRedirectToDashboard(pendingResultsKey: string, answerCount: number) {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  const pendingMarker = window.sessionStorage.getItem(pendingResultsKey);
-
-  if (!pendingMarker) {
-    return false;
-  }
-
-  const markerTimestamp = Date.parse(pendingMarker);
-  const isMarkerFresh =
-    Number.isFinite(markerTimestamp) && Date.now() - markerTimestamp <= PENDING_RESULTS_WINDOW_MS;
-  const hasUnansweredDraft = answerCount === 0;
-
-  if (isMarkerFresh && hasUnansweredDraft) {
-    return true;
-  }
-
-  window.sessionStorage.removeItem(pendingResultsKey);
-  return false;
-}
 
 function findFirstUnansweredIndex(
   questions: readonly QuestionItem[],
@@ -177,8 +103,6 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   const pendingControllers = useRef<Map<string, AbortController>>(new Map());
   const saveVersions = useRef<Map<string, number>>(new Map());
   const deferredAnswers = useDeferredValue(answers);
-  const storedAnswersKey = getStoredAnswersKey(survey.type);
-  const pendingResultsKey = getPendingResultsKey(survey.type);
   const surveyApiBasePath = getSurveyApiBasePath(survey.type);
 
   const sectionBounds = useMemo(() => {
@@ -244,8 +168,8 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   }, []);
 
   useEffect(() => {
-    writeStoredAnswers(storedAnswersKey, answers);
-  }, [answers, storedAnswersKey]);
+    sessionDraftStorage.writeAnswers(survey.type, answers);
+  }, [answers, survey.type]);
 
   const persistAnswer = useCallback(
     async (questionId: string, questionOrder: number, value: LikertValue, saveVersion: number) => {
@@ -302,12 +226,12 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   );
 
   useEffect(() => {
-    if (shouldRedirectToDashboard(pendingResultsKey, initialDraft.answerCount)) {
+    if (sessionDraftStorage.shouldRedirectToDashboard(survey.type, initialDraft.answerCount)) {
       router.push(survey.dashboardRoute);
       return;
     }
 
-    const storedAnswers = readStoredAnswers(storedAnswersKey);
+    const storedAnswers = sessionDraftStorage.readAnswers(survey.type);
 
     if (Object.keys(storedAnswers).length > Object.keys(initialDraft.answers).length) {
       setAnswers(storedAnswers);
@@ -326,11 +250,10 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   }, [
     initialDraft.answerCount,
     initialDraft.answers,
-    pendingResultsKey,
     questions,
     router,
-    storedAnswersKey,
     survey.dashboardRoute,
+    survey.type,
   ]);
 
   const queueSave = useCallback(
@@ -493,7 +416,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
         throw new Error(payload.error ?? "Unable to submit your survey.");
       }
 
-      markPendingResults(pendingResultsKey, payload.submission.submittedAt ?? null);
+      sessionDraftStorage.markPendingResults(survey.type, payload.submission.submittedAt ?? null);
       router.push(survey.dashboardRoute);
     } catch (error) {
       const message =

@@ -1,0 +1,16 @@
+{
+  "name": "docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "index": "tsx scripts/index-docs.ts"
+  },
+  "dependencies": {
+    "@ciaobang/db": "workspace:*",
+    "@ciaobang/rag": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5"
+  }
+}

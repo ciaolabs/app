@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getCurrentUserId } from "@/lib/auth";
 import { getActiveSurveyDefinition } from "@/lib/survey/definitions";
+import { canAnswer } from "@/lib/survey/lifecycle";
 import { answerPayloadSchema } from "@/lib/survey/schema";
 import { getSurveyRepository } from "@/lib/survey/repository";
 
@@ -39,11 +40,7 @@ export async function PUT(request: Request, context: SurveyRouteContext) {
     const repository = getSurveyRepository();
     const status = await repository.getSurveyStatus(userId, definition.type);
 
-    if (
-      definition.maxSubmissions !== null &&
-      status.submittedCount >= definition.maxSubmissions &&
-      !status.hasActiveDraft
-    ) {
+    if (!canAnswer(definition, status)) {
       return NextResponse.json({ error: FINAL_ATTEMPT_MESSAGE }, { status: 403 });
     }
 

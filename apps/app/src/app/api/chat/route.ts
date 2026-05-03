@@ -2,6 +2,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import {
   convertToModelMessages,
+  stepCountIs,
   streamText,
   type LanguageModel,
   type UIMessage,
@@ -9,6 +10,8 @@ import {
 import { NextResponse } from "next/server";
 
 import { getCurrentUserId } from "@ciaobang/auth";
+import { getReadyDb } from "@ciaobang/db";
+import { makeSearchDocsTool } from "@ciaobang/rag";
 import { getChatRepository } from "@/lib/chat/repository";
 import { buildChatSystemPrompt, createThreadTitle } from "@/lib/chat/prompt";
 import { surveyContextHasResults } from "@/lib/chat/survey-context";
@@ -113,16 +116,6 @@ export async function POST(request: Request) {
     return createDevMockResponse();
   }
 
-  let model: LanguageModel;
-  try {
-    model = await getUserModel(userId);
-  } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "AI model not configured." },
-      { status: 402 },
-    );
-  }
-
   const [surveyContext, repository] = await Promise.all([
     loadSurveyChatContext({ request }),
     Promise.resolve(getChatRepository()),
@@ -134,6 +127,25 @@ export async function POST(request: Request) {
       { status: 409 },
     );
   }
+
+  let model: LanguageModel;
+  let googleApiKey: string | null;
+  try {
+    [model, googleApiKey] = await Promise.all([
+      getUserModel(userId),
+      getDecryptedApiKey(userId, "google"),
+    ]);
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "AI model not configured." },
+      { status: 402 },
+    );
+  }
+
+  const tools =
+    googleApiKey
+      ? { searchDocs: makeSearchDocsTool(surveyContext, await getReadyDb(), googleApiKey) }
+      : undefined;
 
   const isTemporary = body.temporary === true;
   const existingThread =
@@ -152,6 +164,7 @@ export async function POST(request: Request) {
     system: buildChatSystemPrompt(surveyContext),
     messages: await convertToModelMessages(messages),
     temperature: 0.6,
+    ...(tools ? { tools, stopWhen: stepCountIs(3) } : {}),
     onFinish: async ({ text }) => {
       if (!text.trim() || !thread) return;
       await repository.appendMessage({ userId, threadId: thread.id, role: "assistant", content: text });

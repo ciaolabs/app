@@ -1,6 +1,6 @@
 import type postgres from "postgres";
 
-import { AUTH_PROVIDER, ensureSchema, getDb } from "@ciaobang/db";
+import { AUTH_PROVIDER, getReadyDb } from "@ciaobang/db";
 
 import type {
   ChatMessage,
@@ -91,8 +91,7 @@ async function selectThread(sql: postgres.Sql, userId: string, threadId: string)
 export function createPostgresChatRepository(): ChatRepository {
   return {
     async listThreads(userId) {
-      await ensureSchema();
-      const sql = getDb();
+      const sql = await getReadyDb();
       const accountId = await ensureUserAccount(sql, userId);
       const rows = await sql<ThreadRow[]>`
         select
@@ -111,8 +110,7 @@ export function createPostgresChatRepository(): ChatRepository {
     },
 
     async createThread({ userId, title }) {
-      await ensureSchema();
-      const sql = getDb();
+      const sql = await getReadyDb();
       const accountId = await ensureUserAccount(sql, userId);
       const [thread] = await sql<ThreadRow[]>`
         insert into app_private.chat_threads (user_account_id, title)
@@ -133,8 +131,7 @@ export function createPostgresChatRepository(): ChatRepository {
     },
 
     async getThread(userId, threadId) {
-      await ensureSchema();
-      const sql = getDb();
+      const sql = await getReadyDb();
       const thread = await selectThread(sql, userId, threadId);
 
       if (!thread) {
@@ -155,8 +152,7 @@ export function createPostgresChatRepository(): ChatRepository {
     },
 
     async appendMessage({ userId, threadId, role, content }) {
-      await ensureSchema();
-      const sql = getDb();
+      const sql = await getReadyDb();
       const thread = await selectThread(sql, userId, threadId);
 
       if (!thread) {
@@ -183,8 +179,7 @@ export function createPostgresChatRepository(): ChatRepository {
     },
 
     async renameThread({ userId, threadId, title }) {
-      await ensureSchema();
-      const sql = getDb();
+      const sql = await getReadyDb();
       const thread = await selectThread(sql, userId, threadId);
 
       if (!thread) {

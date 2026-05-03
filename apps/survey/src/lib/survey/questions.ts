@@ -1,5 +1,12 @@
 import { QUESTION_COUNT } from "@/lib/survey/constants";
 import {
+  buildDistributionFromMixture,
+  clamp,
+  gaussian,
+  hashString,
+  type MixtureComponent,
+} from "@/lib/survey/results/math";
+import {
   LIKERT_LABELS,
   type LikertValue,
   type QuestionItem,
@@ -232,23 +239,6 @@ function toFirstPersonStatement(stem: string) {
   return `I ${stem.charAt(0).toLowerCase()}${stem.slice(1)}`;
 }
 
-function hashString(value: string) {
-  let hash = 2166136261;
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-
-  return hash >>> 0;
-}
-
-type MixtureComponent = {
-  mean: number;
-  spread: number;
-  weight: number;
-};
-
 const POLARIZED_PATTERNS = [
   /divine power/,
   /universal power or god/,
@@ -412,43 +402,8 @@ const POSITIVE_AFFECT_PATTERNS = [
   /active and full of energy/,
 ];
 
-function clamp(value: number, minValue: number, maxValue: number) {
-  return Math.min(maxValue, Math.max(minValue, value));
-}
-
 function countMatches(prompt: string, patterns: RegExp[]) {
   return patterns.reduce((count, pattern) => count + (pattern.test(prompt) ? 1 : 0), 0);
-}
-
-function gaussian(rating: number, mean: number, spread: number) {
-  return Math.exp(-((rating - mean) ** 2) / (2 * spread ** 2));
-}
-
-function buildDistributionFromMixture(
-  components: MixtureComponent[],
-  total: number,
-  floor: number,
-  seed: number,
-) {
-  const weights = Array.from({ length: LIKERT_LABELS.length }, (_, index) => {
-    const rating = index + 1;
-    const mixture = components.reduce(
-      (sum, component) => sum + component.weight * gaussian(rating, component.mean, component.spread),
-      0,
-    );
-    const ripple = 0.012 * Math.sin((seed % 17) + rating * 1.37);
-
-    return Math.max(floor + mixture + ripple, floor / 2);
-  });
-
-  const weightSum = weights.reduce((sum, value) => sum + value, 0);
-  const counts = weights.map((value) => Math.max(1, Math.round((value / weightSum) * total)));
-  const difference = total - counts.reduce((sum, value) => sum + value, 0);
-  const targetIndex = counts.indexOf(Math.max(...counts));
-
-  counts[targetIndex] += difference;
-
-  return counts;
 }
 
 function seededDistributionFor(questionId: string, prompt: string, order: number) {

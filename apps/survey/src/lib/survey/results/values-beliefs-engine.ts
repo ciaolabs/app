@@ -1,3 +1,4 @@
+import { clamp, erfApproximation, normalCdf } from "@/lib/survey/results/math";
 import { type SurveyAnswers, type SurveySubmission } from "@/lib/survey/types";
 import {
   PRIMAL_AGGREGATE_ITEM_NUMBERS,
@@ -20,31 +21,6 @@ import {
 
 const MIN_PERCENTILE = 1;
 const MAX_PERCENTILE = 99;
-
-function clamp(value: number, minValue: number, maxValue: number) {
-  return Math.min(maxValue, Math.max(minValue, value));
-}
-
-function erfApproximation(value: number) {
-  const sign = value < 0 ? -1 : 1;
-  const absoluteValue = Math.abs(value);
-  const t = 1 / (1 + 0.3275911 * absoluteValue);
-  const polynomial =
-    (((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t +
-      0.254829592) *
-      t);
-  const estimate = 1 - polynomial * Math.exp(-(absoluteValue ** 2));
-
-  return sign * estimate;
-}
-
-function normalCdf(value: number, mean: number, sd: number) {
-  if (sd <= 0) {
-    return value < mean ? 0 : 1;
-  }
-
-  return 0.5 * (1 + erfApproximation((value - mean) / (sd * Math.SQRT2)));
-}
 
 function toScoreBand(score: number): ScoreBand {
   if (score >= 31) {

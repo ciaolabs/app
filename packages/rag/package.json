@@ -1,0 +1,20 @@
+{
+  "name": "@ciaobang/rag",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^3.0.67",
+    "@ciaobang/chat-context": "workspace:*",
+    "@ciaobang/db": "workspace:*",
+    "ai": "^6.0.172",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

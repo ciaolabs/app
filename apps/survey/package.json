@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ciaobang/auth": "workspace:*",
+    "@ciaobang/chat-context": "workspace:*",
     "@ciaobang/db": "workspace:*",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",

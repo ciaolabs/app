@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "mcp__plugin_context7_context7__resolve-library-id",
-      "mcp__b34ecf3d-c004-4d45-a1a8-41e191b08181__execute_sql"
+      "mcp__b34ecf3d-c004-4d45-a1a8-41e191b08181__execute_sql",
+      "Skill(update-config)",
+      "Bash(sed -n '14,18p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/survey/package.json)",
+      "Bash(sed -n '17,21p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/app/package.json)",
+      "Bash(sed -n '1,10p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/survey/src/lib/survey/results/engine.ts)",
+      "Bash(sed -n '1,10p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/survey/src/lib/survey/results/values-beliefs-engine.ts)",
+      "Bash(sed -n '1,8p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/survey/src/lib/survey/questions.ts)"
     ]
   }
 }

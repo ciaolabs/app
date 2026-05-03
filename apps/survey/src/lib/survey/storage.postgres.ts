@@ -1,12 +1,11 @@
-import postgres from "postgres";
-
 import { getActiveSurveyDefinition, type ActiveSurveyDefinition } from "@/lib/survey/definitions";
 import {
   AUTH_PROVIDER,
-  SURVEY_SCHEMA_SQL,
   SURVEY_SCHEMA_VERSION,
   SURVEY_SCORING_VERSION,
-} from "@/lib/survey/db-schema";
+  getReadyDb,
+  type Sql,
+} from "@ciaobang/db";
 import {
   SurveyAnswers,
   SurveyDraft,
@@ -67,34 +66,9 @@ type SurveyContext = {
   surveyVersionId: string;
 };
 
-let client: ReturnType<typeof postgres> | null = null;
-let schemaReady: Promise<void> | null = null;
 const catalogReady = new Map<SurveyType, Promise<string>>();
 
-function getClient() {
-  if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is required for postgres survey storage.");
-  }
-
-  if (!client) {
-    client = postgres(process.env.DATABASE_URL, {
-      max: 1,
-      prepare: false,
-    });
-  }
-
-  return client;
-}
-
-async function ensureSchema() {
-  if (!schemaReady) {
-    schemaReady = getClient().unsafe(SURVEY_SCHEMA_SQL).then(() => undefined);
-  }
-
-  return schemaReady;
-}
-
-type SqlExecutor = postgres.Sql;
+type SqlExecutor = Sql;
 
 function publicId(prefix: string) {
   return `${prefix}_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -499,8 +473,7 @@ async function selectSurveyStatus(
 export function createPostgresSurveyRepository(): SurveyRepository {
   return {
     async ensureDraft(userId, surveyType) {
-      await ensureSchema();
-      const sql = getClient();
+      const sql = await getReadyDb();
       const context = await ensureContext(sql, userId, surveyType);
       const existing = await selectDraft(sql, userId, context);
 
@@ -545,15 +518,13 @@ export function createPostgresSurveyRepository(): SurveyRepository {
     },
 
     async getDraft(userId, surveyType) {
-      await ensureSchema();
-      const sql = getClient();
+      const sql = await getReadyDb();
       const context = await ensureContext(sql, userId, surveyType);
       return selectDraft(sql, userId, context);
     },
 
     async upsertAnswer({ userId, surveyType, submissionId, questionId, questionOrder, value }) {
-      await ensureSchema();
-      const sql = getClient();
+      const sql = await getReadyDb();
       const context = await ensureContext(sql, userId, surveyType);
       const draftId = await ensureDraftId(sql, context, submissionId);
 
@@ -608,8 +579,7 @@ export function createPostgresSurveyRepository(): SurveyRepository {
         throw new Error(`Expected ${definition.questionCount} answers before submitting.`);
       }
 
-      await ensureSchema();
-      const sql = getClient();
+      const sql = await getReadyDb();
       const context = await ensureContext(sql, userId, surveyType);
       const draftId = await ensureDraftId(sql, context);
 
@@ -656,29 +626,25 @@ export function createPostgresSurveyRepository(): SurveyRepository {
     },
 
     async getLatestSubmission(userId, surveyType) {
-      await ensureSchema();
-      const sql = getClient();
+      const sql = await getReadyDb();
       const context = await ensureContext(sql, userId, surveyType);
       return selectLatestSubmission(sql, userId, context);
     },
 
     async getSubmissionById(userId, surveyType, submissionId) {
-      await ensureSchema();
-      const sql = getClient();
+      const sql = await getReadyDb();
       const context = await ensureContext(sql, userId, surveyType);
       return selectSubmissionById(sql, userId, context, submissionId);
     },
 
     async listSubmissions(userId, surveyType) {
-      await ensureSchema();
-      const sql = getClient();
+      const sql = await getReadyDb();
       const context = await ensureContext(sql, userId, surveyType);
       return selectSubmissionSummaries(sql, userId, context);
     },
 
     async getSurveyStatus(userId, surveyType) {
-      await ensureSchema();
-      const sql = getClient();
+      const sql = await getReadyDb();
       const context = await ensureContext(sql, userId, surveyType);
       return selectSurveyStatus(sql, surveyType, context);
     },

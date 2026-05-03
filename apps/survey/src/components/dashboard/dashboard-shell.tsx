@@ -12,11 +12,8 @@ import { DashboardPdfButton } from "@/components/dashboard/dashboard-pdf-button"
 import { DashboardPrintHeader } from "@/components/dashboard/dashboard-print-header";
 import { SiteTopNav } from "@/components/site-top-nav";
 import { formatSubmittedAt } from "@/lib/date-format";
-import {
-  getPendingResultsKey,
-  getStoredAnswersKey,
-  type ActiveSurveyDefinition,
-} from "@/lib/survey/definitions";
+import { sessionDraftStorage } from "@/lib/survey/draft-storage";
+import { type ActiveSurveyDefinition } from "@/lib/survey/definitions";
 import {
   type ResultsPayload,
   type RankedScaleResult,
@@ -473,8 +470,6 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
   const [activeFrameworkId, setActiveFrameworkId] = useState(
     initialPayload.results?.frameworks[0]?.id ?? "NEO",
   );
-  const pendingResultsKey = getPendingResultsKey(survey.type);
-  const storedAnswersKey = getStoredAnswersKey(survey.type);
   const surveyApiBasePath = getSurveyApiBasePath(survey.type);
   const hasSyncedLatestResults = useRef(false);
 
@@ -498,18 +493,18 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
       return;
     }
 
-    if (window.sessionStorage.getItem(pendingResultsKey)) {
+    if (sessionDraftStorage.hasPendingResults(survey.type)) {
       return;
     }
 
-    window.sessionStorage.removeItem(storedAnswersKey);
-  }, [pendingResultsKey, results, storedAnswersKey]);
+    sessionDraftStorage.clearAnswers(survey.type);
+  }, [results, survey.type]);
 
   const applyResultsPayload = useCallback((payload: ResultsPayload<SurveyResults>) => {
-    window.sessionStorage.removeItem(pendingResultsKey);
+    sessionDraftStorage.clearPendingResults(survey.type);
 
     if (payload.results) {
-      window.sessionStorage.removeItem(storedAnswersKey);
+      sessionDraftStorage.clearAnswers(survey.type);
     }
 
     setResults(payload.results);
@@ -520,7 +515,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
     setHoveredRect(null);
     setSelectionError(null);
     setError(null);
-  }, [pendingResultsKey, storedAnswersKey]);
+  }, [survey.type]);
 
   const fetchResultsPayload = useCallback(async (submissionId?: string) => {
     const search = submissionId ? `?submissionId=${encodeURIComponent(submissionId)}` : "";
@@ -542,7 +537,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
       return;
     }
 
-    const hasPendingSubmission = Boolean(window.sessionStorage.getItem(pendingResultsKey));
+    const hasPendingSubmission = sessionDraftStorage.hasPendingResults(survey.type);
 
     if (results && !hasPendingSubmission) {
       return;
@@ -574,7 +569,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
     return () => {
       isMounted = false;
     };
-  }, [applyResultsPayload, error, fetchResultsPayload, pendingResultsKey, results]);
+  }, [applyResultsPayload, error, fetchResultsPayload, results, survey.type]);
 
   const handleSelectSubmission = useCallback(
     (submissionId: string) => {

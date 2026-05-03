@@ -145,6 +145,12 @@ function createMockSql(database: MockDatabase) {
 
     const query = normalizeQuery(strings);
 
+    if (query.includes("information_schema.tables")) {
+      // ensureSchema() check — report schema as already set up
+      database.schemaBootstrapped = true;
+      return Promise.resolve([{ cnt: "5" }]);
+    }
+
     if (query.startsWith("insert into app_private.user_accounts")) {
       const [, userId] = values as [string, string];
       return Promise.resolve([{ id: `account:${userId}` }]);

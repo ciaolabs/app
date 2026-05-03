@@ -1,4 +1,5 @@
 import { surveyQuestions } from "@/lib/survey/questions";
+import { clamp, hashSeed, mulberry32 } from "@/lib/survey/results/math";
 import { type SurveyAnswers, type SurveySubmission } from "@/lib/survey/types";
 import {
   frameworkDefinitions,
@@ -29,10 +30,6 @@ const MIN_PERCENTILE = 1;
 const QUESTION_BY_ORDER = new Map(surveyQuestions.map((question) => [question.order, question]));
 const scaleDistributionCache = new Map<string, ProbabilityDistribution>();
 const overviewSimulationCache = new Map<string, number[]>();
-
-function clamp(value: number, minValue: number, maxValue: number) {
-  return Math.min(maxValue, Math.max(minValue, value));
-}
 
 function toScoreBand(score: number): ScoreBand {
   if (score >= 31) {
@@ -161,29 +158,6 @@ function percentileFromDistribution(distribution: ProbabilityDistribution, obser
   }
 
   return (lowerProbability + equalProbability * 0.5) * 100;
-}
-
-function hashSeed(value: string) {
-  let hash = 1779033703;
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash = Math.imul(hash ^ value.charCodeAt(index), 3432918353);
-    hash = (hash << 13) | (hash >>> 19);
-  }
-
-  return (hash >>> 0) || 1;
-}
-
-function mulberry32(seed: number) {
-  let currentSeed = seed >>> 0;
-
-  return () => {
-    currentSeed += 0x6d2b79f5;
-    let next = currentSeed;
-    next = Math.imul(next ^ (next >>> 15), next | 1);
-    next ^= next + Math.imul(next ^ (next >>> 7), next | 61);
-    return ((next ^ (next >>> 14)) >>> 0) / 4294967296;
-  };
 }
 
 function sampleFromProbabilities(probabilities: number[], random: () => number) {

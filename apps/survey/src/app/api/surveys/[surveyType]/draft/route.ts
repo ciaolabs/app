@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getCurrentUserId } from "@/lib/auth";
 import { getActiveSurveyDefinition } from "@/lib/survey/definitions";
+import { canStartDraft } from "@/lib/survey/lifecycle";
 import { getSurveyRepository } from "@/lib/survey/repository";
 
 export const dynamic = "force-dynamic";
@@ -29,11 +30,7 @@ export async function GET(request: Request, context: SurveyRouteContext) {
   const repository = getSurveyRepository();
   const status = await repository.getSurveyStatus(userId, definition.type);
 
-  if (
-    definition.maxSubmissions !== null &&
-    status.submittedCount >= definition.maxSubmissions &&
-    !status.hasActiveDraft
-  ) {
+  if (!canStartDraft(definition, status)) {
     return NextResponse.json({ error: FINAL_ATTEMPT_MESSAGE }, { status: 403 });
   }
 

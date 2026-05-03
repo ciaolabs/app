@@ -1,4 +1,4 @@
-import { AUTH_PROVIDER, ensureSchema, getDb } from "@ciaobang/db";
+import { AUTH_PROVIDER, getReadyDb } from "@ciaobang/db";
 
 import { decryptApiKey, encryptApiKey } from "./crypto";
 import { DEFAULT_CHAT_MODEL, type ApiKeyProvider } from "./models";
@@ -8,8 +8,7 @@ type ApiKeyRow = { provider: ApiKeyProvider; encrypted_key: string };
 type PrefsRow = { chat_model: string };
 
 export async function getOrCreateAccount(userId: string): Promise<AccountRow> {
-  await ensureSchema();
-  const sql = getDb();
+  const sql = await getReadyDb();
   const [row] = await sql<AccountRow[]>`
     insert into app_private.user_accounts (provider, provider_user_id, last_seen_at)
     values (${AUTH_PROVIDER}, ${userId}, now())
@@ -26,8 +25,7 @@ export async function updateProfile(
   displayName: string | null,
   organization: string | null,
 ) {
-  await ensureSchema();
-  const sql = getDb();
+  const sql = await getReadyDb();
   const account = await getOrCreateAccount(userId);
   await sql`
     update app_private.user_accounts
@@ -37,8 +35,7 @@ export async function updateProfile(
 }
 
 export async function setApiKey(userId: string, provider: ApiKeyProvider, key: string) {
-  await ensureSchema();
-  const sql = getDb();
+  const sql = await getReadyDb();
   const account = await getOrCreateAccount(userId);
   const encrypted = encryptApiKey(key.trim());
   await sql`
@@ -50,8 +47,7 @@ export async function setApiKey(userId: string, provider: ApiKeyProvider, key: s
 }
 
 export async function removeApiKey(userId: string, provider: ApiKeyProvider) {
-  await ensureSchema();
-  const sql = getDb();
+  const sql = await getReadyDb();
   const account = await getOrCreateAccount(userId);
   await sql`
     delete from app_private.user_api_keys
@@ -60,8 +56,7 @@ export async function removeApiKey(userId: string, provider: ApiKeyProvider) {
 }
 
 export async function getApiKeyProviders(userId: string): Promise<Record<ApiKeyProvider, boolean>> {
-  await ensureSchema();
-  const sql = getDb();
+  const sql = await getReadyDb();
   const account = await getOrCreateAccount(userId);
   const rows = await sql<{ provider: ApiKeyProvider }[]>`
     select provider from app_private.user_api_keys where user_account_id = ${account.id}
@@ -74,8 +69,7 @@ export async function getDecryptedApiKey(
   userId: string,
   provider: ApiKeyProvider,
 ): Promise<string | null> {
-  await ensureSchema();
-  const sql = getDb();
+  const sql = await getReadyDb();
   const account = await getOrCreateAccount(userId);
   const [row] = await sql<ApiKeyRow[]>`
     select encrypted_key from app_private.user_api_keys
@@ -90,8 +84,7 @@ export async function getDecryptedApiKey(
 }
 
 export async function getPreferences(userId: string): Promise<{ chatModel: string }> {
-  await ensureSchema();
-  const sql = getDb();
+  const sql = await getReadyDb();
   const account = await getOrCreateAccount(userId);
   const [row] = await sql<PrefsRow[]>`
     select chat_model from app_private.user_preferences where user_account_id = ${account.id}
@@ -100,8 +93,7 @@ export async function getPreferences(userId: string): Promise<{ chatModel: strin
 }
 
 export async function updatePreferences(userId: string, chatModel: string) {
-  await ensureSchema();
-  const sql = getDb();
+  const sql = await getReadyDb();
   const account = await getOrCreateAccount(userId);
   await sql`
     insert into app_private.user_preferences (user_account_id, chat_model)
@@ -112,8 +104,7 @@ export async function updatePreferences(userId: string, chatModel: string) {
 }
 
 export async function deleteAccount(userId: string) {
-  await ensureSchema();
-  const sql = getDb();
+  const sql = await getReadyDb();
   await sql`
     delete from app_private.user_accounts
     where provider = ${AUTH_PROVIDER} and provider_user_id = ${userId}
