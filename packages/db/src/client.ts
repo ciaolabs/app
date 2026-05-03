@@ -22,7 +22,13 @@ export function getDb(): Sql {
 
 export function ensureSchema(): Promise<void> {
   if (!schemaReady) {
-    schemaReady = getDb().unsafe(SHARED_SCHEMA_SQL).then(() => undefined);
+    schemaReady = getDb()
+      .unsafe(SHARED_SCHEMA_SQL)
+      .then(() => undefined)
+      .catch((error) => {
+        schemaReady = null; // allow retry on next request
+        throw error;
+      });
   }
 
   return schemaReady;

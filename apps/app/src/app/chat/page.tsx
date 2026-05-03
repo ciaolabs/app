@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function ChatPage() {
   const userId = await requireCurrentUserId();
   const [threads, surveyContext] = await Promise.all([
-    getChatRepository().listThreads(userId),
+    getChatRepository().listThreads(userId).catch(() => []),
     loadSurveyChatContext(),
   ]);
 
