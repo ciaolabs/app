@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 import { formatSubmittedAt } from "@/lib/date-format";
 import {
@@ -166,7 +166,14 @@ function shouldOfferRepeatAction(survey: SurveyDefinition, status: SurveyUserSta
 
 export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [navigatingPath, setNavigatingPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (navigatingPath && pathname !== "/surveys") {
+      setNavigatingPath(null);
+    }
+  }, [navigatingPath, pathname]);
   const [repeatSurvey, setRepeatSurvey] = useState<ActiveSurveyDefinition | null>(null);
   const prefetchPaths = useMemo(
     () =>
