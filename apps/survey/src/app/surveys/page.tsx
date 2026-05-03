@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense, cache } from "react";
 
 import { SurveyChooserLoadingContent } from "@/app/surveys/loading-ui";
