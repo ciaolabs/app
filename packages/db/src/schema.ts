@@ -160,6 +160,26 @@ export const SHARED_SCHEMA_SQL = `
     unique (submission_id, scoring_version, score_key)
   );
 
+  alter table app_private.user_accounts
+    add column if not exists display_name text,
+    add column if not exists organization text;
+
+  create table if not exists app_private.user_api_keys (
+    id uuid primary key default gen_random_uuid(),
+    user_account_id uuid not null references app_private.user_accounts(id) on delete cascade,
+    provider text not null check (provider in ('anthropic', 'google')),
+    encrypted_key text not null,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    unique (user_account_id, provider)
+  );
+
+  create table if not exists app_private.user_preferences (
+    user_account_id uuid primary key references app_private.user_accounts(id) on delete cascade,
+    chat_model text not null default 'gemini-2.5-flash',
+    updated_at timestamptz not null default now()
+  );
+
   alter table app_private.user_accounts enable row level security;
   alter table app_private.chat_threads enable row level security;
   alter table app_private.chat_messages enable row level security;
@@ -172,4 +192,6 @@ export const SHARED_SCHEMA_SQL = `
   alter table research.answers enable row level security;
   alter table research.score_results enable row level security;
   alter table analytics.reference_distributions enable row level security;
+  alter table app_private.user_api_keys enable row level security;
+  alter table app_private.user_preferences enable row level security;
 `;

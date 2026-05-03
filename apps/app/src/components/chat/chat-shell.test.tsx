@@ -9,6 +9,7 @@ describe("ChatShell", () => {
       <ChatShell
         initialThreads={[]}
         surveyContext={{ personality: null, valuesBeliefs: null }}
+        hasApiKeys={true}
       />,
     );
 

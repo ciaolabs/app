@@ -58,6 +58,7 @@ import type { ChatMessage, ChatThreadSummary, ChatThreadWithMessages } from "@/l
 type ChatShellProps = {
   initialThreads: ChatThreadSummary[];
   surveyContext: SurveyChatContext;
+  hasApiKeys: boolean;
 };
 
 type ThemeMode = "light" | "dark" | "system";
@@ -813,7 +814,7 @@ function AccountMenu() {
           className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-2 shadow-(--shadow-strong)"
         >
           <Link
-            href="/dashboard"
+            href="/account"
             role="menuitem"
             onClick={() => setOpen(false)}
             className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-(--ink) hover:bg-(--surface-inset)"
@@ -861,23 +862,29 @@ function AccountMenu() {
 
 function EmptyChat({
   hasSurveyContext,
+  hasApiKeys,
   isTemporary,
   onPrompt,
 }: {
   hasSurveyContext: boolean;
+  hasApiKeys: boolean;
   isTemporary: boolean;
   onPrompt: (prompt: string) => void;
 }) {
   const heading = isTemporary
     ? "You’re incognito"
-    : hasSurveyContext
-      ? "How can I help you?"
-      : "Complete a survey to start";
+    : !hasSurveyContext
+      ? "Complete a survey to start"
+      : !hasApiKeys
+        ? "Add API keys to start"
+        : "How can I help you?";
   const subtitle = isTemporary
     ? "Threads you create won’t save to your history and expire after 24 hours."
-    : hasSurveyContext
-      ? "Ask for a reflective read on your saved survey results, or start with one of these prompts."
-      : "The chat needs at least one submitted survey result before it can personalize feedback.";
+    : !hasSurveyContext
+      ? "The chat needs at least one submitted survey result before it can personalize feedback."
+      : !hasApiKeys
+        ? "Add your Anthropic or Google API key in Account Settings to enable the chat."
+        : "Ask for a reflective read on your saved survey results, or start with one of these prompts.";
 
   return (
     <div className="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col items-center justify-center px-5 py-8 text-center">
@@ -898,7 +905,22 @@ function EmptyChat({
         {subtitle}
       </p>
 
-      {isTemporary ? null : hasSurveyContext ? (
+      {isTemporary ? null : !hasSurveyContext ? (
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link href="/surveys/personality" className={cn(clayPrimaryButton, "h-12")}>
+            Take Personality
+          </Link>
+          <Link href="/surveys/values-beliefs" className={cn(claySecondaryButton, "h-12")}>
+            Take Values and Beliefs
+          </Link>
+        </div>
+      ) : !hasApiKeys ? (
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link href="/account" className={cn(clayPrimaryButton, "h-12")}>
+            Go to Account Settings
+          </Link>
+        </div>
+      ) : (
         <div className="mt-10 grid w-full max-w-3xl gap-3 text-left sm:grid-cols-2">
           {starterPrompts.map((prompt) => (
             <button
@@ -910,15 +932,6 @@ function EmptyChat({
               {prompt}
             </button>
           ))}
-        </div>
-      ) : (
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/surveys/personality" className={cn(clayPrimaryButton, "h-12")}>
-            Take Personality
-          </Link>
-          <Link href="/surveys/values-beliefs" className={cn(claySecondaryButton, "h-12")}>
-            Take Values and Beliefs
-          </Link>
         </div>
       )}
     </div>
@@ -1041,7 +1054,7 @@ function ChatMessageBubble({ message }: { message: UIMessage }) {
   );
 }
 
-export function ChatShell({ initialThreads, surveyContext }: ChatShellProps) {
+export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShellProps) {
   const [threads, setThreads] = useState(initialThreads);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -1201,7 +1214,7 @@ export function ChatShell({ initialThreads, surveyContext }: ChatShellProps) {
 
   const submitPrompt = useCallback(
     async (prompt: string) => {
-      if (!prompt.trim() || !hasSurveyContext || isBusy) {
+      if (!prompt.trim() || !hasSurveyContext || !hasApiKeys || isBusy) {
         return;
       }
 
@@ -1213,7 +1226,7 @@ export function ChatShell({ initialThreads, surveyContext }: ChatShellProps) {
         toast.error(sendError instanceof Error ? sendError.message : "Unable to send the message.");
       }
     },
-    [hasSurveyContext, isBusy, sendMessage],
+    [hasSurveyContext, hasApiKeys, isBusy, sendMessage],
   );
 
   return (
@@ -1330,6 +1343,7 @@ export function ChatShell({ initialThreads, surveyContext }: ChatShellProps) {
             {messages.length === 0 ? (
               <EmptyChat
                 hasSurveyContext={hasSurveyContext}
+                hasApiKeys={hasApiKeys}
                 isTemporary={isTemporary}
                 onPrompt={submitPrompt}
               />
@@ -1363,7 +1377,7 @@ export function ChatShell({ initialThreads, surveyContext }: ChatShellProps) {
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
                   placeholder="Type your message here..."
-                  disabled={!hasSurveyContext || isBusy}
+                  disabled={!hasSurveyContext || !hasApiKeys || isBusy}
                   className="max-h-44 min-h-20 border-0 bg-transparent px-2 py-2 text-base text-(--ink) placeholder:text-(--muted) focus-visible:border-0"
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && !event.shiftKey) {
@@ -1391,7 +1405,7 @@ export function ChatShell({ initialThreads, surveyContext }: ChatShellProps) {
                     ) : null}
                     <button
                       type="submit"
-                      disabled={!hasSurveyContext || isBusy || !input.trim()}
+                      disabled={!hasSurveyContext || !hasApiKeys || isBusy || !input.trim()}
                       className={clayIconButtonAccent}
                       aria-label="Send message"
                     >
