@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { SurveyShell } from "@/components/survey/survey-shell";
 import { personalitySurveyDefinition } from "@/lib/survey/definitions";
 import { getRequiredSurveyDraft } from "@/lib/survey/server";
