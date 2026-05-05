@@ -1,11 +1,16 @@
 "use client";
 
-import { EyeIcon, EyeOffIcon, LogOutIcon, Trash2Icon } from "lucide-react";
+import { ChevronsUpDownIcon, EyeIcon, EyeOffIcon, HistoryIcon, LogOutIcon, PlusIcon, Trash2Icon, UserIcon } from "lucide-react";
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
+import { ScrollArea } from "@/components/ui/scroll-area";
+import type { ChatThreadSummary } from "@/lib/chat/types";
 
 import { MODEL_OPTIONS } from "@/lib/account/models";
 import type { ApiKeyProvider } from "@/lib/account/models";
@@ -18,6 +23,7 @@ type AccountShellProps = {
   hasAnthropicKey: boolean;
   hasGoogleKey: boolean;
   dbError?: boolean;
+  threads?: ChatThreadSummary[];
 };
 
 type Section = "general" | "models";
@@ -425,6 +431,155 @@ function ModelsSection({
   );
 }
 
+function SidebarAccountMenu() {
+  const { user, loading, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [open]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex h-12 items-center gap-3 px-2 text-(--ink-soft)">
+        <UserIcon className="size-5" />
+        <span className="text-base font-semibold">Account</span>
+      </div>
+    );
+  }
+
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || "Account";
+  const initial = user.firstName?.trim()?.[0]?.toUpperCase() || user.email?.trim()?.[0]?.toUpperCase() || "?";
+
+  return (
+    <div ref={containerRef} className="relative">
+      {open ? (
+        <div
+          role="menu"
+          className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-2 shadow-(--shadow-strong)"
+        >
+          <Link
+            href="/account"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex min-h-10 items-center gap-3 rounded-xl bg-(--accent-soft) px-3 text-sm font-semibold text-(--ink)"
+          >
+            <UserIcon className="size-4" />
+            <span>Account Settings</span>
+          </Link>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => void signOut({ returnTo: window.location.origin })}
+            className="flex min-h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold text-(--ink) hover:bg-(--surface-inset)"
+          >
+            <LogOutIcon className="size-4" />
+            <span>Sign out</span>
+          </button>
+        </div>
+      ) : null}
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-(--surface-inset)"
+      >
+        <Avatar className="size-9 border border-(--line-strong) bg-(--surface-panel-strong)">
+          <AvatarFallback className="bg-transparent text-sm font-bold text-(--ink)">{initial}</AvatarFallback>
+        </Avatar>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-semibold text-(--ink)">{displayName}</span>
+          <span className="block truncate text-xs text-(--muted)">Free</span>
+        </span>
+        <ChevronsUpDownIcon className="size-4 shrink-0 text-(--muted)" />
+      </button>
+    </div>
+  );
+}
+
+function AccountSidebar({ threads }: { threads: ChatThreadSummary[] }) {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const read = () => (html.dataset.theme === "dark" ? "dark" : "light");
+    setTheme(read());
+    const observer = new MutationObserver(() => setTheme(read()));
+    observer.observe(html, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <aside className="flex h-full w-[280px] shrink-0 flex-col border-r border-(--line-strong) bg-(--surface-panel) text-(--ink)">
+      <div className="flex h-16 shrink-0 items-center px-5">
+        <Link href="/" className="flex items-center gap-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={theme === "dark" ? "/ciao-sparkle-dark.svg" : "/ciao-sparkle.svg"}
+            alt=""
+            aria-hidden="true"
+            style={{ height: 36, width: 36, objectFit: "contain" }}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/ciao-text.png"
+            alt="Ciao!"
+            style={{ height: 28, width: "auto", filter: theme === "dark" ? "invert(1)" : "none" }}
+          />
+        </Link>
+      </div>
+
+      <div className="px-4">
+        <Link
+          href="/"
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft) transition hover:opacity-90"
+        >
+          <PlusIcon className="size-4" />
+          New Chat
+        </Link>
+      </div>
+
+      <ScrollArea className="mt-4 min-h-0 flex-1 px-3">
+        <div className="flex flex-col gap-1 pb-4">
+          {threads.length === 0 ? (
+            <p className="px-3 py-4 text-sm text-(--muted)">No threads yet.</p>
+          ) : null}
+          {threads.map((thread) => (
+            <Link
+              key={thread.id}
+              href="/"
+              className="flex min-h-14 w-full items-center gap-3 rounded-xl border border-transparent px-3 text-left text-(--ink-soft) transition hover:border-(--line) hover:bg-(--surface-inset) hover:text-(--ink)"
+            >
+              <HistoryIcon className="size-4 shrink-0" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold">{thread.title}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </ScrollArea>
+
+      <div className="shrink-0 border-t border-(--line) p-3">
+        <SidebarAccountMenu />
+      </div>
+    </aside>
+  );
+}
+
 export function AccountShell({
   email,
   displayName,
@@ -433,45 +588,44 @@ export function AccountShell({
   hasAnthropicKey,
   hasGoogleKey,
   dbError,
+  threads = [],
 }: AccountShellProps) {
   const [section, setSection] = useState<Section>("general");
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto max-w-3xl px-6 py-10">
-        <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <Link
-            href="/"
-            className="text-sm font-medium text-gray-500 hover:text-gray-700"
-          >
-            ← Back to chat
-          </Link>
-        </div>
+    <div className="fixed inset-0 flex" style={{ height: "100dvh" }}>
+      <AccountSidebar threads={threads} />
 
-        {dbError ? (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            Unable to connect to the database. Settings cannot be saved until the connection is restored. Check that <code className="font-mono">DATABASE_URL</code> is configured in your environment.
+      <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+        <div className="mx-auto max-w-2xl px-6 py-10">
+          <div className="mb-8 flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
           </div>
-        ) : null}
 
-        <div className="flex gap-10">
-          <SectionNav active={section} onSelect={setSection} />
+          {dbError ? (
+            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              Unable to connect to the database. Settings cannot be saved until the connection is restored. Check that <code className="font-mono">DATABASE_URL</code> is configured in your environment.
+            </div>
+          ) : null}
 
-          <div className="min-w-0 flex-1">
-            {section === "general" ? (
-              <GeneralSection
-                email={email}
-                initialDisplayName={displayName}
-                initialOrganization={organization}
-              />
-            ) : (
-              <ModelsSection
-                initialChatModel={chatModel}
-                initialHasAnthropicKey={hasAnthropicKey}
-                initialHasGoogleKey={hasGoogleKey}
-              />
-            )}
+          <div className="flex gap-10">
+            <SectionNav active={section} onSelect={setSection} />
+
+            <div className="min-w-0 flex-1">
+              {section === "general" ? (
+                <GeneralSection
+                  email={email}
+                  initialDisplayName={displayName}
+                  initialOrganization={organization}
+                />
+              ) : (
+                <ModelsSection
+                  initialChatModel={chatModel}
+                  initialHasAnthropicKey={hasAnthropicKey}
+                  initialHasGoogleKey={hasGoogleKey}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

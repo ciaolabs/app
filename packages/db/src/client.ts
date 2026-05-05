@@ -14,6 +14,7 @@ export function getDb(): Sql {
     client = postgres(process.env.DATABASE_URL, {
       max: 1,
       prepare: false,
+      ssl: "require",
     });
   }
 

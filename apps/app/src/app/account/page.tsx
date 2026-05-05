@@ -1,6 +1,7 @@
 import { getInitialAuth, requireCurrentUserId } from "@ciaobang/auth";
 
 import { getApiKeyProviders, getOrCreateAccount, getPreferences } from "@/lib/account/repository";
+import { getChatRepository } from "@/lib/chat/repository";
 import { AccountShell } from "@/components/account/account-shell";
 
 export const dynamic = "force-dynamic";
@@ -8,11 +9,12 @@ export const dynamic = "force-dynamic";
 export default async function AccountPage() {
   const userId = await requireCurrentUserId();
 
-  const [auth, account, apiKeys, preferences] = await Promise.all([
+  const [auth, account, apiKeys, preferences, threads] = await Promise.all([
     getInitialAuth(),
     getOrCreateAccount(userId).catch(() => null),
     getApiKeyProviders(userId).catch(() => ({ anthropic: false, google: false })),
     getPreferences(userId).catch(() => ({ chatModel: "gemini-2.5-flash" })),
+    getChatRepository().listThreads(userId).catch(() => []),
   ]);
 
   return (
@@ -24,6 +26,7 @@ export default async function AccountPage() {
       hasAnthropicKey={apiKeys.anthropic}
       hasGoogleKey={apiKeys.google}
       dbError={!account}
+      threads={threads}
     />
   );
 }

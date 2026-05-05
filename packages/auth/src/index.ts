@@ -78,7 +78,7 @@ export async function getCurrentUserId({
 
 export async function requireCurrentUserId() {
   if (!isWorkOSConfigured()) {
-    redirect("/");
+    redirect("/sign-in");
   }
 
   let user: Awaited<ReturnType<typeof withAuth>>["user"];
@@ -86,11 +86,11 @@ export async function requireCurrentUserId() {
   try {
     ({ user } = await withAuth());
   } catch {
-    redirect("/");
+    redirect("/sign-in");
   }
 
   if (!user?.id) {
-    redirect("/");
+    redirect("/sign-in");
   }
 
   return user.id;
