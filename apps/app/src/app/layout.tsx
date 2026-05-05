@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import { Manrope, Space_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { APP_NAME } from "@/lib/app-config";
 import { Toaster } from "@/components/ui/sonner";
@@ -65,6 +66,7 @@ export default async function RootLayout({
           {children}
           <Toaster />
         </AuthKitProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
