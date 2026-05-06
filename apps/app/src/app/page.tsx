@@ -1,13 +1,13 @@
+import { Suspense } from "react";
 import { requireCurrentUserId } from "@ciaobang/auth";
 
 import { getChatRepository } from "@/lib/chat/repository";
 import { loadSurveyChatContext } from "@/lib/chat/survey-context.server";
 import { hasAnyApiKey } from "@/lib/account/repository";
 import { ChatShell } from "@/components/chat/chat-shell";
+import { ChatSkeleton } from "@/components/chat/chat-skeleton";
 
-export const dynamic = "force-dynamic";
-
-export default async function HomePage() {
+async function ChatLoader() {
   const userId = await requireCurrentUserId();
   const [threads, surveyContext, apiKeys] = await Promise.all([
     getChatRepository().listThreads(userId).catch(() => []),
@@ -18,4 +18,12 @@ export default async function HomePage() {
   ]);
 
   return <ChatShell initialThreads={threads} surveyContext={surveyContext} hasApiKeys={apiKeys} />;
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<ChatSkeleton />}>
+      <ChatLoader />
+    </Suspense>
+  );
 }

@@ -56,7 +56,7 @@ export async function loadSurveyChatContext(
     response = await fetch(url, {
       method: "GET",
       headers,
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
   } catch {
     return EMPTY_SURVEY_CHAT_CONTEXT;
