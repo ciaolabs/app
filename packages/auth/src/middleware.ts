@@ -16,7 +16,7 @@ export function makeAuthMiddleware() {
 
     return authkitMiddleware({
       redirectUri:
-        process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI ?? `${request.nextUrl.origin}/callback`,
+        process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI || `${request.nextUrl.origin}/callback`,
     })(request, event);
   };
 }

@@ -83,7 +83,7 @@ export const GET = async (request: NextRequest) => {
   }
 
   const redirectUri =
-    process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI ?? `${request.nextUrl.origin}/callback`;
+    process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI || `${request.nextUrl.origin}/callback`;
   const url = await getSignInUrl({ redirectUri });
 
   redirect(url);
