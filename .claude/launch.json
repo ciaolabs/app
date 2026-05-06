@@ -2,7 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "next-dev",
+      "name": "app",
+      "cwd": "apps/app",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 3001,
+      "autoPort": true
+    },
+    {
+      "name": "survey",
+      "cwd": "apps/survey",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev"],
       "port": 3000,

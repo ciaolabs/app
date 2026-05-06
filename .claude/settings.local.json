@@ -10,5 +10,9 @@
       "Bash(sed -n '1,10p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/survey/src/lib/survey/results/values-beliefs-engine.ts)",
       "Bash(sed -n '1,8p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/survey/src/lib/survey/questions.ts)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "code-review-graph"
+  ],
+  "enableAllProjectMcpServers": true
 }

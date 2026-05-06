@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDownIcon, EyeIcon, EyeOffIcon, HistoryIcon, LogOutIcon, PlusIcon, Trash2Icon, UserIcon } from "lucide-react";
+import { ChevronsUpDownIcon, EyeIcon, EyeOffIcon, HistoryIcon, LogOutIcon, PanelLeftCloseIcon, PanelLeftIcon, PlusIcon, SearchIcon, Trash2Icon, UserIcon } from "lucide-react";
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -8,8 +8,13 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ChatThreadSummary } from "@/lib/chat/types";
 
 import { MODEL_OPTIONS } from "@/lib/account/models";
@@ -511,7 +516,14 @@ function SidebarAccountMenu() {
   );
 }
 
-function AccountSidebar({ threads }: { threads: ChatThreadSummary[] }) {
+function AccountSidebar({
+  threads,
+  onCollapse,
+}: {
+  threads: ChatThreadSummary[];
+  onCollapse: () => void;
+}) {
+  const router = useRouter();
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
@@ -524,59 +536,105 @@ function AccountSidebar({ threads }: { threads: ChatThreadSummary[] }) {
   }, []);
 
   return (
-    <aside className="flex h-full w-[280px] shrink-0 flex-col border-r border-(--line-strong) bg-(--surface-panel) text-(--ink)">
-      <div className="flex h-16 shrink-0 items-center px-5">
-        <Link href="/" className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={theme === "dark" ? "/ciao-sparkle-dark.svg" : "/ciao-sparkle.svg"}
-            alt=""
-            aria-hidden="true"
-            style={{ height: 36, width: 36, objectFit: "contain" }}
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/ciao-text.png"
-            alt="Ciao!"
-            style={{ height: 28, width: "auto", filter: theme === "dark" ? "invert(1)" : "none" }}
-          />
-        </Link>
-      </div>
+    <TooltipProvider delayDuration={300}>
+      <aside className="flex h-full w-[280px] shrink-0 flex-col border-r border-(--line-strong) bg-(--surface-panel) text-(--ink)">
+        <div className="flex h-16 shrink-0 items-center justify-between gap-2 px-5">
+          <Link href="/" className="flex items-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={theme === "dark" ? "/ciao-sparkle-dark.svg" : "/ciao-sparkle.svg"}
+              alt=""
+              aria-hidden="true"
+              style={{ height: 36, width: 36, objectFit: "contain" }}
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/ciao-text.png"
+              alt="Ciao!"
+              style={{ height: 28, width: "auto", filter: theme === "dark" ? "invert(1)" : "none" }}
+            />
+          </Link>
 
-      <div className="px-4">
-        <Link
-          href="/"
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft) transition hover:opacity-90"
-        >
-          <PlusIcon className="size-4" />
-          New Chat
-        </Link>
-      </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Search"
+                  onClick={() => router.push("/")}
+                  className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
+                >
+                  <SearchIcon className="size-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Search (⌘K)</TooltipContent>
+            </Tooltip>
 
-      <ScrollArea className="mt-4 min-h-0 flex-1 px-3">
-        <div className="flex flex-col gap-1 pb-4">
-          {threads.length === 0 ? (
-            <p className="px-3 py-4 text-sm text-(--muted)">No threads yet.</p>
-          ) : null}
-          {threads.map((thread) => (
-            <Link
-              key={thread.id}
-              href="/"
-              className="flex min-h-14 w-full items-center gap-3 rounded-xl border border-transparent px-3 text-left text-(--ink-soft) transition hover:border-(--line) hover:bg-(--surface-inset) hover:text-(--ink)"
-            >
-              <HistoryIcon className="size-4 shrink-0" />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold">{thread.title}</span>
-              </span>
-            </Link>
-          ))}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="New chat"
+                  onClick={() => router.push("/")}
+                  className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
+                >
+                  <PlusIcon className="size-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>New chat</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Collapse sidebar"
+                  onClick={onCollapse}
+                  className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
+                >
+                  <PanelLeftCloseIcon className="size-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Collapse sidebar</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
-      </ScrollArea>
 
-      <div className="shrink-0 border-t border-(--line) p-3">
-        <SidebarAccountMenu />
-      </div>
-    </aside>
+        <div className="px-4">
+          <Link
+            href="/"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft) transition hover:opacity-90"
+          >
+            <PlusIcon className="size-4" />
+            New Chat
+          </Link>
+        </div>
+
+        <ScrollArea className="mt-4 min-h-0 flex-1 px-3">
+          <div className="flex flex-col gap-1 pb-4">
+            {threads.length === 0 ? (
+              <p className="px-3 py-4 text-sm text-(--muted)">No threads yet.</p>
+            ) : null}
+            {threads.map((thread) => (
+              <Link
+                key={thread.id}
+                href="/"
+                className="flex min-h-14 w-full items-center gap-3 rounded-xl border border-transparent px-3 text-left text-(--ink-soft) transition hover:border-(--line) hover:bg-(--surface-inset) hover:text-(--ink)"
+              >
+                <HistoryIcon className="size-4 shrink-0" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold">{thread.title}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </ScrollArea>
+
+        <div className="shrink-0 border-t border-(--line) p-3">
+          <SidebarAccountMenu />
+        </div>
+      </aside>
+    </TooltipProvider>
   );
 }
 
@@ -590,11 +648,61 @@ export function AccountShell({
   dbError,
   threads = [],
 }: AccountShellProps) {
+  const router = useRouter();
   const [section, setSection] = useState<Section>("general");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div className="fixed inset-0 flex" style={{ height: "100dvh" }}>
-      <AccountSidebar threads={threads} />
+      {!sidebarCollapsed && (
+        <AccountSidebar threads={threads} onCollapse={() => setSidebarCollapsed(true)} />
+      )}
+
+      {sidebarCollapsed && (
+        <TooltipProvider delayDuration={300}>
+          <div className="absolute top-4 left-4 z-30 flex items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open sidebar"
+                  onClick={() => setSidebarCollapsed(false)}
+                  className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
+                >
+                  <PanelLeftIcon className="size-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Open sidebar</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Search"
+                  onClick={() => router.push("/")}
+                  className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
+                >
+                  <SearchIcon className="size-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Search (⌘K)</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="New chat"
+                  onClick={() => router.push("/")}
+                  className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
+                >
+                  <PlusIcon className="size-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>New chat</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
+      )}
 
       <div className="min-h-0 flex-1 overflow-y-auto bg-white">
         <div className="mx-auto max-w-2xl px-6 py-10">
