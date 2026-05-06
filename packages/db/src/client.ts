@@ -14,8 +14,20 @@ export class DatabaseConfigurationError extends Error {
   }
 }
 
+function normalizeEnvValue(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed || trimmed === "\"\"" || trimmed === "''") {
+    return undefined;
+  }
+  return trimmed;
+}
+
 function getDatabaseUrl(): string | undefined {
-  return process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL;
+  return (
+    normalizeEnvValue(process.env.DATABASE_URL) ||
+    normalizeEnvValue(process.env.POSTGRES_URL) ||
+    normalizeEnvValue(process.env.POSTGRES_PRISMA_URL)
+  );
 }
 
 export function getDb(): Sql {

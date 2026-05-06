@@ -1182,7 +1182,7 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
         )}
         style={{ height: "100dvh", width: "100dvw" }}
       >
-        {isTemporary ? <InteractiveDotBackground /> : null}
+        <InteractiveDotBackground />
         {isTemporary ? (
           <div aria-hidden="true" className="incognito-maze">
             <span className="maze-ghost maze-ghost-1">

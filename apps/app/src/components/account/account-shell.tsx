@@ -8,6 +8,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
@@ -15,6 +16,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { InteractiveDotBackground } from "@/components/interactive-dot-background";
+import { cn } from "@/lib/utils";
 import type { ChatThreadSummary } from "@/lib/chat/types";
 
 import { MODEL_OPTIONS } from "@/lib/account/models";
@@ -33,6 +36,18 @@ type AccountShellProps = {
 
 type Section = "general" | "models";
 
+const clayPrimaryButton =
+  "clay-button-hover inline-flex items-center justify-center gap-2 rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)";
+
+const claySecondaryButton =
+  "clay-button-hover inline-flex items-center justify-center gap-2 rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold text-(--ink) shadow-(--shadow-soft)";
+
+const clayDangerButton =
+  "clay-button-hover inline-flex items-center justify-center gap-2 rounded-full border border-(--accent-rose) bg-(--surface-panel-strong) px-5 text-sm font-semibold text-(--accent-rose) shadow-(--shadow-soft)";
+
+const accountInputClass =
+  "h-11 rounded-full border-(--line-strong) bg-(--surface-panel-strong) px-4 text-(--ink) placeholder:text-(--muted) shadow-(--shadow-soft) focus-visible:border-black";
+
 function SectionNav({
   active,
   onSelect,
@@ -41,17 +56,18 @@ function SectionNav({
   onSelect: (s: Section) => void;
 }) {
   return (
-    <nav className="w-52 shrink-0">
+    <nav className="w-52 shrink-0 space-y-2">
       {(["general", "models"] as const).map((s) => (
         <button
           key={s}
           type="button"
           onClick={() => onSelect(s)}
-          className={`block w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition ${
+          className={cn(
+            "flex min-h-11 w-full items-center rounded-2xl border px-4 text-left text-sm font-semibold shadow-(--shadow-soft) transition",
             active === s
-              ? "bg-gray-100 text-gray-900"
-              : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-          }`}
+              ? "border-black bg-(--accent-blue) text-(--selected-contrast)"
+              : "border-(--line-strong) bg-(--surface-panel-strong) text-(--ink-soft) hover:bg-(--surface-inset) hover:text-(--ink)",
+          )}
         >
           {s === "general" ? "General" : "Models & API Keys"}
         </button>
@@ -74,7 +90,7 @@ function SaveButton({
       type="button"
       onClick={onClick}
       disabled={loading || disabled}
-      className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+      className={cn(clayPrimaryButton, "h-11 disabled:cursor-not-allowed disabled:opacity-50")}
     >
       {loading ? "Saving…" : "Save"}
     </button>
@@ -139,21 +155,21 @@ function ApiKeyField({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <label className="block text-sm font-semibold text-(--ink)">{label}</label>
       {editing ? (
         <div className="mt-1 flex gap-2">
           <div className="relative flex-1">
-            <input
+            <Input
               type={show ? "text" : "password"}
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder={`Paste your ${label} here`}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 text-sm focus:border-gray-400 focus:outline-none"
+              className={cn(accountInputClass, "pr-10")}
             />
             <button
               type="button"
               onClick={() => setShow((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute top-1/2 right-4 -translate-y-1/2 text-(--muted) transition hover:text-(--ink)"
             >
               {show ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
             </button>
@@ -166,7 +182,7 @@ function ApiKeyField({
                 setEditing(false);
                 setValue("");
               }}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+              className={cn(claySecondaryButton, "h-11 px-4")}
             >
               Cancel
             </button>
@@ -174,13 +190,13 @@ function ApiKeyField({
         </div>
       ) : (
         <div className="mt-1 flex items-center gap-3">
-          <div className="flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500">
+          <div className="flex h-11 flex-1 items-center rounded-full border border-(--line-strong) bg-(--surface-inset) px-4 font-mono text-sm text-(--muted) shadow-(--shadow-soft)">
             {provider === "anthropic" ? "sk-ant-•••••••••••••" : "AI•••••••••••••••"}
           </div>
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className={cn(claySecondaryButton, "h-11 px-4")}
           >
             Update
           </button>
@@ -188,7 +204,7 @@ function ApiKeyField({
             type="button"
             onClick={handleRemove}
             disabled={removing}
-            className="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+            className={cn(clayDangerButton, "h-11 px-4 disabled:opacity-50")}
           >
             {removing ? "Removing…" : "Remove"}
           </button>
@@ -249,55 +265,55 @@ function GeneralSection({
 
   return (
     <div className="space-y-10">
-      <section>
-        <h2 className="text-2xl font-bold text-gray-900">Profile</h2>
+      <section className="clay-card p-6">
+        <h2 className="font-display text-2xl text-(--ink)">Profile</h2>
         <div className="mt-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Display Name</label>
+            <label className="block text-sm font-semibold text-(--ink)">Display Name</label>
             <div className="mt-1 flex gap-2">
-              <input
+              <Input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                className={cn(accountInputClass, "flex-1")}
               />
               <SaveButton onClick={() => saveField("name")} loading={savingName} />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Organisation</label>
+            <label className="block text-sm font-semibold text-(--ink)">Organisation</label>
             <div className="mt-1 flex gap-2">
-              <input
+              <Input
                 type="text"
                 value={organization}
                 onChange={(e) => setOrganization(e.target.value)}
                 placeholder="Enter your organisation"
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                className={cn(accountInputClass, "flex-1")}
               />
               <SaveButton onClick={() => saveField("org")} loading={savingOrg} />
             </div>
           </div>
 
           <div>
-            <p className="text-sm font-medium text-gray-700">Email</p>
-            <p className="mt-1 text-sm text-gray-500">{email}</p>
+            <p className="text-sm font-semibold text-(--ink)">Email</p>
+            <p className="mt-1 text-sm text-(--muted)">{email}</p>
           </div>
         </div>
       </section>
 
-      <section>
-        <h2 className="text-2xl font-bold text-gray-900">Usage Plan</h2>
-        <p className="mt-2 text-sm text-gray-500">Free</p>
+      <section className="clay-card p-6">
+        <h2 className="font-display text-2xl text-(--ink)">Usage Plan</h2>
+        <p className="mt-2 text-sm text-(--muted)">Free</p>
       </section>
 
-      <section>
-        <h2 className="text-2xl font-bold text-gray-900">Actions</h2>
+      <section className="clay-card p-6">
+        <h2 className="font-display text-2xl text-(--ink)">Actions</h2>
         <div className="mt-4">
           <button
             type="button"
             onClick={() => void signOut({ returnTo: window.location.origin })}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className={cn(claySecondaryButton, "h-11")}
           >
             <LogOutIcon className="size-4" />
             Sign Out
@@ -305,20 +321,20 @@ function GeneralSection({
         </div>
       </section>
 
-      <section>
-        <h2 className="text-2xl font-bold text-red-600">Danger Zone</h2>
-        <p className="mt-1 text-sm text-gray-500">
+      <section className="clay-card border-(--accent-rose) p-6">
+        <h2 className="font-display text-2xl text-(--accent-rose)">Danger Zone</h2>
+        <p className="mt-1 text-sm text-(--muted)">
           Permanently delete your account and all associated data. This action cannot be undone.
         </p>
         <div className="mt-4">
           {confirmDelete ? (
             <div className="flex items-center gap-3">
-              <p className="text-sm font-medium text-gray-700">Are you sure?</p>
+              <p className="text-sm font-semibold text-(--ink)">Are you sure?</p>
               <button
                 type="button"
                 onClick={handleDeleteAccount}
                 disabled={deleting}
-                className="inline-flex items-center gap-2 rounded-lg border border-red-500 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 disabled:opacity-50"
+                className={cn(clayDangerButton, "h-11 disabled:opacity-50")}
               >
                 <Trash2Icon className="size-4" />
                 {deleting ? "Deleting…" : "Yes, delete my account"}
@@ -326,7 +342,7 @@ function GeneralSection({
               <button
                 type="button"
                 onClick={() => setConfirmDelete(false)}
-                className="text-sm text-gray-500 hover:text-gray-700"
+                className="text-sm font-semibold text-(--muted) hover:text-(--ink)"
               >
                 Cancel
               </button>
@@ -335,7 +351,7 @@ function GeneralSection({
             <button
               type="button"
               onClick={() => setConfirmDelete(true)}
-              className="inline-flex items-center gap-2 rounded-lg border border-red-400 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+              className={cn(clayDangerButton, "h-11")}
             >
               <Trash2Icon className="size-4" />
               Delete Account
@@ -382,15 +398,15 @@ function ModelsSection({
 
   return (
     <div className="space-y-10">
-      <section>
-        <h2 className="text-2xl font-bold text-gray-900">Model Preferences</h2>
+      <section className="clay-card p-6">
+        <h2 className="font-display text-2xl text-(--ink)">Model Preferences</h2>
         <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700">Chat model</label>
+          <label className="block text-sm font-semibold text-(--ink)">Chat model</label>
           <div className="mt-1 flex gap-2">
             <select
               value={chatModel}
               onChange={(e) => setChatModel(e.target.value)}
-              className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+              className={cn(accountInputClass, "flex-1")}
             >
               {MODEL_OPTIONS.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -404,15 +420,15 @@ function ModelsSection({
               disabled={chatModel === initialChatModel}
             />
           </div>
-          <p className="mt-1.5 text-xs text-gray-400">
+          <p className="mt-2 text-xs text-(--muted)">
             Make sure you have an API key for the selected model&apos;s provider.
           </p>
         </div>
       </section>
 
-      <section>
-        <h2 className="text-2xl font-bold text-gray-900">API Keys</h2>
-        <p className="mt-1 text-sm text-gray-500">
+      <section className="clay-card p-6">
+        <h2 className="font-display text-2xl text-(--ink)">API Keys</h2>
+        <p className="mt-1 text-sm text-(--muted)">
           You must provide your own API keys. Keys are encrypted at rest and never shared.
         </p>
         <div className="mt-6 space-y-6">
@@ -653,7 +669,11 @@ export function AccountShell({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className="fixed inset-0 flex" style={{ height: "100dvh" }}>
+    <main
+      className="fixed inset-0 flex overflow-hidden bg-(--background) text-(--ink)"
+      style={{ height: "100dvh" }}
+    >
+      <InteractiveDotBackground />
       {!sidebarCollapsed && (
         <AccountSidebar threads={threads} onCollapse={() => setSidebarCollapsed(true)} />
       )}
@@ -704,14 +724,16 @@ export function AccountShell({
         </TooltipProvider>
       )}
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-white">
-        <div className="mx-auto max-w-2xl px-6 py-10">
+      <div className="relative min-h-0 flex-1 overflow-y-auto">
+        <div className="app-glow app-glow-left" aria-hidden="true" />
+        <div className="app-glow app-glow-right" aria-hidden="true" />
+        <div className="mx-auto max-w-4xl px-6 py-10">
           <div className="mb-8 flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+            <h1 className="font-display text-4xl text-(--ink)">Settings</h1>
           </div>
 
           {dbError ? (
-            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mb-6 rounded-2xl border border-(--accent-rose) bg-(--surface-panel-strong) px-4 py-3 text-sm font-medium text-(--accent-rose) shadow-(--shadow-soft)">
               Unable to connect to the database. Settings cannot be saved until the connection is restored. Check that <code className="font-mono">DATABASE_URL</code> or <code className="font-mono">POSTGRES_URL</code> is configured in your environment.
             </div>
           ) : null}
@@ -737,6 +759,6 @@ export function AccountShell({
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
