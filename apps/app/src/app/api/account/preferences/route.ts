@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getCurrentUserId } from "@ciaobang/auth";
 
+import { accountStorageErrorResponse } from "../error-response";
 import { MODEL_OPTIONS } from "@/lib/account/models";
 import { updatePreferences } from "@/lib/account/repository";
 
@@ -17,6 +18,10 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Invalid model" }, { status: 400 });
   }
 
-  await updatePreferences(userId, chatModel);
-  return NextResponse.json({ ok: true });
+  try {
+    await updatePreferences(userId, chatModel);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return accountStorageErrorResponse(error);
+  }
 }

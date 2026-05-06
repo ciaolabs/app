@@ -5,4 +5,11 @@ export {
   SURVEY_SCHEMA_VERSION,
   SURVEY_SCORING_VERSION,
 } from "./schema";
-export { ensureRagSchema, ensureSchema, getDb, getReadyDb, type Sql } from "./client";
+export {
+  DatabaseConfigurationError,
+  ensureRagSchema,
+  ensureSchema,
+  getDb,
+  getReadyDb,
+  type Sql,
+} from "./client";

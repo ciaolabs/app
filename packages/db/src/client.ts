@@ -5,13 +5,27 @@ import { RAG_SCHEMA_SQL, SHARED_SCHEMA_SQL } from "./schema";
 let client: Sql | null = null;
 let schemaReady: Promise<void> | null = null;
 
+export class DatabaseConfigurationError extends Error {
+  constructor() {
+    super(
+      "A Postgres connection string is required. Set DATABASE_URL or POSTGRES_URL in the environment.",
+    );
+    this.name = "DatabaseConfigurationError";
+  }
+}
+
+function getDatabaseUrl(): string | undefined {
+  return process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL;
+}
+
 export function getDb(): Sql {
-  if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is required for postgres storage.");
+  const databaseUrl = getDatabaseUrl();
+  if (!databaseUrl) {
+    throw new DatabaseConfigurationError();
   }
 
   if (!client) {
-    client = postgres(process.env.DATABASE_URL, {
+    client = postgres(databaseUrl, {
       max: 1,
       prepare: false,
       ssl: "require",

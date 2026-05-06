@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getCurrentUserId } from "@ciaobang/auth";
 
+import { accountStorageErrorResponse } from "../../error-response";
 import type { ApiKeyProvider } from "@/lib/account/models";
 import { removeApiKey, setApiKey } from "@/lib/account/repository";
 
@@ -26,8 +27,12 @@ export async function PUT(
   const key = body.key?.trim();
   if (!key) return NextResponse.json({ error: "API key is required" }, { status: 400 });
 
-  await setApiKey(userId, provider, key);
-  return NextResponse.json({ ok: true });
+  try {
+    await setApiKey(userId, provider, key);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return accountStorageErrorResponse(error);
+  }
 }
 
 export async function DELETE(
@@ -41,6 +46,10 @@ export async function DELETE(
   const provider = parseProvider(raw);
   if (!provider) return NextResponse.json({ error: "Invalid provider" }, { status: 400 });
 
-  await removeApiKey(userId, provider);
-  return NextResponse.json({ ok: true });
+  try {
+    await removeApiKey(userId, provider);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return accountStorageErrorResponse(error);
+  }
 }
