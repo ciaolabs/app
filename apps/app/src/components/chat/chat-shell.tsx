@@ -58,6 +58,7 @@ const InteractiveDotBackground = dynamic(
   () => import("@/components/interactive-dot-background").then((m) => ({ default: m.InteractiveDotBackground })),
   { ssr: false },
 );
+import { MazeGhost } from "@/components/maze-ghost";
 import type { SurveyChatContext } from "@/lib/chat/survey-context";
 import { surveyContextHasResults } from "@/lib/chat/survey-context";
 import type { ChatMessage, ChatThreadSummary, ChatThreadWithMessages } from "@/lib/chat/types";
@@ -870,10 +871,10 @@ function EmptyChat({
       {isTemporary ? null : !hasSurveyContext ? (
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link href="https://survey.ciaobang.com/surveys/personality" className={cn(clayPrimaryButton, "h-12")}>
-            Take Personality
+            Take Personality survey
           </Link>
           <Link href="https://survey.ciaobang.com/surveys/values-beliefs" className={cn(claySecondaryButton, "h-12")}>
-            Take Values and Beliefs
+            Take Values and Beliefs survey
           </Link>
         </div>
       ) : !hasApiKeys ? (
@@ -1108,16 +1109,16 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
         {isTemporary ? (
           <div aria-hidden="true" className="incognito-maze">
             <span className="maze-ghost maze-ghost-1">
-              <GhostIcon className="size-full" />
+              <MazeGhost className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-2">
-              <GhostIcon className="size-full" />
+              <MazeGhost className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-3">
-              <GhostIcon className="size-full" />
+              <MazeGhost className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-4">
-              <GhostIcon className="size-full" />
+              <MazeGhost className="size-full" />
             </span>
           </div>
         ) : null}

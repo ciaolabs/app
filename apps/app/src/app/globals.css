@@ -823,10 +823,31 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
 
 .maze-ghost {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 30px;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+}
+
+.maze-ghost .ghost-pupil-l,
+.maze-ghost .ghost-pupil-r {
+  transition: transform 0.25s ease;
+}
+
+.incognito-maze:hover .ghost-pupil-l,
+.incognito-maze:hover .ghost-pupil-r {
+  animation: ghost-look 2s ease-in-out infinite;
+}
+
+@keyframes ghost-look {
+  0%, 100% { transform: translate(0, 0); }
+  12.5%    { transform: translate(1.4px, 0); }
+  25%      { transform: translate(1.4px, 0); }
+  37.5%    { transform: translate(-1.4px, 0); }
+  50%      { transform: translate(-1.4px, 0); }
+  62.5%    { transform: translate(0, -1.4px); }
+  75%      { transform: translate(0, -1.4px); }
+  87.5%    { transform: translate(0, 0); }
 }
 
 .maze-ghost-1 { color: #ff4d6d; animation-name: maze-path-1; animation-duration: 54s; }
@@ -846,19 +867,19 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
 }
 
 @keyframes maze-path-2 {
-  0%,  100% { left: 55%; top: 8%;  }
-  25%       { left: 92%; top: 8%;  }
-  50%       { left: 92%; top: 45%; }
-  65%       { left: 70%; top: 45%; }
-  78%       { left: 70%; top: 25%; }
-  89%       { left: 55%; top: 25%; }
+  0%,  100% { left: 55%; top: 18%; }
+  25%       { left: 92%; top: 18%; }
+  50%       { left: 92%; top: 48%; }
+  65%       { left: 70%; top: 48%; }
+  78%       { left: 70%; top: 30%; }
+  89%       { left: 55%; top: 30%; }
 }
 
 @keyframes maze-path-3 {
-  0%,  100% { left: 4%;  top: 92%; }
-  26%       { left: 45%; top: 92%; }
-  40%       { left: 45%; top: 70%; }
-  56%       { left: 20%; top: 70%; }
+  0%,  100% { left: 4%;  top: 85%; }
+  26%       { left: 45%; top: 85%; }
+  40%       { left: 45%; top: 65%; }
+  56%       { left: 20%; top: 65%; }
   66%       { left: 20%; top: 55%; }
   76%       { left: 4%;  top: 55%; }
 }
@@ -874,6 +895,10 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
 
 @media (prefers-reduced-motion: reduce) {
   .maze-ghost {
+    animation: none;
+  }
+  .incognito-maze:hover .ghost-pupil-l,
+  .incognito-maze:hover .ghost-pupil-r {
     animation: none;
   }
 }
