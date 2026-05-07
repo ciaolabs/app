@@ -869,10 +869,10 @@ function EmptyChat({
 
       {isTemporary ? null : !hasSurveyContext ? (
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/surveys/personality" className={cn(clayPrimaryButton, "h-12")}>
+          <Link href="https://survey.ciaobang.com/surveys/personality" className={cn(clayPrimaryButton, "h-12")}>
             Take Personality
           </Link>
-          <Link href="/surveys/values-beliefs" className={cn(claySecondaryButton, "h-12")}>
+          <Link href="https://survey.ciaobang.com/surveys/values-beliefs" className={cn(claySecondaryButton, "h-12")}>
             Take Values and Beliefs
           </Link>
         </div>
