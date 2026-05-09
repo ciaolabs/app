@@ -11,5 +11,6 @@ export {
   ensureSchema,
   getDb,
   getReadyDb,
+  hasDatabaseUrl,
   type Sql,
 } from "./client";

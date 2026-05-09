@@ -48,6 +48,17 @@ const clayDangerButton =
 const accountInputClass =
   "h-11 rounded-full border-(--line-strong) bg-(--surface-panel-strong) px-4 text-(--ink) placeholder:text-(--muted) shadow-(--shadow-soft) focus-visible:border-black";
 
+async function getResponseErrorMessage(response: Response, fallback: string) {
+  try {
+    const payload = (await response.json()) as { error?: unknown };
+    return typeof payload.error === "string" && payload.error.trim()
+      ? payload.error
+      : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function SectionNav({
   active,
   onSelect,
@@ -101,12 +112,14 @@ function ApiKeyField({
   label,
   provider,
   hasKey,
+  disabled,
   onSaved,
   onRemoved,
 }: {
   label: string;
   provider: ApiKeyProvider;
   hasKey: boolean;
+  disabled?: boolean;
   onSaved: () => void;
   onRemoved: () => void;
 }) {
@@ -117,7 +130,7 @@ function ApiKeyField({
   const [removing, setRemoving] = useState(false);
 
   async function handleSave() {
-    if (!value.trim()) return;
+    if (!value.trim() || disabled) return;
     setSaving(true);
     try {
       const res = await fetch(`/api/account/api-keys/${provider}`, {
@@ -125,29 +138,30 @@ function ApiKeyField({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key: value }),
       });
-      if (!res.ok) throw new Error("Failed to save key");
+      if (!res.ok) throw new Error(await getResponseErrorMessage(res, "Failed to save key"));
       setValue("");
       setEditing(false);
       onSaved();
       toast.success("API key saved");
-    } catch {
-      toast.error("Failed to save API key");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save API key");
     } finally {
       setSaving(false);
     }
   }
 
   async function handleRemove() {
+    if (disabled) return;
     setRemoving(true);
     try {
       const res = await fetch(`/api/account/api-keys/${provider}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to remove key");
+      if (!res.ok) throw new Error(await getResponseErrorMessage(res, "Failed to remove key"));
       setEditing(true);
       setValue("");
       onRemoved();
       toast.success("API key removed");
-    } catch {
-      toast.error("Failed to remove API key");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to remove API key");
     } finally {
       setRemoving(false);
     }
@@ -164,6 +178,7 @@ function ApiKeyField({
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder={`Paste your ${label} here`}
+              disabled={disabled}
               className={cn(accountInputClass, "pr-10")}
             />
             <button
@@ -174,7 +189,7 @@ function ApiKeyField({
               {show ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
             </button>
           </div>
-          <SaveButton onClick={handleSave} loading={saving} disabled={!value.trim()} />
+          <SaveButton onClick={handleSave} loading={saving} disabled={disabled || !value.trim()} />
           {hasKey && (
             <button
               type="button"
@@ -196,14 +211,15 @@ function ApiKeyField({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className={cn(claySecondaryButton, "h-11 px-4")}
+            disabled={disabled}
+            className={cn(claySecondaryButton, "h-11 px-4 disabled:opacity-50")}
           >
             Update
           </button>
           <button
             type="button"
             onClick={handleRemove}
-            disabled={removing}
+            disabled={disabled || removing}
             className={cn(clayDangerButton, "h-11 px-4 disabled:opacity-50")}
           >
             {removing ? "Removing…" : "Remove"}
@@ -218,10 +234,12 @@ function GeneralSection({
   email,
   initialDisplayName,
   initialOrganization,
+  disabled,
 }: {
   email: string;
   initialDisplayName: string;
   initialOrganization: string;
+  disabled?: boolean;
 }) {
   const router = useRouter();
   const { signOut } = useAuth();
@@ -233,6 +251,7 @@ function GeneralSection({
   const [deleting, setDeleting] = useState(false);
 
   async function saveField(field: "name" | "org") {
+    if (disabled) return;
     const setter = field === "name" ? setSavingName : setSavingOrg;
     setter(true);
     try {
@@ -241,11 +260,11 @@ function GeneralSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ displayName, organization }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error(await getResponseErrorMessage(res, "Failed to save"));
       toast.success("Saved");
       router.refresh();
-    } catch {
-      toast.error("Failed to save");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save");
     } finally {
       setter(false);
     }
@@ -275,9 +294,10 @@ function GeneralSection({
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
+                disabled={disabled}
                 className={cn(accountInputClass, "flex-1")}
               />
-              <SaveButton onClick={() => saveField("name")} loading={savingName} />
+              <SaveButton onClick={() => saveField("name")} loading={savingName} disabled={disabled} />
             </div>
           </div>
 
@@ -289,9 +309,10 @@ function GeneralSection({
                 value={organization}
                 onChange={(e) => setOrganization(e.target.value)}
                 placeholder="Enter your organisation"
+                disabled={disabled}
                 className={cn(accountInputClass, "flex-1")}
               />
-              <SaveButton onClick={() => saveField("org")} loading={savingOrg} />
+              <SaveButton onClick={() => saveField("org")} loading={savingOrg} disabled={disabled} />
             </div>
           </div>
 
@@ -367,10 +388,12 @@ function ModelsSection({
   initialChatModel,
   initialHasAnthropicKey,
   initialHasGoogleKey,
+  disabled,
 }: {
   initialChatModel: string;
   initialHasAnthropicKey: boolean;
   initialHasGoogleKey: boolean;
+  disabled?: boolean;
 }) {
   const router = useRouter();
   const [chatModel, setChatModel] = useState(initialChatModel);
@@ -379,6 +402,7 @@ function ModelsSection({
   const [hasGoogleKey, setHasGoogleKey] = useState(initialHasGoogleKey);
 
   async function saveModel() {
+    if (disabled) return;
     setSavingModel(true);
     try {
       const res = await fetch("/api/account/preferences", {
@@ -386,11 +410,13 @@ function ModelsSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chatModel }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        throw new Error(await getResponseErrorMessage(res, "Failed to save model preference"));
+      }
       toast.success("Model preference saved");
       router.refresh();
-    } catch {
-      toast.error("Failed to save model preference");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to save model preference");
     } finally {
       setSavingModel(false);
     }
@@ -406,6 +432,7 @@ function ModelsSection({
             <select
               value={chatModel}
               onChange={(e) => setChatModel(e.target.value)}
+              disabled={disabled}
               className={cn(accountInputClass, "flex-1")}
             >
               {MODEL_OPTIONS.map((m) => (
@@ -417,7 +444,7 @@ function ModelsSection({
             <SaveButton
               onClick={saveModel}
               loading={savingModel}
-              disabled={chatModel === initialChatModel}
+              disabled={disabled || chatModel === initialChatModel}
             />
           </div>
           <p className="mt-2 text-xs text-(--muted)">
@@ -436,6 +463,7 @@ function ModelsSection({
             label="Anthropic (Claude) API Key"
             provider="anthropic"
             hasKey={hasAnthropicKey}
+            disabled={disabled}
             onSaved={() => setHasAnthropicKey(true)}
             onRemoved={() => setHasAnthropicKey(false)}
           />
@@ -443,6 +471,7 @@ function ModelsSection({
             label="Google (Gemini) API Key"
             provider="google"
             hasKey={hasGoogleKey}
+            disabled={disabled}
             onSaved={() => setHasGoogleKey(true)}
             onRemoved={() => setHasGoogleKey(false)}
           />
@@ -747,12 +776,14 @@ export function AccountShell({
                   email={email}
                   initialDisplayName={displayName}
                   initialOrganization={organization}
+                  disabled={dbError}
                 />
               ) : (
                 <ModelsSection
                   initialChatModel={chatModel}
                   initialHasAnthropicKey={hasAnthropicKey}
                   initialHasGoogleKey={hasGoogleKey}
+                  disabled={dbError}
                 />
               )}
             </div>

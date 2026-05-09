@@ -30,6 +30,10 @@ function getDatabaseUrl(): string | undefined {
   );
 }
 
+export function hasDatabaseUrl(): boolean {
+  return Boolean(getDatabaseUrl());
+}
+
 export function getDb(): Sql {
   const databaseUrl = getDatabaseUrl();
   if (!databaseUrl) {

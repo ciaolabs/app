@@ -14,13 +14,13 @@ describe("ChatShell", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Complete a survey to start" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Take Personality" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Take Personality survey" })).toHaveAttribute(
       "href",
-      "/surveys/personality",
+      "https://survey.ciaobang.com/surveys/personality",
     );
-    expect(screen.getByRole("link", { name: "Take Values and Beliefs" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Take Values and Beliefs survey" })).toHaveAttribute(
       "href",
-      "/surveys/values-beliefs",
+      "https://survey.ciaobang.com/surveys/values-beliefs",
     );
   });
 });
