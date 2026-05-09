@@ -7,6 +7,32 @@ import { loadSurveyChatContext } from "@/lib/chat-context-loader";
 
 export const dynamic = "force-dynamic";
 
+const DEFAULT_APP_URL = "https://app.ciaobang.com";
+
+function getAllowedOrigins() {
+  return new Set(
+    [process.env.NEXT_PUBLIC_APP_URL, DEFAULT_APP_URL, "http://app.ciaobang.local:3001"]
+      .filter((origin): origin is string => Boolean(origin))
+      .map((origin) => origin.replace(/\/$/, "")),
+  );
+}
+
+function getCorsHeaders(request: Request): HeadersInit {
+  const origin = request.headers.get("origin")?.replace(/\/$/, "");
+
+  if (!origin || !getAllowedOrigins().has(origin)) {
+    return {};
+  }
+
+  return {
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Headers": "authorization, content-type, x-ciao-signature, x-ciao-user-id",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Origin": origin,
+    Vary: "Origin",
+  };
+}
+
 function getInternalSurveyContextSecret() {
   return (
     process.env.SURVEY_CONTEXT_SECRET ||
@@ -41,7 +67,15 @@ function verifyInternalUserId(request: Request) {
   return userId;
 }
 
+export async function OPTIONS(request: Request) {
+  return new Response(null, {
+    status: 204,
+    headers: getCorsHeaders(request),
+  });
+}
+
 export async function GET(request: Request) {
+  const corsHeaders = getCorsHeaders(request);
   const userId =
     verifyInternalUserId(request) ??
     (await getCurrentUserId({ acceptsSessionToken: true, request }));
@@ -49,10 +83,10 @@ export async function GET(request: Request) {
   if (!userId) {
     return NextResponse.json(
       { error: "Authentication required.", context: null },
-      { status: 401 },
+      { status: 401, headers: corsHeaders },
     );
   }
 
   const context = await loadSurveyChatContext(userId);
-  return NextResponse.json({ context });
+  return NextResponse.json({ context }, { headers: corsHeaders });
 }

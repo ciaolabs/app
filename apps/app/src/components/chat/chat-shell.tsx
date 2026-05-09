@@ -97,6 +97,13 @@ const clayIconButton =
 const clayIconButtonAccent =
   "clay-button-hover inline-flex size-11 items-center justify-center rounded-full border border-black bg-(--accent-blue) text-(--selected-contrast) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-60";
 
+const DEFAULT_SURVEY_URL = "https://survey.ciaobang.com";
+
+function getSurveyContextUrl() {
+  const surveyUrl = process.env.NEXT_PUBLIC_SURVEY_URL || DEFAULT_SURVEY_URL;
+  return `${surveyUrl.replace(/\/$/, "")}/api/internal/survey-context`;
+}
+
 function toUIMessage(message: ChatMessage): UIMessage {
   return {
     id: message.id,
@@ -932,8 +939,13 @@ function ChatMessageBubble({ message }: { message: UIMessage }) {
   );
 }
 
-export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShellProps) {
+export function ChatShell({
+  initialThreads,
+  surveyContext: initialSurveyContext,
+  hasApiKeys,
+}: ChatShellProps) {
   const [threads, setThreads] = useState(initialThreads);
+  const [surveyContext, setSurveyContext] = useState(initialSurveyContext);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [input, setInput] = useState("");
@@ -949,6 +961,39 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
     isTemporaryRef.current = isTemporary;
   }, [isTemporary]);
   const hasSurveyContext = surveyContextHasResults(surveyContext);
+
+  useEffect(() => {
+    if (hasSurveyContext) return;
+
+    let cancelled = false;
+
+    async function refreshSurveyContext() {
+      try {
+        const response = await fetch(getSurveyContextUrl(), {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as { context?: SurveyChatContext };
+        const nextContext = payload.context;
+
+        if (!cancelled && nextContext && surveyContextHasResults(nextContext)) {
+          setSurveyContext(nextContext);
+        }
+      } catch {
+        // Server-rendered context remains the source of truth when the browser refresh fails.
+      }
+    }
+
+    void refreshSurveyContext();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasSurveyContext]);
 
   useEffect(() => {
     function handleKey(event: KeyboardEvent) {
@@ -982,6 +1027,7 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
         body: () => ({
           threadId: isTemporaryRef.current ? null : activeThreadRef.current,
           temporary: isTemporaryRef.current,
+          surveyContext: surveyContextHasResults(surveyContext) ? surveyContext : undefined,
         }),
         fetch: async (input, init) => {
           const response = await fetch(input, init);
@@ -995,7 +1041,7 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
           return response;
         },
       }),
-    [],
+    [surveyContext],
   );
 
   const { messages, sendMessage, setMessages, status, stop, error } = useChat({

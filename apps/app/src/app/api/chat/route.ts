@@ -14,7 +14,7 @@ import { getReadyDb } from "@ciaobang/db";
 import { makeSearchDocsTool } from "@ciaobang/rag";
 import { getChatRepository } from "@/lib/chat/repository";
 import { buildChatSystemPrompt, createThreadTitle } from "@/lib/chat/prompt";
-import { surveyContextHasResults } from "@/lib/chat/survey-context";
+import { surveyContextHasResults, type SurveyChatContext } from "@/lib/chat/survey-context";
 import { loadSurveyChatContext } from "@/lib/chat/survey-context.server";
 import { MODEL_OPTIONS } from "@/lib/account/models";
 import { getDecryptedApiKey, getPreferences } from "@/lib/account/repository";
@@ -27,6 +27,7 @@ type ChatRequestBody = {
   threadId?: string | null;
   messages?: UIMessage[];
   temporary?: boolean;
+  surveyContext?: SurveyChatContext;
 };
 
 function createDevMockResponse(): Response {
@@ -116,10 +117,15 @@ export async function POST(request: Request) {
     return createDevMockResponse();
   }
 
-  const [surveyContext, repository] = await Promise.all([
+  const [serverSurveyContext, repository] = await Promise.all([
     loadSurveyChatContext({ request, userId }),
     Promise.resolve(getChatRepository()),
   ]);
+  const surveyContext = surveyContextHasResults(serverSurveyContext)
+    ? serverSurveyContext
+    : body.surveyContext && surveyContextHasResults(body.surveyContext)
+      ? body.surveyContext
+      : serverSurveyContext;
 
   if (!surveyContextHasResults(surveyContext)) {
     return NextResponse.json(

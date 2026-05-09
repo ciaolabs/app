@@ -144,6 +144,34 @@ describe("POST /api/chat", () => {
     expect(streamText).not.toHaveBeenCalled();
   });
 
+  it("uses browser-refreshed survey context when the server-side context lookup is empty", async () => {
+    getCurrentUserId.mockResolvedValue("user_123");
+    loadSurveyChatContext.mockResolvedValue({ personality: null, valuesBeliefs: null });
+    const { POST } = await import("@/app/api/chat/route");
+
+    const response = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          surveyContext,
+          messages: [
+            {
+              id: "m1",
+              role: "user",
+              parts: [{ type: "text", text: "What stands out?" }],
+            },
+          ],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(streamText).toHaveBeenCalledWith(expect.objectContaining({
+      system: expect.stringContaining("Data availability: personality only"),
+    }));
+  });
+
   it("creates a thread, streams a response, and persists both messages", async () => {
     getCurrentUserId.mockResolvedValue("user_123");
     const { POST } = await import("@/app/api/chat/route");
