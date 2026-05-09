@@ -11,7 +11,7 @@ async function ChatLoader() {
   const userId = await requireCurrentUserId();
   const [threads, surveyContext, apiKeys] = await Promise.all([
     getChatRepository().listThreads(userId).catch(() => []),
-    loadSurveyChatContext(),
+    loadSurveyChatContext({ userId }),
     process.env.NODE_ENV === "development"
       ? Promise.resolve(true)
       : hasAnyApiKey(userId).catch(() => false),

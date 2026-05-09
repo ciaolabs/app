@@ -1,4 +1,5 @@
 import { headers as nextHeaders } from "next/headers";
+import { createHmac } from "node:crypto";
 
 import {
   EMPTY_SURVEY_CHAT_CONTEXT,
@@ -17,7 +18,26 @@ function getSurveyUrl() {
 
 type LoadOptions = {
   request?: Request;
+  userId?: string;
 };
+
+function getInternalSurveyContextSecret() {
+  return (
+    process.env.SURVEY_CONTEXT_SECRET ||
+    process.env.WORKOS_COOKIE_PASSWORD ||
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    null
+  );
+}
+
+function signInternalUserId(userId: string) {
+  const secret = getInternalSurveyContextSecret();
+  if (!secret) return null;
+
+  return createHmac("sha256", secret).update(userId).digest("hex");
+}
 
 async function buildForwardedHeaders(request?: Request): Promise<HeadersInit> {
   const result: Record<string, string> = {
@@ -49,14 +69,20 @@ export async function loadSurveyChatContext(
   options: LoadOptions = {},
 ): Promise<SurveyChatContext> {
   const url = `${getSurveyUrl()}/api/internal/survey-context`;
-  const headers = await buildForwardedHeaders(options.request);
+  const headers = new Headers(await buildForwardedHeaders(options.request));
+  const signature = options.userId ? signInternalUserId(options.userId) : null;
+
+  if (options.userId && signature) {
+    headers.set("x-ciao-user-id", options.userId);
+    headers.set("x-ciao-signature", signature);
+  }
 
   let response: Response;
   try {
     response = await fetch(url, {
       method: "GET",
       headers,
-      next: { revalidate: 300 },
+      cache: "no-store",
     });
   } catch {
     return EMPTY_SURVEY_CHAT_CONTEXT;

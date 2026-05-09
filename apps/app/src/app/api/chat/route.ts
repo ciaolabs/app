@@ -117,7 +117,7 @@ export async function POST(request: Request) {
   }
 
   const [surveyContext, repository] = await Promise.all([
-    loadSurveyChatContext({ request }),
+    loadSurveyChatContext({ request, userId }),
     Promise.resolve(getChatRepository()),
   ]);
 
