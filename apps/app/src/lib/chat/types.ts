@@ -35,4 +35,5 @@ export interface ChatRepository {
     threadId: string;
     title: string;
   }): Promise<ChatThreadSummary | null>;
+  deleteThread(params: { userId: string; threadId: string }): Promise<boolean>;
 }
