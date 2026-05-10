@@ -1,6 +1,4 @@
-import type postgres from "postgres";
-
-import { AUTH_PROVIDER, getReadyDb } from "@ciaobang/db";
+import { AUTH_PROVIDER, getReadyDb, type Sql } from "@ciaobang/db";
 
 import type {
   ChatMessage,
@@ -53,7 +51,7 @@ function toMessage(row: MessageRow): ChatMessage {
   };
 }
 
-async function ensureUserAccount(sql: postgres.Sql, userId: string) {
+async function ensureUserAccount(sql: Sql, userId: string) {
   const [account] = await sql<IdRow[]>`
     insert into app_private.user_accounts (provider, provider_user_id, last_seen_at)
     values (${AUTH_PROVIDER}, ${userId}, now())
@@ -69,7 +67,7 @@ async function ensureUserAccount(sql: postgres.Sql, userId: string) {
   return account.id;
 }
 
-async function selectThread(sql: postgres.Sql, userId: string, threadId: string) {
+async function selectThread(sql: Sql, userId: string, threadId: string) {
   const [thread] = await sql<ThreadRow[]>`
     select
       ct.id,
