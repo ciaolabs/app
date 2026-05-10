@@ -1,48 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getCurrentUserId = vi.fn();
-const getChatRepository = vi.fn();
 const loadSurveyChatContext = vi.fn();
-const streamText = vi.fn();
-const convertToModelMessages = vi.fn();
 const getPreferences = vi.fn();
 const getDecryptedApiKey = vi.fn();
 const createAnthropic = vi.fn();
+const runChatTurn = vi.fn();
+const runDevChatTurn = vi.fn();
+const getReadyDb = vi.fn();
+const getChatRepository = vi.fn();
 
-vi.mock("@ciaobang/auth", () => ({
-  getCurrentUserId,
-}));
-
-vi.mock("@/lib/chat/repository", () => ({
-  getChatRepository,
-}));
-
-vi.mock("@/lib/chat/survey-context.server", () => ({
-  loadSurveyChatContext,
-}));
-
-vi.mock("@/lib/account/repository", () => ({
-  getPreferences,
-  getDecryptedApiKey,
-}));
-
-vi.mock("@ai-sdk/anthropic", () => ({
-  createAnthropic,
-}));
-
-vi.mock("ai", () => ({
-  convertToModelMessages,
-  streamText,
-  stepCountIs: vi.fn(),
-}));
-
-vi.mock("@ciaobang/db", () => ({
-  getReadyDb: vi.fn().mockResolvedValue({}),
-}));
-
-vi.mock("@ciaobang/rag", () => ({
-  makeSearchDocsTool: vi.fn().mockReturnValue({}),
-}));
+vi.mock("@ciaobang/auth", () => ({ getCurrentUserId }));
+vi.mock("@/lib/chat/repository", () => ({ getChatRepository }));
+vi.mock("@/lib/chat/survey-context.server", () => ({ loadSurveyChatContext }));
+vi.mock("@/lib/account/repository", () => ({ getPreferences, getDecryptedApiKey }));
+vi.mock("@ai-sdk/anthropic", () => ({ createAnthropic }));
+vi.mock("@ai-sdk/google", () => ({ createGoogleGenerativeAI: vi.fn() }));
+vi.mock("@ciaobang/db", () => ({ getReadyDb }));
+vi.mock("@/lib/chat/turn", () => ({ runChatTurn }));
+vi.mock("@/lib/chat/turn.dev-mock", () => ({ runDevChatTurn }));
 
 const surveyContext = {
   personality: {
@@ -58,158 +34,155 @@ const surveyContext = {
   valuesBeliefs: null,
 };
 
-describe("POST /api/chat", () => {
-  const repository = {
-    getThread: vi.fn(),
-    createThread: vi.fn(),
-    appendMessage: vi.fn(),
-    listThreads: vi.fn(),
-    renameThread: vi.fn(),
-  };
-
+describe("POST /api/chat (HTTP shape)", () => {
   beforeEach(() => {
     vi.resetModules();
     getCurrentUserId.mockReset();
-    getChatRepository.mockReset();
     loadSurveyChatContext.mockReset();
-    streamText.mockReset();
-    convertToModelMessages.mockReset();
     getPreferences.mockReset();
     getDecryptedApiKey.mockReset();
     createAnthropic.mockReset();
-    repository.getThread.mockReset();
-    repository.createThread.mockReset();
-    repository.appendMessage.mockReset();
-    repository.listThreads.mockReset();
-    repository.renameThread.mockReset();
+    runChatTurn.mockReset();
+    runDevChatTurn.mockReset();
+    getReadyDb.mockReset();
+    getChatRepository.mockReset();
 
-    getChatRepository.mockReturnValue(repository);
-    loadSurveyChatContext.mockResolvedValue(surveyContext);
-    convertToModelMessages.mockResolvedValue([{ role: "user", content: "Hello" }]);
+    getChatRepository.mockReturnValue({});
+    getReadyDb.mockResolvedValue({});
     getPreferences.mockResolvedValue({ chatModel: "claude-sonnet-4-6" });
     getDecryptedApiKey.mockResolvedValue("sk-test-key");
     createAnthropic.mockReturnValue(() => "mock-model");
-    repository.getThread.mockResolvedValue(null);
-    repository.createThread.mockResolvedValue({
-      id: "thread_1",
-      userId: "user_123",
-      title: "What stands out?",
-      createdAt: "2026-05-01T10:00:00.000Z",
-      updatedAt: "2026-05-01T10:00:00.000Z",
-    });
-    repository.appendMessage.mockResolvedValue({
-      id: "message_1",
-      threadId: "thread_1",
-      role: "user",
-      content: "What stands out?",
-      createdAt: "2026-05-01T10:00:00.000Z",
-    });
-    streamText.mockImplementation(({ onFinish }) => ({
-      toUIMessageStreamResponse: ({ headers }: { headers: HeadersInit }) => {
-        void onFinish({ text: "A thoughtful response." });
-        return new Response("stream", { headers });
-      },
-    }));
+    loadSurveyChatContext.mockResolvedValue(surveyContext);
+    runChatTurn.mockResolvedValue(new Response("ok", { headers: { "x-chat-thread-id": "t1" } }));
+    runDevChatTurn.mockResolvedValue(new Response("dev"));
   });
 
-  it("returns 401 for unauthenticated chat requests", async () => {
+  function buildRequest(body: unknown) {
+    return new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  }
+
+  it("returns 401 when the request is unauthenticated", async () => {
     getCurrentUserId.mockResolvedValue(null);
     const { POST } = await import("@/app/api/chat/route");
 
-    const response = await POST(
-      new Request("http://localhost/api/chat", {
-        method: "POST",
-        body: JSON.stringify({ messages: [] }),
-      }),
-    );
+    const response = await POST(buildRequest({ messages: [] }));
 
     expect(response.status).toBe(401);
+    expect(runChatTurn).not.toHaveBeenCalled();
   });
 
-  it("rejects chat requests when no survey results exist", async () => {
-    getCurrentUserId.mockResolvedValue("user_123");
+  it("returns 400 when the request body is not JSON", async () => {
+    getCurrentUserId.mockResolvedValue("user_1");
+    const { POST } = await import("@/app/api/chat/route");
+
+    const response = await POST(
+      new Request("http://localhost/api/chat", { method: "POST", body: "not-json" }),
+    );
+
+    expect(response.status).toBe(400);
+    expect(runChatTurn).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when no user message is present", async () => {
+    getCurrentUserId.mockResolvedValue("user_1");
+    const { POST } = await import("@/app/api/chat/route");
+
+    const response = await POST(buildRequest({ messages: [] }));
+
+    expect(response.status).toBe(400);
+    expect(runChatTurn).not.toHaveBeenCalled();
+  });
+
+  it("returns 409 when no survey results exist server-side or in the body", async () => {
+    getCurrentUserId.mockResolvedValue("user_1");
     loadSurveyChatContext.mockResolvedValue({ personality: null, valuesBeliefs: null });
     const { POST } = await import("@/app/api/chat/route");
 
     const response = await POST(
-      new Request("http://localhost/api/chat", {
-        method: "POST",
-        body: JSON.stringify({
-          messages: [{ id: "m1", role: "user", parts: [{ type: "text", text: "Hi" }] }],
-        }),
+      buildRequest({
+        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
       }),
     );
 
     expect(response.status).toBe(409);
-    expect(streamText).not.toHaveBeenCalled();
+    expect(runChatTurn).not.toHaveBeenCalled();
   });
 
-  it("uses browser-refreshed survey context when the server-side context lookup is empty", async () => {
-    getCurrentUserId.mockResolvedValue("user_123");
+  it("returns 402 when no API key is configured for the chosen provider", async () => {
+    getCurrentUserId.mockResolvedValue("user_1");
+    getDecryptedApiKey.mockResolvedValue(null);
+    const { POST } = await import("@/app/api/chat/route");
+
+    const response = await POST(
+      buildRequest({
+        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
+      }),
+    );
+
+    expect(response.status).toBe(402);
+    expect(runChatTurn).not.toHaveBeenCalled();
+  });
+
+  it("falls back to body-provided survey context when the server-side context is empty", async () => {
+    getCurrentUserId.mockResolvedValue("user_1");
     loadSurveyChatContext.mockResolvedValue({ personality: null, valuesBeliefs: null });
     const { POST } = await import("@/app/api/chat/route");
 
-    const response = await POST(
-      new Request("http://localhost/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          surveyContext,
-          messages: [
-            {
-              id: "m1",
-              role: "user",
-              parts: [{ type: "text", text: "What stands out?" }],
-            },
-          ],
-        }),
+    await POST(
+      buildRequest({
+        surveyContext,
+        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
       }),
     );
 
-    expect(response.status).toBe(200);
-    expect(streamText).toHaveBeenCalledWith(expect.objectContaining({
-      system: expect.stringContaining("Data availability: personality only"),
-    }));
+    expect(runChatTurn).toHaveBeenCalledWith(
+      expect.objectContaining({ surveyContext, userId: "user_1" }),
+    );
   });
 
-  it("creates a thread, streams a response, and persists both messages", async () => {
-    getCurrentUserId.mockResolvedValue("user_123");
+  it("hands a fully-resolved input to runChatTurn and returns its response", async () => {
+    getCurrentUserId.mockResolvedValue("user_1");
     const { POST } = await import("@/app/api/chat/route");
 
     const response = await POST(
-      new Request("http://localhost/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [
-            {
-              id: "m1",
-              role: "user",
-              parts: [{ type: "text", text: "What stands out?" }],
-            },
-          ],
-        }),
+      buildRequest({
+        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
+        threadId: null,
+        temporary: false,
       }),
     );
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(response.headers.get("x-chat-thread-id")).toBe("t1");
+    expect(runChatTurn).toHaveBeenCalledTimes(1);
+    const args = runChatTurn.mock.calls[0]![0];
+    expect(args).toMatchObject({
+      userId: "user_1",
+      surveyContext,
+      threadId: null,
+      temporary: false,
+    });
+    expect(args.ragSearch).toEqual({ googleApiKey: "sk-test-key", sql: {} });
+    expect(args.model).toBeDefined();
+    expect(args.repository).toBeDefined();
+  });
 
-    expect(response.headers.get("x-chat-thread-id")).toBe("thread_1");
-    expect(repository.createThread).toHaveBeenCalledWith({
-      userId: "user_123",
-      title: "What stands out?",
-    });
-    expect(repository.appendMessage).toHaveBeenCalledWith({
-      userId: "user_123",
-      threadId: "thread_1",
-      role: "user",
-      content: "What stands out?",
-    });
-    expect(repository.appendMessage).toHaveBeenCalledWith({
-      userId: "user_123",
-      threadId: "thread_1",
-      role: "assistant",
-      content: "A thoughtful response.",
-    });
+  it("omits the RAG capability when no Google API key is configured", async () => {
+    getCurrentUserId.mockResolvedValue("user_1");
+    getDecryptedApiKey.mockImplementation(async (_userId: string, provider: string) =>
+      provider === "google" ? null : "sk-anthropic",
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    await POST(
+      buildRequest({
+        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
+      }),
+    );
+
+    expect(runChatTurn).toHaveBeenCalledWith(expect.objectContaining({ ragSearch: null }));
   });
 });

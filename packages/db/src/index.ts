@@ -14,3 +14,4 @@ export {
   hasDatabaseUrl,
   type Sql,
 } from "./client";
+export { runMigrations } from "./migrate";

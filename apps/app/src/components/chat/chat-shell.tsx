@@ -9,6 +9,7 @@ import {
   CopyIcon,
   HistoryIcon,
   GhostIcon,
+  Loader2Icon,
   LogOutIcon,
   MenuIcon,
   MonitorIcon,
@@ -26,6 +27,7 @@ import {
   ThumbsUpIcon,
   Trash2Icon,
   UserIcon,
+  WrenchIcon,
   XIcon,
 } from "lucide-react";
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
@@ -35,10 +37,7 @@ import { useChat } from "@ai-sdk/react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
-const LazyMarkdown = dynamic(
-  () => import("@/components/chat/markdown-renderer").then((m) => ({ default: m.MarkdownRenderer })),
-  { ssr: false, loading: () => <div className="animate-pulse h-6 rounded bg-(--surface-inset)" /> },
-);
+import { MarkdownRenderer } from "@/components/chat/markdown-renderer";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -124,6 +123,105 @@ function getMessageText(message: UIMessage) {
   return message.parts
     .map((part) => (part.type === "text" ? part.text : ""))
     .join("");
+}
+
+const TOOL_LABELS: Record<string, string> = {
+  searchDocs: "Searching survey docs",
+  recallSurveyDetail: "Recalling survey detail",
+  compareDimensions: "Comparing dimensions",
+};
+
+function humanizeToolName(toolName: string) {
+  if (TOOL_LABELS[toolName]) return TOOL_LABELS[toolName];
+  return toolName.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
+}
+
+function summarizeToolInput(input: unknown): string | null {
+  if (!input || typeof input !== "object") return null;
+  const obj = input as Record<string, unknown>;
+  if (typeof obj.query === "string" && obj.query.trim()) return obj.query.trim();
+  if (typeof obj.section === "string") return obj.section;
+  if (Array.isArray(obj.labels)) return (obj.labels as unknown[]).join(", ");
+  return null;
+}
+
+type ToolMessagePart = {
+  type: string;
+  toolCallId?: string;
+  state?: "input-streaming" | "input-available" | "output-available" | "output-error";
+  input?: unknown;
+  output?: unknown;
+  errorText?: string;
+};
+
+function ToolCallPart({ part }: { part: ToolMessagePart }) {
+  const toolName =
+    part.type === "dynamic-tool"
+      ? (part as { toolName?: string }).toolName ?? "tool"
+      : part.type.replace(/^tool-/, "");
+  const label = humanizeToolName(toolName);
+  const summary = summarizeToolInput(part.input);
+  const isPending = part.state === "input-streaming" || part.state === "input-available";
+  const isError = part.state === "output-error";
+
+  return (
+    <details className="my-2 rounded-xl border border-(--line) bg-(--surface-inset) text-sm text-(--ink-soft)">
+      <summary
+        className={cn(
+          "flex cursor-pointer items-center gap-2 px-3 py-2 font-semibold",
+          isError ? "text-(--accent-rose)" : "text-(--ink)",
+        )}
+      >
+        {isPending ? (
+          <Loader2Icon className="size-4 shrink-0 animate-spin" />
+        ) : isError ? (
+          <XIcon className="size-4 shrink-0" />
+        ) : (
+          <CheckIcon className="size-4 shrink-0" />
+        )}
+        <WrenchIcon className="size-3.5 shrink-0 text-(--muted)" />
+        <span className="truncate">
+          {label}
+          {summary ? (
+            <span className="ml-1 font-normal text-(--ink-soft)">— {summary}</span>
+          ) : null}
+        </span>
+      </summary>
+      <div className="space-y-2 border-t border-(--line) px-3 py-2 text-xs">
+        {part.input !== undefined ? (
+          <div>
+            <div className="clay-label">Input</div>
+            <pre className="mt-1 overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-5">
+              {JSON.stringify(part.input, null, 2)}
+            </pre>
+          </div>
+        ) : null}
+        {part.state === "output-available" && part.output !== undefined ? (
+          <div>
+            <div className="clay-label">Output</div>
+            <pre className="mt-1 max-h-60 overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-5">
+              {JSON.stringify(part.output, null, 2)}
+            </pre>
+          </div>
+        ) : null}
+        {isError ? (
+          <p className="text-(--accent-rose)">{part.errorText ?? "Tool errored."}</p>
+        ) : null}
+      </div>
+    </details>
+  );
+}
+
+function ReasoningPart({ text }: { text: string }) {
+  if (!text.trim()) return null;
+  return (
+    <details className="my-2 rounded-xl border border-(--line) bg-(--surface-inset) text-sm text-(--ink-soft)">
+      <summary className="cursor-pointer px-3 py-2 font-semibold text-(--ink)">Thinking</summary>
+      <p className="whitespace-pre-wrap border-t border-(--line) px-3 py-2 text-xs leading-5">
+        {text}
+      </p>
+    </details>
+  );
 }
 
 function getContextLabel(context: SurveyChatContext) {
@@ -616,6 +714,7 @@ function CiaoLogo() {
 function ThreadSidebarItem({
   thread,
   isActive,
+  isLoading,
   isPinned,
   renamingThreadId,
   onSelect,
@@ -626,6 +725,7 @@ function ThreadSidebarItem({
 }: {
   thread: ChatThreadSummary;
   isActive: boolean;
+  isLoading: boolean;
   isPinned: boolean;
   renamingThreadId: string | null;
   onSelect: () => void;
@@ -686,15 +786,19 @@ function ThreadSidebarItem({
       ) : (
         <button
           type="button"
+          disabled={isLoading}
           onClick={onSelect}
           className={cn(
             "flex min-h-14 w-full items-center gap-3 rounded-xl border px-3 pr-10 text-left transition",
             isActive
               ? "border-(--line-strong) bg-(--accent-soft) text-(--ink)"
               : "border-transparent text-(--ink-soft) hover:border-(--line) hover:bg-(--surface-inset) hover:text-(--ink)",
+            isLoading && "cursor-wait opacity-70",
           )}
         >
-          {isPinned ? (
+          {isLoading ? (
+            <Loader2Icon className="size-4 shrink-0 animate-spin" />
+          ) : isPinned ? (
             <PinIcon className="size-4 shrink-0 rotate-45" />
           ) : (
             <HistoryIcon className="size-4 shrink-0" />
@@ -769,6 +873,7 @@ function ThreadSidebarItem({
 function ThreadSidebar({
   threads,
   activeThreadId,
+  loadingThreadId,
   search,
   onSearch,
   onNewChat,
@@ -782,6 +887,7 @@ function ThreadSidebar({
 }: {
   threads: ChatThreadSummary[];
   activeThreadId: string | null;
+  loadingThreadId: string | null;
   search: string;
   onSearch: (value: string) => void;
   onNewChat: () => void;
@@ -888,6 +994,7 @@ function ThreadSidebar({
               key={thread.id}
               thread={thread}
               isActive={activeThreadId === thread.id}
+              isLoading={loadingThreadId === thread.id}
               isPinned={pinnedThreadIds.includes(thread.id)}
               renamingThreadId={renamingThreadId}
               onSelect={() => onSelectThread(thread.id)}
@@ -1103,93 +1210,106 @@ function ChatMessageBubble({
     setTimeout(() => setCopied(false), 1500);
   };
 
-  return (
-    <div className={cn("group flex w-full gap-4", isUser && "justify-end")}>
-      {!isUser ? (
-        <Avatar className="mt-1 size-9 shrink-0 border border-black bg-(--accent-blue) shadow-(--shadow-soft)">
-          <AvatarFallback className="bg-transparent text-(--selected-contrast)">
-            <BotIcon className="size-4" />
-          </AvatarFallback>
-        </Avatar>
-      ) : null}
-      <div className={cn("flex max-w-[min(760px,85%)] flex-col gap-1", isUser && "items-end")}>
-        <div
-          className={cn(
-            "rounded-2xl border px-5 py-4 text-base leading-7 shadow-(--shadow-soft)",
-            isUser
-              ? "border-black bg-(--accent-blue) text-(--selected-contrast)"
-              : "border-(--line-strong) bg-(--surface-panel-strong) text-(--ink)",
-          )}
-        >
-          {isUser ? (
+  if (isUser) {
+    return (
+      <div className="group flex w-full justify-end gap-4">
+        <div className="flex max-w-[min(760px,85%)] flex-col items-end gap-1">
+          <div className="rounded-2xl border border-black bg-(--accent-blue) px-5 py-4 text-base leading-7 text-(--selected-contrast) shadow-(--shadow-soft)">
             <p className="whitespace-pre-wrap">{text}</p>
+          </div>
+          <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+            <button
+              type="button"
+              onClick={() => onEdit?.(text)}
+              title="Edit message"
+              className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
+            >
+              <PencilIcon className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={copyText}
+              title="Copy message"
+              className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
+            >
+              {copied ? <CheckIcon className="size-3.5 text-green-500" /> : <CopyIcon className="size-3.5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const renderedParts = message.parts.map((part, index) => {
+    if (part.type === "text") {
+      if (!part.text) return null;
+      return <MarkdownRenderer key={`text-${index}`} text={part.text} />;
+    }
+    if (part.type === "reasoning") {
+      const reasoningText = (part as { text?: string }).text ?? "";
+      return <ReasoningPart key={`reasoning-${index}`} text={reasoningText} />;
+    }
+    if (part.type.startsWith("tool-") || part.type === "dynamic-tool") {
+      return <ToolCallPart key={`tool-${index}`} part={part as ToolMessagePart} />;
+    }
+    return null;
+  });
+
+  const hasContent = renderedParts.some(Boolean);
+
+  return (
+    <div className="group flex w-full gap-4">
+      <Avatar className="mt-1 size-9 shrink-0 border border-black bg-(--accent-blue) shadow-(--shadow-soft)">
+        <AvatarFallback className="bg-transparent text-(--selected-contrast)">
+          <BotIcon className="size-4" />
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex max-w-[min(760px,85%)] flex-col gap-1">
+        <div className="rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) px-5 py-4 text-base leading-7 text-(--ink) shadow-(--shadow-soft)">
+          {hasContent ? (
+            renderedParts
           ) : (
-            <LazyMarkdown text={text} />
+            <div className="flex items-center gap-2 text-(--ink-soft)">
+              <Loader2Icon className="size-4 animate-spin" />
+              <span className="text-sm">Thinking...</span>
+            </div>
           )}
         </div>
-        <div
-          className={cn(
-            "flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100",
-            isUser ? "justify-end" : "justify-start",
-          )}
-        >
-          {isUser ? (
-            <>
-              <button
-                type="button"
-                onClick={() => onEdit?.(text)}
-                title="Edit message"
-                className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
-              >
-                <PencilIcon className="size-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={copyText}
-                title="Copy message"
-                className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
-              >
-                {copied ? <CheckIcon className="size-3.5 text-green-500" /> : <CopyIcon className="size-3.5" />}
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={copyText}
-                title="Copy response"
-                className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
-              >
-                {copied ? <CheckIcon className="size-3.5 text-green-500" /> : <CopyIcon className="size-3.5" />}
-              </button>
-              <button
-                type="button"
-                onClick={() => setFeedback(feedback === "up" ? null : "up")}
-                title="Good response"
-                className={cn(
-                  "inline-flex size-7 items-center justify-center rounded-lg transition",
-                  feedback === "up"
-                    ? "text-green-500"
-                    : "text-(--muted) hover:bg-(--surface-inset) hover:text-(--ink)",
-                )}
-              >
-                <ThumbsUpIcon className="size-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setFeedback(feedback === "down" ? null : "down")}
-                title="Poor response"
-                className={cn(
-                  "inline-flex size-7 items-center justify-center rounded-lg transition",
-                  feedback === "down"
-                    ? "text-red-500"
-                    : "text-(--muted) hover:bg-(--surface-inset) hover:text-(--ink)",
-                )}
-              >
-                <ThumbsDownIcon className="size-3.5" />
-              </button>
-            </>
-          )}
+        <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <button
+            type="button"
+            onClick={copyText}
+            title="Copy response"
+            className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
+          >
+            {copied ? <CheckIcon className="size-3.5 text-green-500" /> : <CopyIcon className="size-3.5" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => setFeedback(feedback === "up" ? null : "up")}
+            title="Good response"
+            className={cn(
+              "inline-flex size-7 items-center justify-center rounded-lg transition",
+              feedback === "up"
+                ? "text-green-500"
+                : "text-(--muted) hover:bg-(--surface-inset) hover:text-(--ink)",
+            )}
+          >
+            <ThumbsUpIcon className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setFeedback(feedback === "down" ? null : "down")}
+            title="Poor response"
+            className={cn(
+              "inline-flex size-7 items-center justify-center rounded-lg transition",
+              feedback === "down"
+                ? "text-red-500"
+                : "text-(--muted) hover:bg-(--surface-inset) hover:text-(--ink)",
+            )}
+          >
+            <ThumbsDownIcon className="size-3.5" />
+          </button>
         </div>
       </div>
     </div>
@@ -1206,7 +1326,7 @@ export function ChatShell({
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [input, setInput] = useState("");
-  const [isLoadingThread, setIsLoadingThread] = useState(false);
+  const [loadingThreadId, setLoadingThreadId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isTemporary, setIsTemporary] = useState(false);
@@ -1310,7 +1430,7 @@ export function ChatShell({
   );
 
   const { messages, sendMessage, setMessages, status, stop, error } = useChat({
-    id: activeThreadId ?? "new-chat",
+    id: "main-chat",
     messages: [],
     transport,
     onFinish: () => {
@@ -1366,7 +1486,7 @@ export function ChatShell({
 
   const loadThread = useCallback(
     async (threadId: string) => {
-      setIsLoadingThread(true);
+      setLoadingThreadId(threadId);
 
       try {
         const response = await fetch(`/api/chat/threads/${threadId}`);
@@ -1384,7 +1504,7 @@ export function ChatShell({
       } catch (threadError) {
         toast.error(threadError instanceof Error ? threadError.message : "Unable to load chat.");
       } finally {
-        setIsLoadingThread(false);
+        setLoadingThreadId(null);
       }
     },
     [setMessages],
@@ -1494,6 +1614,7 @@ export function ChatShell({
             <ThreadSidebar
               threads={threads}
               activeThreadId={activeThreadId}
+              loadingThreadId={loadingThreadId}
               search={search}
               onSearch={setSearch}
               onNewChat={startNewChat}
@@ -1528,6 +1649,7 @@ export function ChatShell({
             <ThreadSidebar
               threads={threads}
               activeThreadId={activeThreadId}
+              loadingThreadId={loadingThreadId}
               search={search}
               onSearch={setSearch}
               onNewChat={startNewChat}
@@ -1589,7 +1711,7 @@ export function ChatShell({
                     onEdit={message.role === "user" ? handleEditMessage : undefined}
                   />
                 ))}
-                {isLoadingThread ? (
+                {loadingThreadId ? (
                   <p className="text-sm text-(--muted)">Loading thread...</p>
                 ) : null}
               </div>
