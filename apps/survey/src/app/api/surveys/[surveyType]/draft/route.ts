@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getCurrentUserId } from "@/lib/auth";
 import { getActiveSurveyDefinition } from "@/lib/survey/definitions";
-import { canStartDraft } from "@/lib/survey/lifecycle";
+import { checkSurveyAction } from "@/lib/survey/lifecycle";
 import { getSurveyRepository } from "@/lib/survey/repository";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +10,6 @@ export const dynamic = "force-dynamic";
 type SurveyRouteContext = {
   params: Promise<{ surveyType: string }>;
 };
-
-const FINAL_ATTEMPT_MESSAGE = "You have already used your final attempt for this survey.";
 
 export async function GET(request: Request, context: SurveyRouteContext) {
   const userId = await getCurrentUserId({ acceptsSessionToken: true, request });
@@ -29,9 +27,10 @@ export async function GET(request: Request, context: SurveyRouteContext) {
 
   const repository = getSurveyRepository();
   const status = await repository.getSurveyStatus(userId, definition.type);
+  const decision = checkSurveyAction(definition, status, "start-draft");
 
-  if (!canStartDraft(definition, status)) {
-    return NextResponse.json({ error: FINAL_ATTEMPT_MESSAGE }, { status: 403 });
+  if (!decision.allowed) {
+    return NextResponse.json({ error: decision.message }, { status: 403 });
   }
 
   const draft = status.hasActiveDraft

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentUserId } from "@/lib/auth";
+import { toSurveyResultsDto } from "@/lib/survey/api-types";
 import { getActiveSurveyDefinition } from "@/lib/survey/definitions";
 import { getSurveyRepository } from "@/lib/survey/repository";
 import { buildSurveyResults } from "@/lib/survey/results/engine";
@@ -56,7 +57,7 @@ export async function GET(request: Request, context: SurveyRouteContext) {
   }
 
   return NextResponse.json({
-    results: buildSurveyResults(submission),
+    results: toSurveyResultsDto(buildSurveyResults(submission)),
     submissions,
     selectedSubmissionId: submission.submissionId,
   });

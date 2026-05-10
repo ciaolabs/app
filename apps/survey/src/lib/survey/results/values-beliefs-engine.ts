@@ -1,4 +1,9 @@
 import { clamp, erfApproximation, normalCdf } from "@/lib/survey/results/math";
+import {
+  displayScoreFromMean,
+  percentileDetailsFor,
+  scoreBandFor,
+} from "@/lib/survey/results/score-band";
 import { type SurveyAnswers, type SurveySubmission } from "@/lib/survey/types";
 import {
   PRIMAL_AGGREGATE_ITEM_NUMBERS,
@@ -13,51 +18,21 @@ import {
   type BeliefsResultTab,
   type PolarScaleResult,
   type ReferenceDistribution,
-  type ScoreBand,
   type ValuesBeliefsResults,
   type ValuesResultTab,
   type ValuesScaleResult,
 } from "@/lib/survey/results/types";
-
-const MIN_PERCENTILE = 1;
-const MAX_PERCENTILE = 99;
-
-function toScoreBand(score: number): ScoreBand {
-  if (score >= 31) {
-    return "High";
-  }
-
-  if (score <= 19) {
-    return "Low";
-  }
-
-  return "Middle";
-}
-
-function toPercentileDetails(percentile: number) {
-  const normalized = clamp(Math.round(percentile), MIN_PERCENTILE, MAX_PERCENTILE);
-
-  if (normalized >= 50) {
-    return {
-      percentile: normalized,
-      percentileDirection: "higher" as const,
-      percentileMagnitude: normalized,
-      percentileText: `Higher than ${normalized}% of reference respondents`,
-    };
-  }
-
-  const percentileMagnitude = 100 - normalized;
-
-  return {
-    percentile: normalized,
-    percentileDirection: "lower" as const,
-    percentileMagnitude,
-    percentileText: `Lower than ${percentileMagnitude}% of reference respondents`,
-  };
-}
+import {
+  IQR_Z_SCORE,
+  VALUES_BELIEFS_COMPARISON_NOUN,
+  compareByPercentileDesc,
+  compareByScoreAsc,
+  compareByScoreDesc,
+  keyedItemValue,
+} from "@/lib/survey/results/scoring-utils";
 
 function toReferenceDistribution(reference: ReferenceScaleStats): ReferenceDistribution {
-  const iqrOffset = 0.67448975 * reference.sd;
+  const iqrOffset = IQR_Z_SCORE * reference.sd;
 
   return {
     mean: clamp(Math.round(reference.mean), 0, 50),
@@ -67,20 +42,12 @@ function toReferenceDistribution(reference: ReferenceScaleStats): ReferenceDistr
   };
 }
 
-function toDisplayScore(meanScore: number) {
-  return clamp(Math.round(((meanScore - 1) / 5) * 50), 0, 50);
-}
-
 function beliefQuestionId(itemNumber: number) {
   return `PWB${itemNumber.toString().padStart(2, "0")}`;
 }
 
 function valueQuestionId(itemNumber: number) {
   return `PVQ${itemNumber.toString().padStart(2, "0")}`;
-}
-
-function keyedBeliefValue(rawValue: number, reverse: boolean) {
-  return reverse ? 7 - rawValue : rawValue;
 }
 
 function scoreBeliefItems(
@@ -96,11 +63,11 @@ function scoreBeliefItems(
       throw new Error(`Missing answer for belief item ${itemNumber}.`);
     }
 
-    return keyedBeliefValue(answer, reverseSet.has(itemNumber));
+    return keyedItemValue(answer, reverseSet.has(itemNumber));
   });
 
   const meanScore = keyedValues.reduce((sum, value) => sum + value, 0) / keyedValues.length;
-  return toDisplayScore(meanScore);
+  return displayScoreFromMean(meanScore);
 }
 
 function scoreValuesItems(answers: SurveyAnswers, itemNumbers: readonly number[]) {
@@ -115,17 +82,17 @@ function scoreValuesItems(answers: SurveyAnswers, itemNumbers: readonly number[]
   });
 
   const meanScore = rawValues.reduce((sum, value) => sum + value, 0) / rawValues.length;
-  return toDisplayScore(meanScore);
+  return displayScoreFromMean(meanScore);
 }
 
 function scoreFromReference(score: number, reference: ReferenceScaleStats) {
   const percentile = normalCdf(score, reference.mean, reference.sd) * 100;
-  const percentileDetails = toPercentileDetails(percentile);
+  const percentileDetails = percentileDetailsFor(percentile, VALUES_BELIEFS_COMPARISON_NOUN);
 
   return {
     ...percentileDetails,
     reference: toReferenceDistribution(reference),
-    band: toScoreBand(score),
+    band: scoreBandFor(score),
   };
 }
 
@@ -302,13 +269,7 @@ function buildBeliefsResults(answers: SurveyAnswers): BeliefsResultTab {
     tertiaryById.get("acceptable"),
   ].filter((value): value is PolarScaleResult => Boolean(value));
 
-  const rankedTertiary = [...tertiaryResults].sort((left, right) => {
-    if (right.percentile !== left.percentile) {
-      return right.percentile - left.percentile;
-    }
-
-    return right.score - left.score;
-  });
+  const rankedTertiary = [...tertiaryResults].sort(compareByPercentileDesc);
 
   return {
     overview: [primary, ...secondary],
@@ -370,20 +331,8 @@ function buildValuesResults(answers: SurveyAnswers): ValuesResultTab {
   const narrativePool = basicResults.filter(
     (result) => result.id !== "face" && result.id !== "humility",
   );
-  const strongest = [...narrativePool].sort((left, right) => {
-    if (right.score !== left.score) {
-      return right.score - left.score;
-    }
-
-    return right.percentile - left.percentile;
-  });
-  const weakest = [...narrativePool].sort((left, right) => {
-    if (left.score !== right.score) {
-      return left.score - right.score;
-    }
-
-    return left.percentile - right.percentile;
-  });
+  const strongest = [...narrativePool].sort(compareByScoreDesc);
+  const weakest = [...narrativePool].sort(compareByScoreAsc);
 
   return {
     higherOrder,
