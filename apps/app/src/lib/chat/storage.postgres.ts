@@ -200,5 +200,21 @@ export function createPostgresChatRepository(): ChatRepository {
 
       return renamed ? toThread(renamed) : null;
     },
+
+    async deleteThread({ userId, threadId }) {
+      const sql = await getReadyDb();
+      const thread = await selectThread(sql, userId, threadId);
+
+      if (!thread) {
+        return false;
+      }
+
+      await sql`
+        delete from app_private.chat_threads
+        where id = ${threadId}
+      `;
+
+      return true;
+    },
   };
 }

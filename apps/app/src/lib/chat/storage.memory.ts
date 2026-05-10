@@ -125,5 +125,17 @@ export function createMemoryChatRepository(): ChatRepository {
       state.threads.set(threadId, renamed);
       return cloneThread(renamed);
     },
+
+    async deleteThread({ userId, threadId }) {
+      const thread = state.threads.get(threadId);
+
+      if (!thread || thread.userId !== userId) {
+        return false;
+      }
+
+      state.threads.delete(threadId);
+      state.messages.delete(threadId);
+      return true;
+    },
   };
 }
