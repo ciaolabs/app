@@ -8,7 +8,6 @@ import {
   CornerDownLeftIcon,
   CopyIcon,
   HistoryIcon,
-  GhostIcon,
   Loader2Icon,
   LogOutIcon,
   MenuIcon,
@@ -800,10 +799,10 @@ function ThreadSidebarItem({
           ) : isPinned ? (
             <PinIcon className="size-4 shrink-0 rotate-45" />
           ) : null}
-          <span className="min-w-0 flex-1 overflow-hidden">
-            <span className="block truncate text-sm font-semibold">{thread.title}</span>
-            <span className="block truncate text-xs text-(--muted)">{formatThreadDate(thread.updatedAt)}</span>
-          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{thread.title}</p>
+            <p className="truncate text-xs text-(--muted)">{formatThreadDate(thread.updatedAt)}</p>
+          </div>
         </button>
       )}
       {!isRenaming && (
@@ -1584,16 +1583,16 @@ export function ChatShell({
         {isTemporary ? (
           <div aria-hidden="true" className="incognito-maze">
             <span className="maze-ghost maze-ghost-1">
-              <GhostIcon className="size-full" />
+              <IncognitoGhostIcon className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-2">
-              <GhostIcon className="size-full" />
+              <IncognitoGhostIcon className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-3">
-              <GhostIcon className="size-full" />
+              <IncognitoGhostIcon className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-4">
-              <GhostIcon className="size-full" />
+              <IncognitoGhostIcon className="size-full" />
             </span>
           </div>
         ) : null}
@@ -1671,7 +1670,7 @@ export function ChatShell({
                     onClick={toggleTemporary}
                     className={cn(
                       clayIconButton,
-                      "incognito-toggle-btn",
+                      "group incognito-toggle-btn",
                       isTemporary &&
                         "border-black bg-(--accent-blue) text-(--selected-contrast)",
                     )}

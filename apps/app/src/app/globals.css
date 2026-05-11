@@ -821,19 +821,11 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
   --dot-hot-edge: 1.92px;
 }
 
-.incognito-toggle-btn:hover .ghost-eye {
-  animation: ghost-look 2s ease-in-out infinite;
-}
-
-@keyframes ghost-look {
-  0%, 100% { transform: translate(0, 0); }
-  12.5%    { transform: translate(1px, 0); }
-  25%      { transform: translate(1px, 0); }
-  37.5%    { transform: translate(-1px, 0); }
-  50%      { transform: translate(-1px, 0); }
-  62.5%    { transform: translate(0, -1px); }
-  75%      { transform: translate(0, -1px); }
-  87.5%    { transform: translate(0, 0); }
+@keyframes look-around {
+  0%, 16.6%, 100% { transform: translateX(-1.5px) translateY(0); }
+  25%, 41.6%      { transform: translateX(1.5px) translateY(0); }
+  50%, 66.6%      { transform: translateX(0) translateY(-1.5px); }
+  75%, 91.6%      { transform: translateX(0) translateY(0); }
 }
 
 .maze-ghost {
