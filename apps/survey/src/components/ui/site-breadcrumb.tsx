@@ -50,6 +50,7 @@ export function SiteBreadcrumb({ title, items }: SiteBreadcrumbProps) {
     >
       <Link
         href="/"
+        prefetch={false}
         aria-label="Home"
         className="clay-button-hover inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-transparent bg-transparent text-[var(--ink)] transition hover:border-[var(--line)] hover:bg-[var(--accent-coral)]"
       >

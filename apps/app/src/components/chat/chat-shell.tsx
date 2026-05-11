@@ -3,21 +3,31 @@
 import {
   ArrowUpIcon,
   BotIcon,
+  CheckIcon,
   ChevronsUpDownIcon,
   CornerDownLeftIcon,
+  CopyIcon,
   HistoryIcon,
   GhostIcon,
+  Loader2Icon,
   LogOutIcon,
   MenuIcon,
   MonitorIcon,
+  MoreHorizontalIcon,
   MoonIcon,
   PanelLeftCloseIcon,
   PanelLeftIcon,
+  PencilIcon,
+  PinIcon,
   PlusIcon,
   SearchIcon,
   Settings2Icon,
   SunIcon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
+  Trash2Icon,
   UserIcon,
+  WrenchIcon,
   XIcon,
 } from "lucide-react";
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
@@ -27,10 +37,7 @@ import { useChat } from "@ai-sdk/react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
-const LazyMarkdown = dynamic(
-  () => import("@/components/chat/markdown-renderer").then((m) => ({ default: m.MarkdownRenderer })),
-  { ssr: false, loading: () => <div className="animate-pulse h-6 rounded bg-(--surface-inset)" /> },
-);
+import { MarkdownRenderer } from "@/components/chat/markdown-renderer";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -97,6 +104,13 @@ const clayIconButton =
 const clayIconButtonAccent =
   "clay-button-hover inline-flex size-11 items-center justify-center rounded-full border border-black bg-(--accent-blue) text-(--selected-contrast) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-60";
 
+const DEFAULT_SURVEY_URL = "https://survey.ciaobang.com";
+
+function getSurveyContextUrl() {
+  const surveyUrl = process.env.NEXT_PUBLIC_SURVEY_URL || DEFAULT_SURVEY_URL;
+  return `${surveyUrl.replace(/\/$/, "")}/api/internal/survey-context`;
+}
+
 function toUIMessage(message: ChatMessage): UIMessage {
   return {
     id: message.id,
@@ -109,6 +123,105 @@ function getMessageText(message: UIMessage) {
   return message.parts
     .map((part) => (part.type === "text" ? part.text : ""))
     .join("");
+}
+
+const TOOL_LABELS: Record<string, string> = {
+  searchDocs: "Searching survey docs",
+  recallSurveyDetail: "Recalling survey detail",
+  compareDimensions: "Comparing dimensions",
+};
+
+function humanizeToolName(toolName: string) {
+  if (TOOL_LABELS[toolName]) return TOOL_LABELS[toolName];
+  return toolName.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
+}
+
+function summarizeToolInput(input: unknown): string | null {
+  if (!input || typeof input !== "object") return null;
+  const obj = input as Record<string, unknown>;
+  if (typeof obj.query === "string" && obj.query.trim()) return obj.query.trim();
+  if (typeof obj.section === "string") return obj.section;
+  if (Array.isArray(obj.labels)) return (obj.labels as unknown[]).join(", ");
+  return null;
+}
+
+type ToolMessagePart = {
+  type: string;
+  toolCallId?: string;
+  state?: "input-streaming" | "input-available" | "output-available" | "output-error";
+  input?: unknown;
+  output?: unknown;
+  errorText?: string;
+};
+
+function ToolCallPart({ part }: { part: ToolMessagePart }) {
+  const toolName =
+    part.type === "dynamic-tool"
+      ? (part as { toolName?: string }).toolName ?? "tool"
+      : part.type.replace(/^tool-/, "");
+  const label = humanizeToolName(toolName);
+  const summary = summarizeToolInput(part.input);
+  const isPending = part.state === "input-streaming" || part.state === "input-available";
+  const isError = part.state === "output-error";
+
+  return (
+    <details className="my-2 rounded-xl border border-(--line) bg-(--surface-inset) text-sm text-(--ink-soft)">
+      <summary
+        className={cn(
+          "flex cursor-pointer items-center gap-2 px-3 py-2 font-semibold",
+          isError ? "text-(--accent-rose)" : "text-(--ink)",
+        )}
+      >
+        {isPending ? (
+          <Loader2Icon className="size-4 shrink-0 animate-spin" />
+        ) : isError ? (
+          <XIcon className="size-4 shrink-0" />
+        ) : (
+          <CheckIcon className="size-4 shrink-0" />
+        )}
+        <WrenchIcon className="size-3.5 shrink-0 text-(--muted)" />
+        <span className="truncate">
+          {label}
+          {summary ? (
+            <span className="ml-1 font-normal text-(--ink-soft)">— {summary}</span>
+          ) : null}
+        </span>
+      </summary>
+      <div className="space-y-2 border-t border-(--line) px-3 py-2 text-xs">
+        {part.input !== undefined ? (
+          <div>
+            <div className="clay-label">Input</div>
+            <pre className="mt-1 overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-5">
+              {JSON.stringify(part.input, null, 2)}
+            </pre>
+          </div>
+        ) : null}
+        {part.state === "output-available" && part.output !== undefined ? (
+          <div>
+            <div className="clay-label">Output</div>
+            <pre className="mt-1 max-h-60 overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-5">
+              {JSON.stringify(part.output, null, 2)}
+            </pre>
+          </div>
+        ) : null}
+        {isError ? (
+          <p className="text-(--accent-rose)">{part.errorText ?? "Tool errored."}</p>
+        ) : null}
+      </div>
+    </details>
+  );
+}
+
+function ReasoningPart({ text }: { text: string }) {
+  if (!text.trim()) return null;
+  return (
+    <details className="my-2 rounded-xl border border-(--line) bg-(--surface-inset) text-sm text-(--ink-soft)">
+      <summary className="cursor-pointer px-3 py-2 font-semibold text-(--ink)">Thinking</summary>
+      <p className="whitespace-pre-wrap border-t border-(--line) px-3 py-2 text-xs leading-5">
+        {text}
+      </p>
+    </details>
+  );
 }
 
 function getContextLabel(context: SurveyChatContext) {
@@ -598,28 +711,205 @@ function CiaoLogo() {
   );
 }
 
+function ThreadSidebarItem({
+  thread,
+  isActive,
+  isLoading,
+  isPinned,
+  renamingThreadId,
+  onSelect,
+  onDelete,
+  onRename,
+  onStartRename,
+  onPin,
+}: {
+  thread: ChatThreadSummary;
+  isActive: boolean;
+  isLoading: boolean;
+  isPinned: boolean;
+  renamingThreadId: string | null;
+  onSelect: () => void;
+  onDelete: () => void;
+  onRename: (title: string) => void;
+  onStartRename: () => void;
+  onPin: () => void;
+}) {
+  const isRenaming = renamingThreadId === thread.id;
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [renameValue, setRenameValue] = useState(thread.title);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const renameInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (isRenaming) {
+      setRenameValue(thread.title);
+      renameInputRef.current?.focus();
+      renameInputRef.current?.select();
+    }
+  }, [isRenaming, thread.title]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
+  return (
+    <div className="group relative">
+      {isRenaming ? (
+        <div
+          className={cn(
+            "flex min-h-14 w-full items-center gap-3 rounded-xl border px-3",
+            isActive
+              ? "border-(--line-strong) bg-(--accent-soft)"
+              : "border-(--line) bg-(--surface-inset)",
+          )}
+        >
+          <HistoryIcon className="size-4 shrink-0 text-(--muted)" />
+          <input
+            ref={renameInputRef}
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onRename(renameValue);
+              if (e.key === "Escape") onRename(thread.title);
+            }}
+            onBlur={() => onRename(renameValue)}
+            className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-(--ink) outline-none"
+          />
+        </div>
+      ) : (
+        <button
+          type="button"
+          disabled={isLoading}
+          onClick={onSelect}
+          className={cn(
+            "flex min-h-14 w-full items-center gap-3 rounded-xl border px-3 pr-10 text-left transition",
+            isActive
+              ? "border-(--line-strong) bg-(--accent-soft) text-(--ink)"
+              : "border-transparent text-(--ink-soft) hover:border-(--line) hover:bg-(--surface-inset) hover:text-(--ink)",
+            isLoading && "cursor-wait opacity-70",
+          )}
+        >
+          {isLoading ? (
+            <Loader2Icon className="size-4 shrink-0 animate-spin" />
+          ) : isPinned ? (
+            <PinIcon className="size-4 shrink-0 rotate-45" />
+          ) : (
+            <HistoryIcon className="size-4 shrink-0" />
+          )}
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-semibold">{thread.title}</span>
+            <span className="block text-xs text-(--muted)">{formatThreadDate(thread.updatedAt)}</span>
+          </span>
+        </button>
+      )}
+      {!isRenaming && (
+        <div
+          ref={menuRef}
+          className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100"
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen((v) => !v);
+            }}
+            className="inline-flex size-6 items-center justify-center rounded-md text-(--muted) hover:bg-(--surface-panel) hover:text-(--ink) transition"
+          >
+            <MoreHorizontalIcon className="size-4" />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-full z-50 mt-1 w-40 overflow-hidden rounded-xl border border-(--line-strong) bg-(--surface-panel) py-1 shadow-(--shadow-strong)">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPin();
+                  setMenuOpen(false);
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-(--ink) hover:bg-(--surface-inset) transition"
+              >
+                <PinIcon className="size-4 rotate-45" />
+                {isPinned ? "Unpin" : "Pin"}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStartRename();
+                  setMenuOpen(false);
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-(--ink) hover:bg-(--surface-inset) transition"
+              >
+                <PencilIcon className="size-4" />
+                Rename
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                  setMenuOpen(false);
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-(--surface-inset) transition"
+              >
+                <Trash2Icon className="size-4" />
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ThreadSidebar({
   threads,
   activeThreadId,
+  loadingThreadId,
   search,
   onSearch,
   onNewChat,
   onSelectThread,
+  onDeleteThread,
+  onRenameThread,
+  onPinThread,
+  pinnedThreadIds,
   onCollapse,
   onOpenSearch,
 }: {
   threads: ChatThreadSummary[];
   activeThreadId: string | null;
+  loadingThreadId: string | null;
   search: string;
   onSearch: (value: string) => void;
   onNewChat: () => void;
   onSelectThread: (threadId: string) => void;
+  onDeleteThread: (threadId: string) => void;
+  onRenameThread: (threadId: string, title: string) => void;
+  onPinThread: (threadId: string) => void;
+  pinnedThreadIds: string[];
   onCollapse?: () => void;
   onOpenSearch?: () => void;
 }) {
+  const [renamingThreadId, setRenamingThreadId] = useState<string | null>(null);
+
   const filteredThreads = threads.filter((thread) =>
     thread.title.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const sortedThreads = [...filteredThreads].sort((a, b) => {
+    const aPinned = pinnedThreadIds.includes(a.id) ? 1 : 0;
+    const bPinned = pinnedThreadIds.includes(b.id) ? 1 : 0;
+    return bPinned - aPinned;
+  });
 
   return (
     <aside className="flex h-full min-h-0 w-full flex-col bg-(--surface-panel) text-(--ink) backdrop-blur">
@@ -696,27 +986,28 @@ function ThreadSidebar({
 
       <ScrollArea className="mt-4 min-h-0 flex-1 px-3">
         <div className="flex flex-col gap-1 pb-4">
-          {filteredThreads.length === 0 ? (
+          {sortedThreads.length === 0 ? (
             <p className="px-3 py-4 text-sm text-(--muted)">No threads yet.</p>
           ) : null}
-          {filteredThreads.map((thread) => (
-            <button
+          {sortedThreads.map((thread) => (
+            <ThreadSidebarItem
               key={thread.id}
-              type="button"
-              onClick={() => onSelectThread(thread.id)}
-              className={cn(
-                "flex min-h-14 w-full items-center gap-3 rounded-xl border px-3 text-left transition",
-                activeThreadId === thread.id
-                  ? "border-(--line-strong) bg-(--accent-soft) text-(--ink)"
-                  : "border-transparent text-(--ink-soft) hover:border-(--line) hover:bg-(--surface-inset) hover:text-(--ink)",
-              )}
-            >
-              <HistoryIcon className="size-4 shrink-0" />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold">{thread.title}</span>
-                <span className="block text-xs text-(--muted)">{formatThreadDate(thread.updatedAt)}</span>
-              </span>
-            </button>
+              thread={thread}
+              isActive={activeThreadId === thread.id}
+              isLoading={loadingThreadId === thread.id}
+              isPinned={pinnedThreadIds.includes(thread.id)}
+              renamingThreadId={renamingThreadId}
+              onSelect={() => onSelectThread(thread.id)}
+              onDelete={() => onDeleteThread(thread.id)}
+              onRename={(title) => {
+                setRenamingThreadId(null);
+                if (title.trim() && title.trim() !== thread.title) {
+                  onRenameThread(thread.id, title.trim());
+                }
+              }}
+              onStartRename={() => setRenamingThreadId(thread.id)}
+              onPin={() => onPinThread(thread.id)}
+            />
           ))}
         </div>
       </ScrollArea>
@@ -901,46 +1192,152 @@ function EmptyChat({
   );
 }
 
-function ChatMessageBubble({ message }: { message: UIMessage }) {
+function ChatMessageBubble({
+  message,
+  onEdit,
+}: {
+  message: UIMessage;
+  onEdit?: (text: string) => void;
+}) {
   const isUser = message.role === "user";
   const text = getMessageText(message);
+  const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const copyText = () => {
+    void navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  if (isUser) {
+    return (
+      <div className="group flex w-full justify-end gap-4">
+        <div className="flex max-w-[min(760px,85%)] flex-col items-end gap-1">
+          <div className="rounded-2xl border border-black bg-(--accent-blue) px-5 py-4 text-base leading-7 text-(--selected-contrast) shadow-(--shadow-soft)">
+            <p className="whitespace-pre-wrap">{text}</p>
+          </div>
+          <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+            <button
+              type="button"
+              onClick={() => onEdit?.(text)}
+              title="Edit message"
+              className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
+            >
+              <PencilIcon className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={copyText}
+              title="Copy message"
+              className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
+            >
+              {copied ? <CheckIcon className="size-3.5 text-green-500" /> : <CopyIcon className="size-3.5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const renderedParts = message.parts.map((part, index) => {
+    if (part.type === "text") {
+      if (!part.text) return null;
+      return <MarkdownRenderer key={`text-${index}`} text={part.text} />;
+    }
+    if (part.type === "reasoning") {
+      const reasoningText = (part as { text?: string }).text ?? "";
+      return <ReasoningPart key={`reasoning-${index}`} text={reasoningText} />;
+    }
+    if (part.type.startsWith("tool-") || part.type === "dynamic-tool") {
+      return <ToolCallPart key={`tool-${index}`} part={part as ToolMessagePart} />;
+    }
+    return null;
+  });
+
+  const hasContent = renderedParts.some(Boolean);
 
   return (
-    <div className={cn("flex w-full gap-4", isUser && "justify-end")}>
-      {!isUser ? (
-        <Avatar className="mt-1 size-9 border border-black bg-(--accent-blue) shadow-(--shadow-soft)">
-          <AvatarFallback className="bg-transparent text-(--selected-contrast)">
-            <BotIcon className="size-4" />
-          </AvatarFallback>
-        </Avatar>
-      ) : null}
-      <div
-        className={cn(
-          "max-w-[min(760px,85%)] rounded-2xl border px-5 py-4 text-base leading-7 shadow-(--shadow-soft)",
-          isUser
-            ? "border-black bg-(--accent-blue) text-(--selected-contrast)"
-            : "border-(--line-strong) bg-(--surface-panel-strong) text-(--ink)",
-        )}
-      >
-        {isUser ? (
-          <p className="whitespace-pre-wrap">{text}</p>
-        ) : (
-          <LazyMarkdown text={text} />
-        )}
+    <div className="group flex w-full gap-4">
+      <Avatar className="mt-1 size-9 shrink-0 border border-black bg-(--accent-blue) shadow-(--shadow-soft)">
+        <AvatarFallback className="bg-transparent text-(--selected-contrast)">
+          <BotIcon className="size-4" />
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex max-w-[min(760px,85%)] flex-col gap-1">
+        <div className="rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) px-5 py-4 text-base leading-7 text-(--ink) shadow-(--shadow-soft)">
+          {hasContent ? (
+            renderedParts
+          ) : (
+            <div className="flex items-center gap-2 text-(--ink-soft)">
+              <Loader2Icon className="size-4 animate-spin" />
+              <span className="text-sm">Thinking...</span>
+            </div>
+          )}
+        </div>
+        <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <button
+            type="button"
+            onClick={copyText}
+            title="Copy response"
+            className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
+          >
+            {copied ? <CheckIcon className="size-3.5 text-green-500" /> : <CopyIcon className="size-3.5" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => setFeedback(feedback === "up" ? null : "up")}
+            title="Good response"
+            className={cn(
+              "inline-flex size-7 items-center justify-center rounded-lg transition",
+              feedback === "up"
+                ? "text-green-500"
+                : "text-(--muted) hover:bg-(--surface-inset) hover:text-(--ink)",
+            )}
+          >
+            <ThumbsUpIcon className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setFeedback(feedback === "down" ? null : "down")}
+            title="Poor response"
+            className={cn(
+              "inline-flex size-7 items-center justify-center rounded-lg transition",
+              feedback === "down"
+                ? "text-red-500"
+                : "text-(--muted) hover:bg-(--surface-inset) hover:text-(--ink)",
+            )}
+          >
+            <ThumbsDownIcon className="size-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShellProps) {
+export function ChatShell({
+  initialThreads,
+  surveyContext: initialSurveyContext,
+  hasApiKeys,
+}: ChatShellProps) {
   const [threads, setThreads] = useState(initialThreads);
+  const [surveyContext, setSurveyContext] = useState(initialSurveyContext);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [input, setInput] = useState("");
-  const [isLoadingThread, setIsLoadingThread] = useState(false);
+  const [loadingThreadId, setLoadingThreadId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isTemporary, setIsTemporary] = useState(false);
+  const [pinnedThreadIds, setPinnedThreadIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(localStorage.getItem("ciao-pinned-threads") ?? "[]") as string[];
+    } catch {
+      return [];
+    }
+  });
   const sidebarLayout = useSidebarLayout();
   const activeThreadRef = useRef<string | null>(null);
   const isTemporaryRef = useRef(false);
@@ -949,6 +1346,39 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
     isTemporaryRef.current = isTemporary;
   }, [isTemporary]);
   const hasSurveyContext = surveyContextHasResults(surveyContext);
+
+  useEffect(() => {
+    if (hasSurveyContext) return;
+
+    let cancelled = false;
+
+    async function refreshSurveyContext() {
+      try {
+        const response = await fetch(getSurveyContextUrl(), {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as { context?: SurveyChatContext };
+        const nextContext = payload.context;
+
+        if (!cancelled && nextContext && surveyContextHasResults(nextContext)) {
+          setSurveyContext(nextContext);
+        }
+      } catch {
+        // Server-rendered context remains the source of truth when the browser refresh fails.
+      }
+    }
+
+    void refreshSurveyContext();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasSurveyContext]);
 
   useEffect(() => {
     function handleKey(event: KeyboardEvent) {
@@ -982,6 +1412,7 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
         body: () => ({
           threadId: isTemporaryRef.current ? null : activeThreadRef.current,
           temporary: isTemporaryRef.current,
+          surveyContext: surveyContextHasResults(surveyContext) ? surveyContext : undefined,
         }),
         fetch: async (input, init) => {
           const response = await fetch(input, init);
@@ -995,11 +1426,11 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
           return response;
         },
       }),
-    [],
+    [surveyContext],
   );
 
   const { messages, sendMessage, setMessages, status, stop, error } = useChat({
-    id: activeThreadId ?? "new-chat",
+    id: "main-chat",
     messages: [],
     transport,
     onFinish: () => {
@@ -1055,7 +1486,7 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
 
   const loadThread = useCallback(
     async (threadId: string) => {
-      setIsLoadingThread(true);
+      setLoadingThreadId(threadId);
 
       try {
         const response = await fetch(`/api/chat/threads/${threadId}`);
@@ -1073,7 +1504,7 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
       } catch (threadError) {
         toast.error(threadError instanceof Error ? threadError.message : "Unable to load chat.");
       } finally {
-        setIsLoadingThread(false);
+        setLoadingThreadId(null);
       }
     },
     [setMessages],
@@ -1095,6 +1526,53 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
     },
     [hasSurveyContext, hasApiKeys, isBusy, sendMessage],
   );
+
+  const handleDeleteThread = useCallback(
+    async (threadId: string) => {
+      try {
+        const response = await fetch(`/api/chat/threads/${threadId}`, { method: "DELETE" });
+        if (!response.ok) throw new Error("Failed to delete thread.");
+        setThreads((prev) => prev.filter((t) => t.id !== threadId));
+        if (activeThreadRef.current === threadId) {
+          activeThreadRef.current = null;
+          setActiveThreadId(null);
+          setMessages([]);
+        }
+      } catch {
+        toast.error("Unable to delete the chat.");
+      }
+    },
+    [setMessages],
+  );
+
+  const handleRenameThread = useCallback(async (threadId: string, title: string) => {
+    try {
+      const response = await fetch(`/api/chat/threads/${threadId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      if (!response.ok) throw new Error("Failed to rename thread.");
+      const payload = (await response.json()) as { thread: ChatThreadSummary };
+      setThreads((prev) => prev.map((t) => (t.id === threadId ? payload.thread : t)));
+    } catch {
+      toast.error("Unable to rename the chat.");
+    }
+  }, []);
+
+  const handlePinThread = useCallback((threadId: string) => {
+    setPinnedThreadIds((prev) => {
+      const next = prev.includes(threadId) ? prev.filter((id) => id !== threadId) : [...prev, threadId];
+      try {
+        localStorage.setItem("ciao-pinned-threads", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const handleEditMessage = useCallback((text: string) => {
+    setInput(text);
+  }, []);
 
   return (
     <TooltipProvider>
@@ -1136,10 +1614,15 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
             <ThreadSidebar
               threads={threads}
               activeThreadId={activeThreadId}
+              loadingThreadId={loadingThreadId}
               search={search}
               onSearch={setSearch}
               onNewChat={startNewChat}
               onSelectThread={loadThread}
+              onDeleteThread={handleDeleteThread}
+              onRenameThread={handleRenameThread}
+              onPinThread={handlePinThread}
+              pinnedThreadIds={pinnedThreadIds}
               onCollapse={() => sidebarLayout.setCollapsed(true)}
               onOpenSearch={() => setIsPaletteOpen(true)}
             />
@@ -1166,10 +1649,15 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
             <ThreadSidebar
               threads={threads}
               activeThreadId={activeThreadId}
+              loadingThreadId={loadingThreadId}
               search={search}
               onSearch={setSearch}
               onNewChat={startNewChat}
               onSelectThread={loadThread}
+              onDeleteThread={handleDeleteThread}
+              onRenameThread={handleRenameThread}
+              onPinThread={handlePinThread}
+              pinnedThreadIds={pinnedThreadIds}
             />
           </SheetContent>
         </Sheet>
@@ -1218,9 +1706,13 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
             ) : (
               <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 py-4">
                 {messages.map((message) => (
-                  <ChatMessageBubble key={message.id} message={message} />
+                  <ChatMessageBubble
+                    key={message.id}
+                    message={message}
+                    onEdit={message.role === "user" ? handleEditMessage : undefined}
+                  />
                 ))}
-                {isLoadingThread ? (
+                {loadingThreadId ? (
                   <p className="text-sm text-(--muted)">Loading thread...</p>
                 ) : null}
               </div>

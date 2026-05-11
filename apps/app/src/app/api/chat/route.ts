@@ -1,23 +1,18 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import {
-  convertToModelMessages,
-  stepCountIs,
-  streamText,
-  type LanguageModel,
-  type UIMessage,
-} from "ai";
+import type { LanguageModel, UIMessage } from "ai";
 import { NextResponse } from "next/server";
 
 import { getCurrentUserId } from "@ciaobang/auth";
 import { getReadyDb } from "@ciaobang/db";
-import { makeSearchDocsTool } from "@ciaobang/rag";
 import { getChatRepository } from "@/lib/chat/repository";
-import { buildChatSystemPrompt, createThreadTitle } from "@/lib/chat/prompt";
-import { surveyContextHasResults } from "@/lib/chat/survey-context";
+import { surveyContextHasResults, type SurveyChatContext } from "@/lib/chat/survey-context";
 import { loadSurveyChatContext } from "@/lib/chat/survey-context.server";
+import { runChatTurn, type RagSearchCapability } from "@/lib/chat/turn";
+import { runDevChatTurn } from "@/lib/chat/turn.dev-mock";
 import { MODEL_OPTIONS } from "@/lib/account/models";
 import { getDecryptedApiKey, getPreferences } from "@/lib/account/repository";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -27,44 +22,10 @@ type ChatRequestBody = {
   threadId?: string | null;
   messages?: UIMessage[];
   temporary?: boolean;
+  surveyContext?: SurveyChatContext;
 };
 
-function createDevMockResponse(): Response {
-  const chunks = [
-    "🧪 **Dev mode** — this is a simulated response. ",
-    "No API tokens were used. ",
-    "Add your Anthropic or Google API key in [Account Settings](/account) for real responses.",
-  ];
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream({
-    async start(controller) {
-      for (const chunk of chunks) {
-        controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`));
-        await new Promise((r) => setTimeout(r, 40));
-      }
-      controller.enqueue(
-        encoder.encode(
-          `e:${JSON.stringify({ finishReason: "stop", usage: { promptTokens: 0, completionTokens: 0 } })}\n`,
-        ),
-      );
-      controller.enqueue(
-        encoder.encode(
-          `d:${JSON.stringify({ finishReason: "stop", usage: { promptTokens: 0, completionTokens: 0 } })}\n`,
-        ),
-      );
-      controller.close();
-    },
-  });
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "X-Vercel-AI-Data-Stream": "v1",
-    },
-  });
-}
-
-async function getUserModel(userId: string): Promise<LanguageModel> {
-
+async function selectModelForParticipant(userId: string): Promise<LanguageModel> {
   const { chatModel } = await getPreferences(userId);
   const option = MODEL_OPTIONS.find((m) => m.value === chatModel) ?? MODEL_OPTIONS[0]!;
   const apiKey = await getDecryptedApiKey(userId, option.provider);
@@ -82,9 +43,10 @@ async function getUserModel(userId: string): Promise<LanguageModel> {
   return createGoogleGenerativeAI({ apiKey })(option.value);
 }
 
-function getTextFromMessage(message: UIMessage | undefined) {
-  if (!message) return "";
-  return message.parts
+function getLatestUserText(messages: UIMessage[]) {
+  const latest = [...messages].reverse().find((m) => m.role === "user");
+  if (!latest) return "";
+  return latest.parts
     .map((part) => (part.type === "text" ? part.text : ""))
     .join("")
     .trim();
@@ -94,6 +56,7 @@ export async function POST(request: Request) {
   const userId = await getCurrentUserId({ acceptsSessionToken: true, request });
 
   if (!userId) {
+    logger.warn("Chat request rejected: unauthenticated");
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
@@ -105,21 +68,35 @@ export async function POST(request: Request) {
   }
 
   const messages = body.messages ?? [];
-  const latestUserMessage = [...messages].reverse().find((m) => m.role === "user");
-  const latestUserText = getTextFromMessage(latestUserMessage);
 
-  if (!latestUserText) {
+  if (!getLatestUserText(messages)) {
     return NextResponse.json({ error: "Message text is required." }, { status: 400 });
   }
 
+  const temporary = body.temporary === true;
+
+  logger.info({ userId, threadId: body.threadId, temporary }, "Chat turn starting");
+
   if (process.env.NODE_ENV === "development") {
-    return createDevMockResponse();
+    return runDevChatTurn({
+      userId,
+      surveyContext: body.surveyContext ?? { personality: null, valuesBeliefs: null },
+      // The dev adapter ignores model and ragSearch; pass null as placeholders.
+      model: null,
+      ragSearch: null,
+      messages,
+      threadId: body.threadId ?? null,
+      temporary,
+      repository: getChatRepository(),
+    });
   }
 
-  const [surveyContext, repository] = await Promise.all([
-    loadSurveyChatContext({ request }),
-    Promise.resolve(getChatRepository()),
-  ]);
+  const serverSurveyContext = await loadSurveyChatContext({ request, userId });
+  const surveyContext = surveyContextHasResults(serverSurveyContext)
+    ? serverSurveyContext
+    : body.surveyContext && surveyContextHasResults(body.surveyContext)
+      ? body.surveyContext
+      : serverSurveyContext;
 
   if (!surveyContextHasResults(surveyContext)) {
     return NextResponse.json(
@@ -132,46 +109,31 @@ export async function POST(request: Request) {
   let googleApiKey: string | null;
   try {
     [model, googleApiKey] = await Promise.all([
-      getUserModel(userId),
+      selectModelForParticipant(userId),
       getDecryptedApiKey(userId, "google"),
     ]);
   } catch (err) {
+    logger.error({ userId, err }, "Model selection failed");
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "AI model not configured." },
       { status: 402 },
     );
   }
 
-  const tools =
-    googleApiKey
-      ? { searchDocs: makeSearchDocsTool(surveyContext, await getReadyDb(), googleApiKey) }
-      : undefined;
+  const ragSearch: RagSearchCapability | null = googleApiKey
+    ? { googleApiKey, sql: await getReadyDb() }
+    : null;
 
-  const isTemporary = body.temporary === true;
-  const existingThread =
-    !isTemporary && body.threadId ? await repository.getThread(userId, body.threadId) : null;
-  const thread = isTemporary
-    ? null
-    : (existingThread ??
-      (await repository.createThread({ userId, title: createThreadTitle(latestUserText) })));
+  logger.info({ userId, threadId: body.threadId, temporary, ragEnabled: ragSearch !== null }, "Chat turn dispatched");
 
-  if (thread) {
-    await repository.appendMessage({ userId, threadId: thread.id, role: "user", content: latestUserText });
-  }
-
-  const result = streamText({
+  return runChatTurn({
+    userId,
+    surveyContext,
     model,
-    system: buildChatSystemPrompt(surveyContext),
-    messages: await convertToModelMessages(messages),
-    temperature: 0.6,
-    ...(tools ? { tools, stopWhen: stepCountIs(3) } : {}),
-    onFinish: async ({ text }) => {
-      if (!text.trim() || !thread) return;
-      await repository.appendMessage({ userId, threadId: thread.id, role: "assistant", content: text });
-    },
-  });
-
-  return result.toUIMessageStreamResponse({
-    headers: thread ? { "x-chat-thread-id": thread.id } : undefined,
+    ragSearch,
+    messages,
+    threadId: body.threadId ?? null,
+    temporary,
+    repository: getChatRepository(),
   });
 }

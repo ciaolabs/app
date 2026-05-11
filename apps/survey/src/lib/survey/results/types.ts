@@ -18,9 +18,9 @@ export const INVENTORY_CODES = [
 
 export type InventoryCode = (typeof INVENTORY_CODES)[number];
 
-export type ScoreBand = "Low" | "Middle" | "High";
+import type { PercentileDirection, ScoreBand } from "@/lib/survey/results/score-band";
 
-export type PercentileDirection = "higher" | "lower";
+export type { PercentileDirection, ScoreBand };
 
 export type KeyedItemDefinition = {
   order: number;

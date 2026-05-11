@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -8,10 +7,11 @@ import {
   DashboardGauge,
   SegmentedScoreBar,
 } from "@/components/dashboard/dashboard-metrics";
-import { DashboardPdfButton } from "@/components/dashboard/dashboard-pdf-button";
-import { DashboardPrintHeader } from "@/components/dashboard/dashboard-print-header";
-import { SiteTopNav } from "@/components/site-top-nav";
-import { formatSubmittedAt } from "@/lib/date-format";
+import {
+  describeDashboardError,
+  SubmissionHistoryList,
+  SurveyDashboardLayout,
+} from "@/components/dashboard/survey-dashboard-layout";
 import { sessionDraftStorage } from "@/lib/survey/draft-storage";
 import { type ActiveSurveyDefinition } from "@/lib/survey/definitions";
 import {
@@ -20,7 +20,7 @@ import {
   type ScaleResult,
   type SurveyResults,
 } from "@/lib/survey/results/types";
-import { SURVEYS_ROUTE, getSurveyApiBasePath } from "@/lib/survey/routes";
+import { getSurveyApiBasePath } from "@/lib/survey/routes";
 import { type SurveySubmissionSummary } from "@/lib/survey/types";
 
 type RankingMode = "highest" | "lowest";
@@ -36,14 +36,6 @@ function percentileSentence(item: { percentileDirection: "higher" | "lower"; per
   return item.percentileDirection === "higher"
     ? `You scored higher than ${item.percentileMagnitude} percent of people.`
     : `You scored lower than ${item.percentileMagnitude} percent of people.`;
-}
-
-function describeDashboardError(error: string) {
-  if (/authentication required/i.test(error)) {
-    return "Please refresh the page and try again.";
-  }
-
-  return error;
 }
 
 function SummaryNarrative({ results }: { results: SurveyResults }) {
@@ -337,116 +329,6 @@ function FrameworkPanel({ framework }: { framework: SurveyResults["frameworks"][
   );
 }
 
-function EmptyDashboard({ ctaHref }: { ctaHref: string }) {
-  return (
-    <section
-      className="clay-section mt-6 px-8 py-10 sm:px-12"
-      style={{ background: "var(--hero-gradient)" }}
-    >
-      <p className="clay-label">
-        No submission yet
-      </p>
-      <h1 className="mt-4 font-display text-5xl text-[var(--ink)] sm:text-6xl">
-        Your results dashboard appears after you submit the survey.
-      </h1>
-      <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--ink-soft)]">
-        Finish the questionnaire to generate AMBI-based score estimates, ranked traits, and the
-        eight-framework breakdown on this page.
-      </p>
-      <Link
-        href={ctaHref}
-        className="clay-button-hover mt-8 inline-flex rounded-full border border-black bg-[var(--accent-blue)] px-5 py-3 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
-      >
-        Start a survey →
-      </Link>
-    </section>
-  );
-}
-
-function SubmissionHistoryList({
-  submissions,
-  selectedSubmissionId,
-  isSwitchingSubmission,
-  selectionError,
-  onSelect,
-}: {
-  submissions: SurveySubmissionSummary[];
-  selectedSubmissionId: string | null;
-  isSwitchingSubmission: boolean;
-  selectionError: string | null;
-  onSelect: (submissionId: string) => void;
-}) {
-  return (
-    <div data-print-hide className="mt-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="clay-label">
-            Completed surveys
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
-            Open any saved submission stored for this account.
-          </p>
-        </div>
-        <p className="rounded-full border border-dashed border-[var(--line)] bg-[var(--surface-panel-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
-          {submissions.length} saved
-        </p>
-      </div>
-
-      {selectionError ? (
-        <p className="mt-4 text-sm leading-6 text-[var(--accent-coral)]">
-          {describeDashboardError(selectionError)}
-        </p>
-      ) : null}
-
-      <div className="mt-4 max-h-[18rem] space-y-3 overflow-y-auto pr-1">
-        {submissions.map((submission, index) => {
-          const isActive = selectedSubmissionId === submission.submissionId;
-
-          return (
-            <button
-              key={submission.submissionId}
-              type="button"
-              onClick={() => onSelect(submission.submissionId)}
-              disabled={isSwitchingSubmission && !isActive}
-              className={[
-                "w-full rounded-[1rem] border px-4 py-4 text-left shadow-[var(--shadow-soft)] transition",
-                isActive
-                  ? "border-[var(--line-strong)] bg-[var(--surface-panel-strong)] shadow-[var(--shadow-soft)]"
-                  : "border-[var(--line)] bg-[var(--surface-panel)] hover:border-[var(--line-strong)]",
-                isSwitchingSubmission && !isActive ? "cursor-not-allowed opacity-60" : "",
-              ].join(" ")}
-            >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="clay-label">
-                    {index === 0 ? "Most recent" : "Saved submission"}
-                  </p>
-                  <p className="mt-2 text-base font-semibold text-[var(--ink)]">
-                    {formatSubmittedAt(submission.submittedAt)}
-                  </p>
-                </div>
-                <span
-                  className={[
-                    "rounded-full border border-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]",
-                    isActive
-                      ? "bg-[var(--accent-coral)] text-[var(--selected-contrast)]"
-                      : "bg-[var(--surface-panel-strong)] text-[var(--ink-soft)]",
-                  ].join(" ")}
-                >
-                  {isSwitchingSubmission && isActive ? "Loading..." : isActive ? "Viewing" : "Open"}
-                </span>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-[var(--ink-soft)]">
-                {submission.answerCount} scored responses attached to this completion.
-              </p>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 type DashboardShellProps = {
   survey: Pick<ActiveSurveyDefinition, "type" | "title" | "route" | "resultsTitle">;
   initialPayload: ResultsPayload<SurveyResults>;
@@ -613,115 +495,49 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
   };
 
   return (
-    <>
-      <SiteTopNav
-        breadcrumbItems={[
-          { label: "Surveys", href: SURVEYS_ROUTE },
-          { label: survey.title, href: survey.route },
-          { label: "Survey Results" },
-        ]}
-        action={
-          <Link
-            href={SURVEYS_ROUTE}
-            className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-blue)] px-5 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
-          >
-            Start a survey →
-          </Link>
-        }
-      />
-
-      {error ? (
-        <section
-          className="clay-section mt-6 px-8 py-10 sm:px-12"
-          style={{ background: "var(--hero-gradient)" }}
+    <SurveyDashboardLayout
+      survey={survey}
+      error={error}
+      hasResults={Boolean(results)}
+      submission={results?.submission ?? null}
+      emptyStateBody="Finish the questionnaire to generate AMBI-based score estimates, ranked traits, and the eight-framework breakdown on this page."
+      heroDescription={
+        <>
+          <p className="mt-4 max-w-4xl text-base leading-7 text-[var(--ink-soft)]">
+            The questions you answered are used to generate personality scores across several
+            different frameworks. This approach, based on the Analog to Multiple Broadband
+            Inventories, estimates your scores using a limited number of public-domain questions.
+          </p>
+          <p className="mt-3 max-w-4xl text-[15px] leading-7 text-[var(--ink-soft)]">
+            Please note that the results provided below are for informational purposes only, and
+            are not intended to be psychological or medical advice. The accuracy or completeness
+            of the results are not guaranteed.
+          </p>
+        </>
+      }
+      heroActionLinks={
+        <a
+          href={activeFramework?.readMoreHref ?? "https://doi.org/10.1016/j.jrp.2010.01.002"}
+          target="_blank"
+          rel="noreferrer"
+          className="clay-button-hover inline-flex rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)]"
         >
-          <p className="clay-label">
-            Results unavailable
-          </p>
-          <h1 className="mt-4 font-display text-5xl text-[var(--ink)] sm:text-6xl">
-            We could not load the dashboard right now.
-          </h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--accent-coral)]">
-            {describeDashboardError(error)}
-          </p>
-        </section>
-      ) : null}
-
-      {!error && !results ? <EmptyDashboard ctaHref={SURVEYS_ROUTE} /> : null}
-
-      {!error && results ? (
-        <div className="mt-6 space-y-6">
-          <DashboardPrintHeader
-            surveyTitle={survey.title}
-            resultsTitle={survey.resultsTitle}
-            submittedAt={results.submission.submittedAt}
-            answerCount={results.submission.answerCount}
-          />
-          <section
-            data-print-hide
-            className="clay-section overflow-hidden px-5 py-6 sm:px-8 sm:py-8"
-            style={{ background: "var(--hero-gradient)" }}
-          >
-            <div className="grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_22rem] xl:items-start">
-              <div>
-                <p className="clay-label">
-                  Survey Results
-                </p>
-                <h1 className="mt-4 font-display text-4xl text-[var(--ink)] sm:text-5xl">
-                  {survey.resultsTitle}
-                </h1>
-                <p className="mt-4 max-w-4xl text-base leading-7 text-[var(--ink-soft)]">
-                  The questions you answered are used to generate personality scores across several
-                  different frameworks. This approach, based on the Analog to Multiple Broadband
-                  Inventories, estimates your scores using a limited number of public-domain questions.
-                </p>
-                <p className="mt-3 max-w-4xl text-[15px] leading-7 text-[var(--ink-soft)]">
-                  Please note that the results provided below are for informational purposes only, and
-                  are not intended to be psychological or medical advice. The accuracy or completeness
-                  of the results are not guaranteed.
-                </p>
-              </div>
-
-              <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)]">
-                <p className="clay-label">
-                  Viewing saved results
-                </p>
-                <p className="mt-3 text-[1.65rem] text-[var(--ink)]">
-                  {formatSubmittedAt(results.submission.submittedAt)}
-                </p>
-                <p className="mt-3 text-sm leading-6 text-[var(--ink-soft)]">
-                  {results.submission.answerCount} responses were scored from the selected submission
-                  stored on this account.
-                </p>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <DashboardPdfButton
-                    fileName={`Ciao - ${survey.title} - ${formatSubmittedAt(results.submission.submittedAt)}.pdf`}
-                  />
-                  <a
-                    href={activeFramework?.readMoreHref ?? "https://doi.org/10.1016/j.jrp.2010.01.002"}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="clay-button-hover inline-flex rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)]"
-                  >
-                    Read the source
-                  </a>
-                </div>
-
-                <SubmissionHistoryList
-                  submissions={submissions}
-                  selectedSubmissionId={selectedSubmissionId}
-                  isSwitchingSubmission={isSwitchingSubmission}
-                  selectionError={selectionError}
-                  onSelect={handleSelectSubmission}
-                />
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <SummaryNarrative results={results} />
-            </div>
-          </section>
-
+          Read the source
+        </a>
+      }
+      submissionHistory={
+        <SubmissionHistoryList
+          submissions={submissions}
+          selectedSubmissionId={selectedSubmissionId}
+          isSwitchingSubmission={isSwitchingSubmission}
+          selectionError={selectionError}
+          onSelect={handleSelectSubmission}
+        />
+      }
+      heroFooter={results ? <SummaryNarrative results={results} /> : null}
+    >
+      {results ? (
+        <>
           <section data-pdf-capture className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <h2 className="font-display text-3xl text-[var(--ink)]">Your Scores</h2>
@@ -822,9 +638,9 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
           </section>
 
           {hoveredScale && hoveredRect ? <HoverPopover item={hoveredScale} rect={hoveredRect} /> : null}
-        </div>
+        </>
       ) : null}
-    </>
+    </SurveyDashboardLayout>
   );
 }
 

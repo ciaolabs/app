@@ -1,5 +1,9 @@
 import { surveyQuestions } from "@/lib/survey/questions";
 import { clamp, hashSeed, mulberry32 } from "@/lib/survey/results/math";
+import {
+  percentileDetailsFor,
+  scoreBandFor,
+} from "@/lib/survey/results/score-band";
 import { type SurveyAnswers, type SurveySubmission } from "@/lib/survey/types";
 import {
   frameworkDefinitions,
@@ -18,59 +22,24 @@ import {
   type RankedScaleResult,
   type ScaleDefinition,
   type ScaleResult,
-  type ScoreBand,
   type SurveyResults,
   type ValuesBeliefsResults,
 } from "@/lib/survey/results/types";
+import {
+  PERSONALITY_COMPARISON_NOUN,
+  compareByPercentileAsc,
+  compareByPercentileDesc,
+  compareByScoreAsc,
+  compareByScoreDesc,
+  displayScoreFromKeyedSum,
+  keyedItemValue,
+} from "@/lib/survey/results/scoring-utils";
 
 type ProbabilityDistribution = number[];
 
-const MAX_PERCENTILE = 99;
-const MIN_PERCENTILE = 1;
 const QUESTION_BY_ORDER = new Map(surveyQuestions.map((question) => [question.order, question]));
 const scaleDistributionCache = new Map<string, ProbabilityDistribution>();
 const overviewSimulationCache = new Map<string, number[]>();
-
-function toScoreBand(score: number): ScoreBand {
-  if (score >= 31) {
-    return "High";
-  }
-
-  if (score <= 19) {
-    return "Low";
-  }
-
-  return "Middle";
-}
-
-function toPercentileDetails(percentile: number) {
-  const normalized = clamp(Math.round(percentile), MIN_PERCENTILE, MAX_PERCENTILE);
-
-  if (normalized >= 50) {
-    return {
-      percentile: normalized,
-      percentileDirection: "higher" as const,
-      percentileMagnitude: normalized,
-      percentileText: `Higher than ${normalized}% of people`,
-    };
-  }
-
-  const percentileMagnitude = 100 - normalized;
-
-  return {
-    percentile: normalized,
-    percentileDirection: "lower" as const,
-    percentileMagnitude,
-    percentileText: `Lower than ${percentileMagnitude}% of people`,
-  };
-}
-
-function toDisplayScore(sum: number, itemCount: number, scoreOffset = 0) {
-  const meanScore = sum / itemCount;
-  const normalized = ((meanScore - 1) / 5) * 50;
-
-  return clamp(Math.round(normalized + scoreOffset), 0, 50);
-}
 
 function questionProbabilities(order: number, reverse = false) {
   const question = QUESTION_BY_ORDER.get(order);
@@ -89,10 +58,6 @@ function questionProbabilities(order: number, reverse = false) {
   return reverse ? [...probabilities].reverse() : probabilities;
 }
 
-function keyedAnswerValue(rawValue: number, reverse: boolean) {
-  return reverse ? 7 - rawValue : rawValue;
-}
-
 function keyedAnswerSum(definition: ScaleDefinition, answers: SurveyAnswers) {
   return definition.keyedItems.reduce((sum, keyedItem) => {
     const rawValue = answers[QUESTION_BY_ORDER.get(keyedItem.order)?.id ?? ""];
@@ -103,7 +68,7 @@ function keyedAnswerSum(definition: ScaleDefinition, answers: SurveyAnswers) {
       );
     }
 
-    return sum + keyedAnswerValue(rawValue, keyedItem.reverse);
+    return sum + keyedItemValue(rawValue, keyedItem.reverse);
   }, 0);
 }
 
@@ -220,7 +185,7 @@ function buildOverviewSimulation(metric: OverviewMetricDefinition) {
     }
 
     const childScores = scaleDefinitions.map((definition) =>
-      toDisplayScore(keyedAnswerSum(definition, sampleAnswers), definition.keyedItems.length),
+      displayScoreFromKeyedSum(keyedAnswerSum(definition, sampleAnswers), definition.keyedItems.length),
     );
     const mean = childScores.reduce((sum, value) => sum + value, 0) / childScores.length;
     simulations.push(clamp(Math.round(mean + (metric.scoreOffset ?? 0)), 0, 50));
@@ -272,9 +237,9 @@ function fallbackDescription(definition: ScaleDefinition) {
 
 function scoreScale(definition: ScaleDefinition, answers: SurveyAnswers): ScaleResult {
   const keyedSum = keyedAnswerSum(definition, answers);
-  const displayScore = toDisplayScore(keyedSum, definition.keyedItems.length);
+  const displayScore = displayScoreFromKeyedSum(keyedSum, definition.keyedItems.length);
   const percentile = percentileFromDistribution(buildScaleDistribution(definition), keyedSum);
-  const percentileDetails = toPercentileDetails(percentile);
+  const percentileDetails = percentileDetailsFor(percentile, PERSONALITY_COMPARISON_NOUN);
   const override = scaleDisplayOverrides[definition.scaleNo];
 
   return {
@@ -292,7 +257,7 @@ function scoreScale(definition: ScaleDefinition, answers: SurveyAnswers): ScaleR
     percentileDirection: percentileDetails.percentileDirection,
     percentileMagnitude: percentileDetails.percentileMagnitude,
     percentileText: percentileDetails.percentileText,
-    band: toScoreBand(displayScore),
+    band: scoreBandFor(displayScore),
     reliability: {
       convergentCorrelation: definition.convergentCorrelation,
       alphaGa: definition.alphaGa,
@@ -312,7 +277,7 @@ function buildOverviewResults(
     const score = calibratedOverviewScore(metric, childResults);
     const simulations = buildOverviewSimulation(metric);
     const percentile = percentileFromSamples(simulations, score);
-    const percentileDetails = toPercentileDetails(percentile);
+    const percentileDetails = percentileDetailsFor(percentile, PERSONALITY_COMPARISON_NOUN);
     const median = Math.round(quantileFromSortedSamples(simulations, 0.5));
     const iqrStart = Math.round(quantileFromSortedSamples(simulations, 0.25));
     const iqrEnd = Math.round(quantileFromSortedSamples(simulations, 0.75));
@@ -329,7 +294,7 @@ function buildOverviewResults(
       percentileDirection: percentileDetails.percentileDirection,
       percentileMagnitude: percentileDetails.percentileMagnitude,
       percentileText: percentileDetails.percentileText,
-      band: toScoreBand(score),
+      band: scoreBandFor(score),
     };
   });
 }
@@ -345,17 +310,7 @@ function buildFrameworkSections(
     items: section.scaleNumbers
       .map((scaleNumber) => scaleResultsByNumber.get(scaleNumber))
       .filter((value): value is ScaleResult => Boolean(value))
-      .sort((left, right) => {
-        if (right.score !== left.score) {
-          return right.score - left.score;
-        }
-
-        if (right.percentile !== left.percentile) {
-          return right.percentile - left.percentile;
-        }
-
-        return left.displayName.localeCompare(right.displayName);
-      }),
+      .sort(compareByScoreDesc),
   }));
 }
 
@@ -401,50 +356,10 @@ function buildFrameworkResults(scaleResultsByNumber: Map<number, ScaleResult>) {
 export function buildPersonalitySurveyResults(submission: SurveySubmission): SurveyResults {
   const scaleResults = ambiScaleDefinitions.map((definition) => scoreScale(definition, submission.answers));
   const scaleResultsByNumber = new Map(scaleResults.map((result) => [result.scaleNo, result]));
-  const highestByScore = toRankedScaleResults(scaleResults, (left, right) => {
-    if (right.score !== left.score) {
-      return right.score - left.score;
-    }
-
-    if (right.percentile !== left.percentile) {
-      return right.percentile - left.percentile;
-    }
-
-    return left.displayName.localeCompare(right.displayName);
-  });
-  const lowestByScore = toRankedScaleResults(scaleResults, (left, right) => {
-    if (left.score !== right.score) {
-      return left.score - right.score;
-    }
-
-    if (left.percentile !== right.percentile) {
-      return left.percentile - right.percentile;
-    }
-
-    return left.displayName.localeCompare(right.displayName);
-  });
-  const highestByPercentile = toRankedScaleResults(scaleResults, (left, right) => {
-    if (right.percentile !== left.percentile) {
-      return right.percentile - left.percentile;
-    }
-
-    if (right.score !== left.score) {
-      return right.score - left.score;
-    }
-
-    return left.displayName.localeCompare(right.displayName);
-  });
-  const lowestByPercentile = toRankedScaleResults(scaleResults, (left, right) => {
-    if (left.percentile !== right.percentile) {
-      return left.percentile - right.percentile;
-    }
-
-    if (left.score !== right.score) {
-      return left.score - right.score;
-    }
-
-    return left.displayName.localeCompare(right.displayName);
-  });
+  const highestByScore = toRankedScaleResults(scaleResults, compareByScoreDesc);
+  const lowestByScore = toRankedScaleResults(scaleResults, compareByScoreAsc);
+  const highestByPercentile = toRankedScaleResults(scaleResults, compareByPercentileDesc);
+  const lowestByPercentile = toRankedScaleResults(scaleResults, compareByPercentileAsc);
 
   return {
     surveyType: "personality",

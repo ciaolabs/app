@@ -11,5 +11,7 @@ export {
   ensureSchema,
   getDb,
   getReadyDb,
+  hasDatabaseUrl,
   type Sql,
 } from "./client";
+export { runMigrations } from "./migrate";
