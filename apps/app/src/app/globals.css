@@ -834,8 +834,6 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
   height: 36px;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
-  transform: scaleX(1.15) scaleY(0.82);
-  border-radius: 50%;
 }
 
 .maze-ghost-1 { color: #ff4d6d; animation-name: maze-path-1; animation-duration: 54s; }

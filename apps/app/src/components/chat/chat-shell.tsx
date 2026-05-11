@@ -65,6 +65,7 @@ const InteractiveDotBackground = dynamic(
   { ssr: false },
 );
 import { IncognitoGhostIcon } from "@/components/incognito-ghost-icon";
+import { MazeGhostIcon } from "@/components/maze-ghost-icon";
 import type { SurveyChatContext } from "@/lib/chat/survey-context";
 import { surveyContextHasResults } from "@/lib/chat/survey-context";
 import type { ChatMessage, ChatThreadSummary, ChatThreadWithMessages } from "@/lib/chat/types";
@@ -1583,16 +1584,16 @@ export function ChatShell({
         {isTemporary ? (
           <div aria-hidden="true" className="incognito-maze">
             <span className="maze-ghost maze-ghost-1">
-              <IncognitoGhostIcon className="size-full" />
+              <MazeGhostIcon className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-2">
-              <IncognitoGhostIcon className="size-full" />
+              <MazeGhostIcon className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-3">
-              <IncognitoGhostIcon className="size-full" />
+              <MazeGhostIcon className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-4">
-              <IncognitoGhostIcon className="size-full" />
+              <MazeGhostIcon className="size-full" />
             </span>
           </div>
         ) : null}
