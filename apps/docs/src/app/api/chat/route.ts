@@ -1,7 +1,6 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { streamText, tool } from "ai";
-import { z } from "zod/v3";
+import { streamText, tool, jsonSchema } from "ai";
 import { getModelOption, MODEL_OPTIONS } from "@/lib/ai-models";
 import { embedText, retrieveCandidates, mmrRerank } from "@ciaobang/rag";
 import { getDb } from "@ciaobang/db";
@@ -20,10 +19,17 @@ function makeDocsSearchTool(googleApiKey: string) {
   return tool({
     description:
       "Search the documentation for explanations of personality traits, values, beliefs, assessment scales, and psychological concepts. Use when the user asks about what something means or how it works.",
-    parameters: z.object({
-      query: z.string().describe("Search query based on the user's question"),
+    parameters: jsonSchema<{ query: string }>({
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "Search query based on the user's question",
+        },
+      },
+      required: ["query"],
     }),
-    execute: async ({ query }) => {
+    execute: async ({ query }: { query: string }) => {
       const sql = getDb();
       const queryEmbedding = await embedText(query, googleApiKey);
       const candidates = await retrieveCandidates(queryEmbedding, sql);
