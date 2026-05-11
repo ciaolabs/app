@@ -3,14 +3,39 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "dev": "next dev --turbopack -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "lint": "eslint .",
+    "generate:content": "tsx scripts/generate-assessment-demo.ts",
     "index": "tsx scripts/index-docs.ts"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.74",
+    "@ai-sdk/google": "^3.0.67",
+    "@ai-sdk/react": "^3.0.174",
     "@ciaobang/db": "workspace:*",
-    "@ciaobang/rag": "workspace:*"
+    "@ciaobang/rag": "workspace:*",
+    "ai": "^6.0.172",
+    "fumadocs-core": "^16.8.9",
+    "fumadocs-mdx": "^15.0.2",
+    "fumadocs-ui": "^16.8.9",
+    "lucide-react": "^1.14.0",
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "^20",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4.3.0",
     "tsx": "^4.0.0",
-    "typescript": "^5"
+    "typescript": "5.9.3"
   }
 }

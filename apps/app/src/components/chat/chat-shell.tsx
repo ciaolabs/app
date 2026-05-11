@@ -807,7 +807,7 @@ function ThreadSidebarItem({
             "flex min-h-14 w-full items-center gap-3 overflow-hidden rounded-xl border px-3 pr-3 text-left transition group-hover:pr-10",
             isActive
               ? "border-(--line-strong) bg-(--accent-soft) text-(--ink)"
-              : "border-transparent text-(--ink-soft) hover:border-(--line) hover:bg-(--surface-inset) hover:text-(--ink)",
+              : "border-transparent text-(--ink-soft) group-hover:border-(--line) group-hover:bg-(--surface-inset) group-hover:text-(--ink)",
             isLoading && "cursor-wait opacity-70",
           )}
         >
@@ -1249,7 +1249,7 @@ function ChatMessageBubble({
               type="button"
               onClick={() => onEdit?.(text)}
               title="Edit message"
-              className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
+              className="inline-flex size-7 items-center justify-center rounded-lg bg-(--accent-blue) text-(--selected-contrast) transition hover:brightness-90"
             >
               <PencilIcon className="size-3.5" />
             </button>
@@ -1257,7 +1257,7 @@ function ChatMessageBubble({
               type="button"
               onClick={copyText}
               title="Copy message"
-              className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
+              className="inline-flex size-7 items-center justify-center rounded-lg bg-(--accent-blue) text-(--selected-contrast) transition hover:brightness-90"
             >
               {copied ? <CheckIcon className="size-3.5 text-green-500" /> : <CopyIcon className="size-3.5" />}
             </button>
@@ -1307,7 +1307,7 @@ function ChatMessageBubble({
             type="button"
             onClick={copyText}
             title="Copy response"
-            className="inline-flex size-7 items-center justify-center rounded-lg text-(--muted) transition hover:bg-(--surface-inset) hover:text-(--ink)"
+            className="inline-flex size-7 items-center justify-center rounded-lg bg-(--surface-panel-strong) text-(--muted) transition hover:text-(--ink)"
           >
             {copied ? <CheckIcon className="size-3.5 text-green-500" /> : <CopyIcon className="size-3.5" />}
           </button>
@@ -1316,10 +1316,10 @@ function ChatMessageBubble({
             onClick={() => setFeedback(feedback === "up" ? null : "up")}
             title="Good response"
             className={cn(
-              "inline-flex size-7 items-center justify-center rounded-lg transition",
+              "inline-flex size-7 items-center justify-center rounded-lg bg-(--surface-panel-strong) transition",
               feedback === "up"
                 ? "text-green-500"
-                : "text-(--muted) hover:bg-(--surface-inset) hover:text-(--ink)",
+                : "text-(--muted) hover:text-(--ink)",
             )}
           >
             <ThumbsUpIcon className="size-3.5" />
@@ -1329,10 +1329,10 @@ function ChatMessageBubble({
             onClick={() => setFeedback(feedback === "down" ? null : "down")}
             title="Poor response"
             className={cn(
-              "inline-flex size-7 items-center justify-center rounded-lg transition",
+              "inline-flex size-7 items-center justify-center rounded-lg bg-(--surface-panel-strong) transition",
               feedback === "down"
                 ? "text-red-500"
-                : "text-(--muted) hover:bg-(--surface-inset) hover:text-(--ink)",
+                : "text-(--muted) hover:text-(--ink)",
             )}
           >
             <ThumbsDownIcon className="size-3.5" />

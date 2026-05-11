@@ -8,11 +8,17 @@
       "Bash(sed -n '17,21p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/app/package.json)",
       "Bash(sed -n '1,10p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/survey/src/lib/survey/results/engine.ts)",
       "Bash(sed -n '1,10p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/survey/src/lib/survey/results/values-beliefs-engine.ts)",
-      "Bash(sed -n '1,8p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/survey/src/lib/survey/questions.ts)"
+      "Bash(sed -n '1,8p' /Volumes/TiaSSD/Users/mattiaippoliti/Developer/surveys/apps/survey/src/lib/survey/questions.ts)",
+      "PowerShell(cmd /c \"dir /a \"\"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\docs\\\\node_modules\\\\fumadocs-ui\\\\dist\"\" 2>&1\")",
+      "Bash(pnpm --filter @app/docs build)",
+      "Bash(xargs grep -l \"PageData\\\\|SharedFileInfo\\\\| path:\")",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(Get-NetTCPConnection *)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "code-review-graph"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

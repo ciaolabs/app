@@ -1,5 +1,5 @@
 import { readdir, readFile } from "node:fs/promises";
-import { join, basename } from "node:path";
+import { join, relative } from "node:path";
 import { getReadyDb, ensureRagSchema } from "@ciaobang/db";
 import { embedText } from "@ciaobang/rag";
 
@@ -15,10 +15,39 @@ type DocChunkInput = {
   embedding: number[];
 };
 
-function parseFrontmatter(raw: string): { docId: string; title: string; body: string } {
+function docIdFromPath(filePath: string) {
+  const withoutExtension = relative(CONTENT_DIR, filePath)
+    .replaceAll("\\", "/")
+    .replace(/\.mdx$/, "")
+    .replace(/\/index$/, "");
+
+  return withoutExtension.replaceAll("/", ":") || "index";
+}
+
+async function listMdxFiles(dir: string): Promise<string[]> {
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files = await Promise.all(
+    entries.map((entry) => {
+      const entryPath = join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        return listMdxFiles(entryPath);
+      }
+
+      return entry.isFile() && entry.name.endsWith(".mdx") ? [entryPath] : [];
+    }),
+  );
+
+  return files.flat();
+}
+
+function parseFrontmatter(
+  raw: string,
+  fallbackDocId: string,
+): { docId: string; title: string; body: string } {
   const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!match) {
-    return { docId: "unknown", title: "Untitled", body: raw };
+    return { docId: fallbackDocId, title: "Untitled", body: raw };
   }
   const frontmatter = match[1]!;
   const body = match[2]!.trim();
@@ -26,7 +55,7 @@ function parseFrontmatter(raw: string): { docId: string; title: string; body: st
   const docIdMatch = frontmatter.match(/^docId:\s*(.+)$/m);
   return {
     title: titleMatch?.[1]?.trim() ?? "Untitled",
-    docId: docIdMatch?.[1]?.trim() ?? "unknown",
+    docId: docIdMatch?.[1]?.trim() ?? fallbackDocId,
     body,
   };
 }
@@ -42,7 +71,7 @@ function chunkByHeadings(body: string, docTitle: string): Array<{ title: string;
     const headingLine = lines[0] ?? "";
     const isHeading = headingLine.startsWith("## ");
     const sectionTitle = isHeading
-      ? `${docTitle} — ${headingLine.replace(/^## /, "")}`
+      ? `${docTitle} - ${headingLine.replace(/^## /, "")}`
       : docTitle;
     const sectionContent = isHeading ? lines.slice(1).join("\n").trim() : section.trim();
 
@@ -58,7 +87,7 @@ function chunkByHeadings(body: string, docTitle: string): Array<{ title: string;
         const subHeading = subLines[0] ?? "";
         const isSubHeading = subHeading.startsWith("### ");
         const subTitle = isSubHeading
-          ? `${sectionTitle} — ${subHeading.replace(/^### /, "")}`
+          ? `${sectionTitle} - ${subHeading.replace(/^### /, "")}`
           : sectionTitle;
         const subContent = isSubHeading ? subLines.slice(1).join("\n").trim() : sub.trim();
 
@@ -133,15 +162,17 @@ async function main() {
   await ensureRagSchema();
   console.log("RAG schema ready.");
 
-  const files = (await readdir(CONTENT_DIR)).filter((f) => f.endsWith(".mdx"));
+  const files = await listMdxFiles(CONTENT_DIR);
   console.log(`Found ${files.length} MDX file(s).`);
 
   for (const file of files) {
-    const raw = await readFile(join(CONTENT_DIR, file), "utf-8");
-    const { docId, title, body } = parseFrontmatter(raw);
+    const raw = await readFile(file, "utf-8");
+    const { docId, title, body } = parseFrontmatter(raw, docIdFromPath(file));
     const textChunks = chunkByHeadings(body, title);
 
-    console.log(`\n[${file}] docId="${docId}", ${textChunks.length} chunks`);
+    console.log(
+      `\n[${relative(CONTENT_DIR, file)}] docId="${docId}", ${textChunks.length} chunks`,
+    );
 
     const chunkInputs: DocChunkInput[] = [];
     for (let i = 0; i < textChunks.length; i++) {
