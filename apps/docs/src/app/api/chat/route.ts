@@ -1,7 +1,7 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { streamText, tool } from "ai";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { getModelOption, MODEL_OPTIONS } from "@/lib/ai-models";
 import { embedText, retrieveCandidates, mmrRerank } from "@ciaobang/rag";
 import { getDb } from "@ciaobang/db";
