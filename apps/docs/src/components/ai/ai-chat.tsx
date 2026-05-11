@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { useAiSettings } from "@/lib/use-ai-settings";
 import { AiSettings } from "./ai-settings";
 import {
@@ -160,20 +161,29 @@ function Sidebar({
   const [showSettings, setShowSettings] = useState(false);
   const settings = useAiSettings();
   const hasSentInitial = useRef(false);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
 
-  const chat = useChat({
-    api: "/api/chat",
-    headers: {
-      "x-api-key": settings.activeApiKey ?? "",
-      ...(settings.googleApiKey && settings.modelOption.provider !== "google"
-        ? { "x-google-api-key": settings.googleApiKey }
-        : {}),
-    },
-    body: {
-      model: settings.model,
-      provider: settings.modelOption.provider,
-    },
-  });
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        headers: () => ({
+          "x-api-key": settingsRef.current.activeApiKey ?? "",
+          ...(settingsRef.current.googleApiKey &&
+          settingsRef.current.modelOption.provider !== "google"
+            ? { "x-google-api-key": settingsRef.current.googleApiKey }
+            : {}),
+        }),
+        body: () => ({
+          model: settingsRef.current.model,
+          provider: settingsRef.current.modelOption.provider,
+        }),
+      }),
+    [],
+  );
+
+  const chat = useChat({ transport });
 
   useEffect(() => {
     if (initialQuery && settings.isReady && !hasSentInitial.current) {
