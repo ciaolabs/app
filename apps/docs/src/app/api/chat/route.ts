@@ -88,5 +88,6 @@ export async function POST(request: Request) {
     temperature: 0.6,
   });
 
-  return result.toDataStreamResponse();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (result as any).toDataStreamResponse();
 }
