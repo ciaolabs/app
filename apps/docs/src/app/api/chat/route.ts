@@ -1,6 +1,6 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { streamText, tool, jsonSchema } from "ai";
+import { streamText, jsonSchema } from "ai";
 import { getModelOption, MODEL_OPTIONS } from "@/lib/ai-models";
 import { embedText, retrieveCandidates, mmrRerank } from "@ciaobang/rag";
 import { getDb } from "@ciaobang/db";
@@ -16,7 +16,7 @@ function createModel(modelValue: string, apiKey: string) {
 }
 
 function makeDocsSearchTool(googleApiKey: string) {
-  return tool({
+  return {
     description:
       "Search the documentation for explanations of personality traits, values, beliefs, assessment scales, and psychological concepts. Use when the user asks about what something means or how it works.",
     parameters: jsonSchema<{ query: string }>({
@@ -40,7 +40,7 @@ function makeDocsSearchTool(googleApiKey: string) {
         relevance: Math.round(chunk.similarity * 100) / 100,
       }));
     },
-  });
+  };
 }
 
 const SYSTEM_PROMPT = `You are an AI assistant for Ciao Docs, the documentation site for the Ciao personality assessment platform.
@@ -74,7 +74,8 @@ export async function POST(request: Request) {
       ? apiKey
       : request.headers.get("x-google-api-key") ?? undefined;
 
-  const tools: Record<string, ReturnType<typeof tool>> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tools: Record<string, any> = {};
   if (googleApiKey) {
     tools.searchDocs = makeDocsSearchTool(googleApiKey);
   }
