@@ -760,7 +760,7 @@ function ThreadSidebarItem({
   }, [menuOpen]);
 
   return (
-    <div className="group relative">
+    <div className="group relative overflow-hidden">
       {isRenaming ? (
         <div
           className={cn(
@@ -788,7 +788,7 @@ function ThreadSidebarItem({
           disabled={isLoading}
           onClick={onSelect}
           className={cn(
-            "flex min-h-14 w-full items-center gap-3 rounded-xl border px-3 pr-10 text-left transition",
+            "flex min-h-14 w-full items-center gap-3 overflow-hidden rounded-xl border px-3 pr-10 text-left transition",
             isActive
               ? "border-(--line-strong) bg-(--accent-soft) text-(--ink)"
               : "border-transparent text-(--ink-soft) hover:border-(--line) hover:bg-(--surface-inset) hover:text-(--ink)",
