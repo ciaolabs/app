@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
 import Link from "next/link";
@@ -736,8 +737,11 @@ function ThreadSidebarItem({
 }) {
   const isRenaming = renamingThreadId === thread.id;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
   const [renameValue, setRenameValue] = useState(thread.title);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const renameInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -751,7 +755,11 @@ function ThreadSidebarItem({
   useEffect(() => {
     if (!menuOpen) return;
     function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        menuRef.current && !menuRef.current.contains(target) &&
+        dropdownRef.current && !dropdownRef.current.contains(target)
+      ) {
         setMenuOpen(false);
       }
     }
@@ -759,8 +767,16 @@ function ThreadSidebarItem({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
+  function openMenu() {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+    }
+    setMenuOpen(true);
+  }
+
   return (
-    <div className="group relative overflow-hidden">
+    <div className="group relative">
       {isRenaming ? (
         <div
           className={cn(
@@ -788,7 +804,7 @@ function ThreadSidebarItem({
           disabled={isLoading}
           onClick={onSelect}
           className={cn(
-            "flex min-h-14 w-full items-center gap-3 overflow-hidden rounded-xl border px-3 pr-10 text-left transition",
+            "flex min-h-14 w-full items-center gap-3 overflow-hidden rounded-xl border px-3 pr-3 text-left transition group-hover:pr-10",
             isActive
               ? "border-(--line-strong) bg-(--accent-soft) text-(--ink)"
               : "border-transparent text-(--ink-soft) hover:border-(--line) hover:bg-(--surface-inset) hover:text-(--ink)",
@@ -809,60 +825,74 @@ function ThreadSidebarItem({
       {!isRenaming && (
         <div
           ref={menuRef}
-          className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100"
+          className={cn(
+            "absolute right-2 top-1/2 -translate-y-1/2 transition-opacity",
+            menuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+          )}
         >
           <button
+            ref={triggerRef}
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setMenuOpen((v) => !v);
+              if (menuOpen) {
+                setMenuOpen(false);
+              } else {
+                openMenu();
+              }
             }}
             className="inline-flex size-6 items-center justify-center rounded-md text-(--muted) hover:bg-(--surface-panel) hover:text-(--ink) transition"
           >
             <MoreHorizontalIcon className="size-4" />
           </button>
-          {menuOpen && (
-            <div className="absolute right-0 top-full z-50 mt-1 w-40 overflow-hidden rounded-xl border border-(--line-strong) bg-(--surface-panel) py-1 shadow-(--shadow-strong)">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPin();
-                  setMenuOpen(false);
-                }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-(--ink) hover:bg-(--surface-inset) transition"
-              >
-                <PinIcon className="size-4 rotate-45" />
-                {isPinned ? "Unpin" : "Pin"}
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onStartRename();
-                  setMenuOpen(false);
-                }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-(--ink) hover:bg-(--surface-inset) transition"
-              >
-                <PencilIcon className="size-4" />
-                Rename
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                  setMenuOpen(false);
-                }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-(--surface-inset) transition"
-              >
-                <Trash2Icon className="size-4" />
-                Delete
-              </button>
-            </div>
-          )}
         </div>
       )}
+      {menuOpen && menuPos && typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            style={{ position: "fixed", top: menuPos.top, right: menuPos.right }}
+            className="z-[9999] w-40 overflow-hidden rounded-xl border border-(--line-strong) bg-(--surface-panel) py-1 shadow-(--shadow-strong)"
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPin();
+                setMenuOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-(--ink) hover:bg-(--surface-inset) transition"
+            >
+              <PinIcon className="size-4 rotate-45" />
+              {isPinned ? "Unpin" : "Pin"}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartRename();
+                setMenuOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-(--ink) hover:bg-(--surface-inset) transition"
+            >
+              <PencilIcon className="size-4" />
+              Rename
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+                setMenuOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-(--surface-inset) transition"
+            >
+              <Trash2Icon className="size-4" />
+              Delete
+            </button>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
