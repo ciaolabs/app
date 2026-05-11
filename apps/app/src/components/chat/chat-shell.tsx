@@ -770,7 +770,6 @@ function ThreadSidebarItem({
               : "border-(--line) bg-(--surface-inset)",
           )}
         >
-          <HistoryIcon className="size-4 shrink-0 text-(--muted)" />
           <input
             ref={renameInputRef}
             value={renameValue}
@@ -800,12 +799,10 @@ function ThreadSidebarItem({
             <Loader2Icon className="size-4 shrink-0 animate-spin" />
           ) : isPinned ? (
             <PinIcon className="size-4 shrink-0 rotate-45" />
-          ) : (
-            <HistoryIcon className="size-4 shrink-0" />
-          )}
-          <span className="min-w-0 flex-1">
+          ) : null}
+          <span className="min-w-0 flex-1 overflow-hidden">
             <span className="block truncate text-sm font-semibold">{thread.title}</span>
-            <span className="block text-xs text-(--muted)">{formatThreadDate(thread.updatedAt)}</span>
+            <span className="block truncate text-xs text-(--muted)">{formatThreadDate(thread.updatedAt)}</span>
           </span>
         </button>
       )}
