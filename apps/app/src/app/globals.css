@@ -821,33 +821,29 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
   --dot-hot-edge: 1.92px;
 }
 
-.maze-ghost {
-  position: absolute;
-  width: 36px;
-  height: 30px;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
-.maze-ghost .ghost-pupil-l,
-.maze-ghost .ghost-pupil-r {
-  transition: transform 0.25s ease;
-}
-
-.incognito-maze:hover .ghost-pupil-l,
-.incognito-maze:hover .ghost-pupil-r {
+.incognito-toggle-btn:hover .ghost-eye {
   animation: ghost-look 2s ease-in-out infinite;
 }
 
 @keyframes ghost-look {
   0%, 100% { transform: translate(0, 0); }
-  12.5%    { transform: translate(1.4px, 0); }
-  25%      { transform: translate(1.4px, 0); }
-  37.5%    { transform: translate(-1.4px, 0); }
-  50%      { transform: translate(-1.4px, 0); }
-  62.5%    { transform: translate(0, -1.4px); }
-  75%      { transform: translate(0, -1.4px); }
+  12.5%    { transform: translate(1px, 0); }
+  25%      { transform: translate(1px, 0); }
+  37.5%    { transform: translate(-1px, 0); }
+  50%      { transform: translate(-1px, 0); }
+  62.5%    { transform: translate(0, -1px); }
+  75%      { transform: translate(0, -1px); }
   87.5%    { transform: translate(0, 0); }
+}
+
+.maze-ghost {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  transform: scaleX(1.15) scaleY(0.82);
+  border-radius: 50%;
 }
 
 .maze-ghost-1 { color: #ff4d6d; animation-name: maze-path-1; animation-duration: 54s; }
@@ -895,10 +891,6 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
 
 @media (prefers-reduced-motion: reduce) {
   .maze-ghost {
-    animation: none;
-  }
-  .incognito-maze:hover .ghost-pupil-l,
-  .incognito-maze:hover .ghost-pupil-r {
     animation: none;
   }
 }

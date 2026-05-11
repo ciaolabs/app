@@ -58,7 +58,7 @@ const InteractiveDotBackground = dynamic(
   () => import("@/components/interactive-dot-background").then((m) => ({ default: m.InteractiveDotBackground })),
   { ssr: false },
 );
-import { MazeGhost } from "@/components/maze-ghost";
+import { IncognitoGhostIcon } from "@/components/incognito-ghost-icon";
 import type { SurveyChatContext } from "@/lib/chat/survey-context";
 import { surveyContextHasResults } from "@/lib/chat/survey-context";
 import type { ChatMessage, ChatThreadSummary, ChatThreadWithMessages } from "@/lib/chat/types";
@@ -1109,16 +1109,16 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
         {isTemporary ? (
           <div aria-hidden="true" className="incognito-maze">
             <span className="maze-ghost maze-ghost-1">
-              <MazeGhost className="size-full" />
+              <GhostIcon className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-2">
-              <MazeGhost className="size-full" />
+              <GhostIcon className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-3">
-              <MazeGhost className="size-full" />
+              <GhostIcon className="size-full" />
             </span>
             <span className="maze-ghost maze-ghost-4">
-              <MazeGhost className="size-full" />
+              <GhostIcon className="size-full" />
             </span>
           </div>
         ) : null}
@@ -1186,11 +1186,12 @@ export function ChatShell({ initialThreads, surveyContext, hasApiKeys }: ChatShe
                     onClick={toggleTemporary}
                     className={cn(
                       clayIconButton,
+                      "incognito-toggle-btn",
                       isTemporary &&
                         "border-black bg-(--accent-blue) text-(--selected-contrast)",
                     )}
                   >
-                    <GhostIcon className="size-5" />
+                    <IncognitoGhostIcon className="size-5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
