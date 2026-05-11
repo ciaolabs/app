@@ -86,7 +86,6 @@ export async function POST(request: Request) {
     messages,
     tools,
     temperature: 0.6,
-    maxSteps: 4,
   });
 
   return result.toDataStreamResponse();
