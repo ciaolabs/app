@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { useAiSettings } from "@/lib/use-ai-settings";
 import { AiSettings } from "./ai-settings";
 import {
@@ -16,11 +16,18 @@ import {
   Trash2,
 } from "lucide-react";
 
+function messageText(msg: UIMessage): string {
+  return msg.parts
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("");
+}
+
 function ChatMessages({
   messages,
   isLoading,
 }: {
-  messages: { id: string; role: string; content: string }[];
+  messages: UIMessage[];
   isLoading: boolean;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -73,7 +80,7 @@ function ChatMessages({
                   : "bg-fd-muted text-fd-foreground"
               }`}
             >
-              <div className="whitespace-pre-wrap">{msg.content}</div>
+              <div className="whitespace-pre-wrap">{messageText(msg)}</div>
             </div>
           </div>
         ))}
@@ -184,13 +191,33 @@ function Sidebar({
   );
 
   const chat = useChat({ transport });
+  const [input, setInput] = useState("");
+  const isLoading = chat.status === "submitted" || chat.status === "streaming";
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setInput(e.target.value);
+    },
+    [],
+  );
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      const text = input.trim();
+      if (!text || isLoading) return;
+      setInput("");
+      void chat.sendMessage({ text });
+    },
+    [input, isLoading, chat],
+  );
 
   useEffect(() => {
     if (initialQuery && settings.isReady && !hasSentInitial.current) {
       hasSentInitial.current = true;
-      chat.append({ role: "user", content: initialQuery });
+      void chat.sendMessage({ text: initialQuery });
     }
-  }, [initialQuery, settings.isReady]);
+  }, [initialQuery, settings.isReady, chat]);
 
   useEffect(() => {
     if (!settings.isReady) {
@@ -251,12 +278,12 @@ function Sidebar({
           </div>
         ) : (
           <>
-            <ChatMessages messages={chat.messages} isLoading={chat.isLoading} />
+            <ChatMessages messages={chat.messages} isLoading={isLoading} />
             <SidebarInput
-              input={chat.input}
-              isLoading={chat.isLoading}
-              onInputChange={chat.handleInputChange}
-              onSubmit={chat.handleSubmit}
+              input={input}
+              isLoading={isLoading}
+              onInputChange={handleInputChange}
+              onSubmit={handleSubmit}
             />
           </>
         )}
