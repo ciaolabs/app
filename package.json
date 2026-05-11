@@ -14,7 +14,7 @@
     "test": "pnpm -r test",
     "lint": "pnpm -r lint"
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@11.1.0",
   "engines": {
     "node": ">=20"
   }

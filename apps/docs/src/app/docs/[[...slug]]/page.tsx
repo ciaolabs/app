@@ -41,20 +41,17 @@ export default async function Page(props: PageProps) {
     <DocsPage
       toc={page.data.toc}
       full={page.data.full}
-      tableOfContent={{
-        header: (
-          <div className="flex items-center gap-1.5">
-            <MarkdownCopyButton markdownUrl={markdownUrl} />
-            <ViewOptionsPopover
-              markdownUrl={markdownUrl}
-              githubUrl={githubUrl}
-            />
-          </div>
-        ),
-      }}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
+      <div className="flex items-center gap-1.5">
+        <MarkdownCopyButton markdownUrl={markdownUrl} />
+        <ViewOptionsPopover
+          markdownUrl={markdownUrl}
+          githubUrl={githubUrl}
+        />
+      </div>
+      <hr className="my-4" />
       <DocsBody>
         <MDX components={getMDXComponents()} />
       </DocsBody>
