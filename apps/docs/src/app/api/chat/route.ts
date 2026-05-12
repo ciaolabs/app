@@ -1,6 +1,6 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { streamText, jsonSchema } from "ai";
+import { streamText, jsonSchema, convertToModelMessages } from "ai";
 import { getModelOption, MODEL_OPTIONS } from "@/lib/ai-models";
 import { embedText, retrieveCandidates, mmrRerank } from "@ciaobang/rag";
 import { getDb } from "@ciaobang/db";
@@ -80,14 +80,15 @@ export async function POST(request: Request) {
     tools.searchDocs = makeDocsSearchTool(googleApiKey);
   }
 
+  const modelMessages = convertToModelMessages(messages);
+
   const result = streamText({
     model: languageModel,
     system: SYSTEM_PROMPT,
-    messages,
+    messages: modelMessages,
     tools,
     temperature: 0.6,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (result as any).toDataStreamResponse();
+  return result.toUIMessageStreamResponse();
 }
