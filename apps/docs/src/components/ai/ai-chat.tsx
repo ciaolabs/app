@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
+import { useChat } from "@ai-sdk/react";
 import { useAiSettings } from "@/lib/use-ai-settings";
 import { AiSettings } from "./ai-settings";
 import {
@@ -11,7 +11,6 @@ import {
   Settings,
   Loader2,
   Bot,
-  User,
   Trash2,
   ChevronDown,
   Sparkles,

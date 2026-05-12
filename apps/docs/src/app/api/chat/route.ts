@@ -1,9 +1,7 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { streamText, jsonSchema, convertToModelMessages } from "ai";
+import { convertToModelMessages, streamText } from "ai";
 import { getModelOption, MODEL_OPTIONS } from "@/lib/ai-models";
-import { embedText, retrieveCandidates, mmrRerank } from "@ciaobang/rag";
-import { getDb } from "@ciaobang/db";
 
 function createModel(modelValue: string, apiKey: string) {
   const option = getModelOption(modelValue);
@@ -15,43 +13,26 @@ function createModel(modelValue: string, apiKey: string) {
   return google(option.value);
 }
 
-function makeDocsSearchTool(googleApiKey: string) {
-  return {
-    description:
-      "Search the documentation for explanations of personality traits, values, beliefs, assessment scales, and psychological concepts. Use when the user asks about what something means or how it works.",
-    parameters: jsonSchema<{ query: string }>({
-      type: "object",
-      properties: {
-        query: {
-          type: "string",
-          description: "Search query based on the user's question",
-        },
-      },
-      required: ["query"],
-    }),
-    execute: async ({ query }: { query: string }) => {
-      const sql = getDb();
-      const queryEmbedding = await embedText(query, googleApiKey);
-      const candidates = await retrieveCandidates(queryEmbedding, sql);
-      const chunks = mmrRerank(candidates, 5);
-      return chunks.map((chunk) => ({
-        title: chunk.title,
-        content: chunk.content,
-        relevance: Math.round(chunk.similarity * 100) / 100,
-      }));
-    },
-  };
-}
-
-const SYSTEM_PROMPT = `You are an AI assistant for Ciao Docs, the documentation site for the Ciao personality assessment platform.
+function buildSystemPrompt(pageContent?: string) {
+  const base = `You are an AI assistant for Ciao Docs, the documentation site for the Ciao personality assessment platform.
 You help users understand personality traits, values, beliefs, and psychological assessment concepts.
-When answering questions, use the searchDocs tool to find relevant documentation content.
-Be concise, accurate, and cite the documentation when possible.
+Be concise, accurate, and reference the page content when possible.
 If you don't know something, say so rather than guessing.`;
+
+  if (!pageContent) return base;
+
+  return `${base}
+
+The user is currently reading the following documentation page. Use it as context to answer their questions:
+
+<page-content>
+${pageContent}
+</page-content>`;
+}
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { messages, model: modelValue, provider } = body;
+  const { messages, model: modelValue, provider, pageContent } = body;
 
   const apiKey = request.headers.get("x-api-key");
   if (!apiKey) {
@@ -69,24 +50,10 @@ export async function POST(request: Request) {
 
   const languageModel = createModel(modelValue, apiKey);
 
-  const googleApiKey =
-    provider === "google"
-      ? apiKey
-      : request.headers.get("x-google-api-key") ?? undefined;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tools: Record<string, any> = {};
-  if (googleApiKey) {
-    tools.searchDocs = makeDocsSearchTool(googleApiKey);
-  }
-
-  const modelMessages = convertToModelMessages(messages);
-
   const result = streamText({
     model: languageModel,
-    system: SYSTEM_PROMPT,
-    messages: modelMessages,
-    tools,
+    system: buildSystemPrompt(pageContent),
+    messages: await convertToModelMessages(messages),
     temperature: 0.6,
   });
 
