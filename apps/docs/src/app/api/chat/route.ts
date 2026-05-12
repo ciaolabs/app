@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     tools.searchDocs = makeDocsSearchTool(googleApiKey);
   }
 
-  const modelMessages = convertToModelMessages(messages);
+  const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
     model: languageModel,
