@@ -7,13 +7,12 @@ import { useChat } from "@ai-sdk/react";
 import { useAiSettings } from "@/lib/use-ai-settings";
 import { AiSettings } from "./ai-settings";
 import {
-  ArrowUp,
+  ArrowRight,
   Settings,
   Loader2,
   Bot,
-  Trash2,
+  Edit,
   ChevronDown,
-  Sparkles,
 } from "lucide-react";
 
 function messageText(msg: UIMessage): string {
@@ -40,7 +39,14 @@ function ChatMessages({
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-10 text-center">
         <div className="rounded-full bg-white/10 p-3 backdrop-blur-sm">
-          <Sparkles className="size-6 text-white/80" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/ciao-sparkle-dark.svg"
+            alt=""
+            aria-hidden="true"
+            className="ciao-wave"
+            style={{ height: 24, width: 24, objectFit: "contain" }}
+          />
         </div>
         <div>
           <p className="font-medium text-white/90">Ask about the docs</p>
@@ -248,25 +254,38 @@ export function AiSearchBar() {
       }}
     >
       <div
-        className="flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl transition-all duration-300 ease-out"
+        className="flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-white/[0.06] shadow-2xl transition-all duration-300 ease-out"
         style={{
           maxHeight: expanded ? "min(75vh, 620px)" : "3rem",
           background: expanded
-            ? "rgba(30, 30, 30, 0.82)"
-            : "rgba(30, 30, 30, 0.70)",
-          backdropFilter: "blur(24px) saturate(1.6)",
-          WebkitBackdropFilter: "blur(24px) saturate(1.6)",
+            ? "rgba(20, 20, 20, 0.6)"
+            : "rgba(20, 20, 20, 0.5)",
+          backdropFilter: "blur(40px) saturate(2)",
+          WebkitBackdropFilter: "blur(40px) saturate(2)",
         }}
       >
         {expanded && (
           <>
             {/* Header */}
             <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-4 py-2.5">
-              <div className="flex items-center gap-2">
-                <Sparkles className="size-4 text-white/60" />
-                <span className="text-[13px] font-medium text-white/80">
-                  Ask AI
+              <div className="flex shrink-0 items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/ciao-sparkle-dark.svg"
+                  alt=""
+                  aria-hidden="true"
+                  className="ciao-wave"
+                  style={{ height: 24, width: 24, objectFit: "contain" }}
+                />
+                <span className="text-[13px] font-medium leading-none text-white/80">
+                  Ask
                 </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/ciao-text.png"
+                  alt="Ciao!"
+                  style={{ height: 16, width: "auto", filter: "invert(1)" }}
+                />
                 <span className="rounded-full bg-white/[0.08] px-2 py-0.5 text-[10px] text-white/40">
                   {settings.modelOption.label}
                 </span>
@@ -289,9 +308,9 @@ export function AiSearchBar() {
                     type="button"
                     onClick={() => chat.setMessages([])}
                     className="rounded-lg p-1.5 text-white/30 hover:bg-white/[0.06] hover:text-white/60"
-                    title="Clear chat"
+                    title="New chat"
                   >
-                    <Trash2 className="size-3.5" />
+                    <Edit className="size-3.5" />
                   </button>
                 )}
                 <button
@@ -342,12 +361,12 @@ export function AiSearchBar() {
                       e.preventDefault();
                       handleSubmit(input);
                     }}
-                    className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/15 text-white/80 backdrop-blur-sm transition-colors disabled:opacity-30 hover:bg-white/25"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-white/80 backdrop-blur-sm transition-colors disabled:opacity-30 hover:bg-white/25"
                   >
                     {isLoading ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
-                      <ArrowUp className="size-4" />
+                      <ArrowRight className="size-4" />
                     )}
                   </button>
                 </div>
@@ -379,17 +398,6 @@ export function AiSearchBar() {
               <button
                 type="button"
                 onClick={() => {
-                  setExpanded(true);
-                  setShowSettings(true);
-                }}
-                className="rounded-lg p-1.5 text-white/30 transition-colors hover:bg-white/[0.06] hover:text-white/60"
-                title="Settings"
-              >
-                <Settings className="size-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
                   if (input.trim()) {
                     handleSubmit(input.trim());
                   } else {
@@ -398,7 +406,7 @@ export function AiSearchBar() {
                 }}
                 className="flex size-7 items-center justify-center rounded-full bg-white/15 text-white/80 transition-colors hover:bg-white/25"
               >
-                <ArrowUp className="size-3.5" />
+                <ArrowRight className="size-3.5" />
               </button>
             </div>
           </div>

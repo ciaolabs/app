@@ -2,12 +2,8 @@
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 
-:root {
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
-}
-
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
 }
 
 @keyframes slide-in-from-right {
@@ -21,4 +17,22 @@ body {
 
 .ai-sidebar-panel {
   animation: slide-in-from-right 0.2s ease-out;
+}
+
+@keyframes ciao-wave {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  10%, 30% { transform: rotate(18deg); }
+  20%, 40% { transform: rotate(-12deg); }
+  50% { transform: rotate(10deg); }
+}
+
+.ciao-wave {
+  transform-origin: 70% 80%;
+  animation: ciao-wave 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ciao-wave {
+    animation: none;
+  }
 }
