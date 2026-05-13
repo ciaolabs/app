@@ -106,9 +106,9 @@ export async function POST(request: Request) {
   }
 
   let model: LanguageModel;
-  let googleApiKey: string | null;
+  let participantGoogleApiKey: string | null;
   try {
-    [model, googleApiKey] = await Promise.all([
+    [model, participantGoogleApiKey] = await Promise.all([
       selectModelForParticipant(userId),
       getDecryptedApiKey(userId, "google"),
     ]);
@@ -120,11 +120,14 @@ export async function POST(request: Request) {
     );
   }
 
-  const ragSearch: RagSearchCapability | null = googleApiKey
-    ? { googleApiKey, sql: await getReadyDb() }
+  const ragSearch: RagSearchCapability | null = participantGoogleApiKey
+    ? { googleApiKey: participantGoogleApiKey, sql: await getReadyDb() }
     : null;
 
-  logger.info({ userId, threadId: body.threadId, temporary, ragEnabled: ragSearch !== null }, "Chat turn dispatched");
+  logger.info(
+    { userId, threadId: body.threadId, temporary, ragEnabled: ragSearch !== null },
+    "Chat turn dispatched",
+  );
 
   return runChatTurn({
     userId,

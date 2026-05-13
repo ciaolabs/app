@@ -185,4 +185,23 @@ describe("POST /api/chat (HTTP shape)", () => {
 
     expect(runChatTurn).toHaveBeenCalledWith(expect.objectContaining({ ragSearch: null }));
   });
+
+  it("does not use server Google env vars for RAG when the participant has no Google key", async () => {
+    process.env.RAG_GOOGLE_API_KEY = "server-google-key";
+    process.env.GOOGLE_API_KEY = "server-google-key";
+    getCurrentUserId.mockResolvedValue("user_1");
+    getDecryptedApiKey.mockImplementation(async (_userId: string, provider: string) =>
+      provider === "google" ? null : "sk-anthropic",
+    );
+    const { POST } = await import("@/app/api/chat/route");
+
+    await POST(
+      buildRequest({
+        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
+      }),
+    );
+
+    expect(runChatTurn).toHaveBeenCalledWith(expect.objectContaining({ ragSearch: null }));
+    expect(getReadyDb).not.toHaveBeenCalled();
+  });
 });

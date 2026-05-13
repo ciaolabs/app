@@ -14,7 +14,7 @@ export function makeSearchDocsTool(
 ) {
   return tool({
     description:
-      "Search the survey documentation for explanations of personality traits, values, beliefs, and psychological concepts. Use this when the user asks about what a score means, how a dimension is defined, or wants to understand the science behind their results.",
+      "Search the Ciao Docs knowledge base for explanations of personality traits, values, beliefs, methodology, and psychological concepts. Use this when the user asks about what a score means, how a dimension is defined, or wants to understand the science behind their results.",
     inputSchema: z.object({
       query: z.string().describe("The search query based on the user's question"),
     }),

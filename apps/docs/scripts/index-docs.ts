@@ -1,9 +1,11 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
 import { getReadyDb, ensureRagSchema } from "@ciaobang/db";
 import { embedText } from "@ciaobang/rag";
 
-const CONTENT_DIR = join(import.meta.dirname, "../content");
+const SCRIPT_DIR = fileURLToPath(new URL(".", import.meta.url));
+const CONTENT_DIR = join(SCRIPT_DIR, "../content/docs");
 const CHUNK_MAX_CHARS = 2000;
 const EMBEDDING_BATCH_DELAY_MS = 200;
 
@@ -148,14 +150,32 @@ async function upsertChunks(chunks: DocChunkInput[]): Promise<void> {
   }
 }
 
+async function deleteStaleDocs(currentDocIds: Set<string>): Promise<void> {
+  const sql = await getReadyDb();
+  const rows = await sql<{ doc_id: string }[]>`
+    SELECT DISTINCT doc_id
+    FROM research.doc_chunks
+  `;
+
+  for (const row of rows) {
+    if (currentDocIds.has(row.doc_id)) continue;
+
+    await sql`
+      DELETE FROM research.doc_chunks
+      WHERE doc_id = ${row.doc_id}
+    `;
+    console.log(`Removed stale chunks for "${row.doc_id}".`);
+  }
+}
+
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function main() {
-  const googleApiKey = process.env.GOOGLE_API_KEY;
+  const googleApiKey = process.env.RAG_GOOGLE_API_KEY?.trim() || process.env.GOOGLE_API_KEY?.trim();
   if (!googleApiKey) {
-    console.error("GOOGLE_API_KEY environment variable is required.");
+    console.error("RAG_GOOGLE_API_KEY or GOOGLE_API_KEY environment variable is required.");
     process.exit(1);
   }
 
@@ -165,9 +185,12 @@ async function main() {
   const files = await listMdxFiles(CONTENT_DIR);
   console.log(`Found ${files.length} MDX file(s).`);
 
+  const currentDocIds = new Set<string>();
+
   for (const file of files) {
     const raw = await readFile(file, "utf-8");
     const { docId, title, body } = parseFrontmatter(raw, docIdFromPath(file));
+    currentDocIds.add(docId);
     const textChunks = chunkByHeadings(body, title);
 
     console.log(
@@ -195,6 +218,8 @@ async function main() {
     await upsertChunks(chunkInputs);
     console.log(`  Upserted ${chunkInputs.length} chunks for "${docId}".`);
   }
+
+  await deleteStaleDocs(currentDocIds);
 
   console.log("\nIndexing complete.");
   process.exit(0);
