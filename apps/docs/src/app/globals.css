@@ -13,13 +13,13 @@
   --color-fd-card: #ffffff;
   --color-fd-card-foreground: #1a1a18;
   --color-fd-border: rgba(0, 0, 0, 0.08);
-  --color-fd-primary: #058a52;
-  --color-fd-primary-foreground: #ffffff;
-  --color-fd-secondary: #fdfbf0;
+  --color-fd-primary: #fdfbf0;
+  --color-fd-primary-foreground: #1a1a18;
+  --color-fd-secondary: #f0ede4;
   --color-fd-secondary-foreground: #1a1a18;
-  --color-fd-accent: rgba(5, 138, 82, 0.1);
-  --color-fd-accent-foreground: #058a52;
-  --color-fd-ring: #058a52;
+  --color-fd-accent: rgba(253, 251, 240, 0.8);
+  --color-fd-accent-foreground: #1a1a18;
+  --color-fd-ring: #c8c4b4;
   --color-fd-overlay: rgba(0, 0, 0, 0.15);
 }
 
