@@ -6,6 +6,7 @@ import { Space_Mono } from "next/font/google";
 import { APP_NAME } from "@/lib/app-config";
 import { InteractiveDotBackground } from "@/components/interactive-dot-background";
 import { Toaster } from "@/components/ui/sonner";
+import { AiSearchBar } from "@/components/ai/ai-chat";
 import { getInitialAuth } from "@/lib/auth";
 
 import "./globals.css";
@@ -68,6 +69,7 @@ export default async function RootLayout({
             <div className="app-glow app-glow-left" />
             <div className="app-glow app-glow-right" />
             {children}
+            <AiSearchBar />
             <Toaster />
           </div>
         </AuthKitProvider>

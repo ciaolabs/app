@@ -14,7 +14,10 @@
       "Bash(xargs grep -l \"PageData\\\\|SharedFileInfo\\\\| path:\")",
       "Bash(./node_modules/.bin/tsc --noEmit)",
       "PowerShell(Get-Process *)",
-      "PowerShell(Get-NetTCPConnection *)"
+      "PowerShell(Get-NetTCPConnection *)",
+      "Bash(Copy-Item \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\app\\\\public\\\\ciao-sparkle.svg\" -Destination \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\docs\\\\public\\\\\" -Force; Copy-Item \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\app\\\\public\\\\ciao-sparkle-dark.svg\" -Destination \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\docs\\\\public\\\\\" -Force)",
+      "Bash(Copy-Item \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\app\\\\public\\\\ciao-text.png\" -Destination \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\docs\\\\public\\\\\" -Force; Write-Output \"done\")",
+      "mcp__Claude_Preview__preview_start"
     ]
   },
   "enableAllProjectMcpServers": true,
