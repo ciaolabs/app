@@ -27,15 +27,33 @@ body {
   font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
 }
 
-/* Sidebar + TOC active item — override cream primary which is invisible on cream bg */
-#nd-sidebar [data-active=true],
-#nd-toc [data-active=true] {
-  background-color: rgba(26, 26, 24, 0.08);
+/* Sidebar active — cream primary invisible on cream bg, use dark tint */
+#nd-sidebar [data-active=true] {
+  background-color: rgba(26, 26, 24, 0.08) !important;
   color: #1a1a18;
 }
-#nd-sidebar [data-active=true]::before,
-#nd-toc [data-active=true]::before {
+#nd-sidebar [data-active=true]::before {
   background-color: #1a1a18 !important;
+}
+
+/* TOC active — uses text-fd-primary, override to dark */
+#nd-toc [data-active=true] {
+  color: #1a1a18 !important;
+}
+#nd-toc [data-active=true] + * {
+  background-color: #1a1a18 !important;
+}
+
+/* Dark mode — restore visible active states */
+.dark #nd-sidebar [data-active=true] {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f9f8f6;
+}
+.dark #nd-sidebar [data-active=true]::before {
+  background-color: #f9f8f6 !important;
+}
+.dark #nd-toc [data-active=true] {
+  color: #fdfbf0 !important;
 }
 
 @keyframes slide-in-from-right {
