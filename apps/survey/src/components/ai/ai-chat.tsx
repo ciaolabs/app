@@ -22,7 +22,7 @@ function ThinkingLottie({ className }: { className?: string }) {
       loop
       autoplay
       className={className}
-      aria-label="Ciao is thinking"
+      aria-label="Ciao! is thinking"
     />
   );
 }
@@ -375,7 +375,7 @@ export function AiSearchBar() {
                 }
               }}
               placeholder="Ask Ciao!"
-              className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/40 focus:outline-none"
+              className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/40 outline-none focus:outline-none focus-visible:outline-none"
             />
             <div className="flex items-center gap-1.5">
               <kbd className="hidden items-center gap-0.5 rounded border border-white/[0.08] bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/30 sm:flex">

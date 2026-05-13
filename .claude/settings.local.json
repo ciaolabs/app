@@ -17,7 +17,12 @@
       "PowerShell(Get-NetTCPConnection *)",
       "Bash(Copy-Item \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\app\\\\public\\\\ciao-sparkle.svg\" -Destination \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\docs\\\\public\\\\\" -Force; Copy-Item \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\app\\\\public\\\\ciao-sparkle-dark.svg\" -Destination \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\docs\\\\public\\\\\" -Force)",
       "Bash(Copy-Item \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\app\\\\public\\\\ciao-text.png\" -Destination \"C:\\\\Users\\\\mippoliti\\\\OneDrive - Luiss\\\\Repository\\\\app\\\\apps\\\\docs\\\\public\\\\\" -Force; Write-Output \"done\")",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(ls \"C:/Users/mippoliti/OneDrive - Luiss/Desktop/lottie_background.json\")",
+      "Bash(cp \"C:/Users/mippoliti/OneDrive - Luiss/Desktop/lottie_background.json\" \"C:/Users/mippoliti/OneDrive - Luiss/Repository/app/apps/survey/public/lottie_background.json\" && ls -la \"C:/Users/mippoliti/OneDrive - Luiss/Repository/app/apps/survey/public/lottie_background.json\")",
+      "Bash(node -e \"const j=require\\('C:/Users/mippoliti/OneDrive - Luiss/Repository/app/apps/survey/public/lottie_background.json'\\);console.log\\({w:j.w,h:j.h,fr:j.fr,ip:j.ip,op:j.op,layers:j.layers?j.layers.length:0,firstLayerName:j.layers?j.layers[0].nm:null}\\);\")",
+      "Bash(find \"C:/Users/mippoliti/OneDrive - Luiss/\" -maxdepth 4 -iname \"gradient*.png\" 2>/dev/null | head -20)",
+      "Bash(cp \"C:/Users/mippoliti/OneDrive - Luiss/Download/gradient_global.png.png\" \"C:/Users/mippoliti/OneDrive - Luiss/Repository/app/apps/survey/public/gradient_global.png\" && ls -la \"C:/Users/mippoliti/OneDrive - Luiss/Repository/app/apps/survey/public/gradient_global.png\")"
     ]
   },
   "enableAllProjectMcpServers": true,

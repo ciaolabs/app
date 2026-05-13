@@ -54,12 +54,6 @@ export function baseOptions(): BaseLayoutProps {
         url: "/docs/demo",
         active: "nested-url",
       },
-      {
-        text: "GitHub",
-        url: "https://github.com/ciaobang/app",
-        icon: <GithubIcon />,
-        external: true,
-      },
     ],
   };
 }

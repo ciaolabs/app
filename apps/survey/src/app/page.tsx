@@ -2,6 +2,7 @@ import { StartSurveyButton } from "@/components/auth/start-survey-button";
 import { LandingFooter } from "@/components/landing-footer";
 import { LandingHeader } from "@/components/landing-header";
 import { SurveyPreview } from "@/components/home/survey-preview";
+import { HeroLottieBackground } from "@/components/home/hero-lottie-bg";
 import { getCurrentUserId } from "@/lib/auth";
 
 const SIGN_IN_ROUTE = "/sign-in";
@@ -15,13 +16,9 @@ export default async function HomePage() {
       <LandingHeader isSignedIn={isSignedIn} signInHref={signInUrl ?? "/"} />
       <main className="mx-auto flex min-h-screen w-full max-w-360 flex-col px-6 pt-0 sm:px-10 lg:px-12">
         <section
-        className="relative mt-6 overflow-hidden rounded-3xl border border-(--line-strong) px-4 py-10 shadow-(--shadow-soft) sm:px-8 sm:py-14 lg:px-10 lg:py-16"
-        style={{ background: "var(--hero-gradient)" }}
+        className="hero-sun relative mt-6 overflow-hidden rounded-3xl border border-(--line-strong) px-4 py-10 shadow-(--shadow-soft) sm:px-8 sm:py-14 lg:px-10 lg:py-16"
       >
-        {/* Floating colour blobs */}
-        <div className="hero-blob hero-blob-1" aria-hidden="true" />
-        <div className="hero-blob hero-blob-2" aria-hidden="true" />
-        <div className="hero-blob hero-blob-3" aria-hidden="true" />
+        <HeroLottieBackground />
 
         <div className="relative">
           <div className="flex flex-col items-center text-center">

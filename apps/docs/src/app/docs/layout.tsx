@@ -7,7 +7,7 @@ import { AiSearchBar } from "@/components/ai/ai-chat";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout tree={source.getPageTree()} {...baseOptions()}>
+    <DocsLayout tree={source.getPageTree()} githubUrl="https://github.com/ciaobang/app" {...baseOptions()}>
       {children}
       <AiSearchBar />
     </DocsLayout>
