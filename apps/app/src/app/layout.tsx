@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   applicationName: APP_NAME,
   description: "Chat with your Ciao survey results.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.svg",
   },
 };
 
