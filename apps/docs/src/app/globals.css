@@ -27,12 +27,14 @@ body {
   font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
 }
 
-/* Sidebar active item — override cream primary which is invisible on cream bg */
-#nd-sidebar [data-active=true] {
+/* Sidebar + TOC active item — override cream primary which is invisible on cream bg */
+#nd-sidebar [data-active=true],
+#nd-toc [data-active=true] {
   background-color: rgba(26, 26, 24, 0.08);
   color: #1a1a18;
 }
-#nd-sidebar [data-active=true]::before {
+#nd-sidebar [data-active=true]::before,
+#nd-toc [data-active=true]::before {
   background-color: #1a1a18 !important;
 }
 
