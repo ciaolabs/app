@@ -42,6 +42,32 @@ body {
   color: #1a1a18 !important;
 }
 
+/* Dark mode — custom palette */
+.dark {
+  --color-fd-background: #121212;
+  --color-fd-foreground: #e8e6e0;
+  --color-fd-muted: #2c2c2b;
+  --color-fd-muted-foreground: #a8a49e;
+  --color-fd-popover: #1f1f1e;
+  --color-fd-popover-foreground: #e8e6e0;
+  --color-fd-card: #1f1f1e;
+  --color-fd-card-foreground: #e8e6e0;
+  --color-fd-border: rgba(255, 255, 255, 0.07);
+  --color-fd-primary: #e8e6e0;
+  --color-fd-primary-foreground: #121212;
+  --color-fd-secondary: #2c2c2b;
+  --color-fd-secondary-foreground: #e8e6e0;
+  --color-fd-accent: rgba(255, 255, 255, 0.06);
+  --color-fd-accent-foreground: #e8e6e0;
+  --color-fd-ring: rgba(255, 255, 255, 0.2);
+  --color-fd-overlay: rgba(0, 0, 0, 0.5);
+}
+
+.dark #nd-sidebar {
+  --color-fd-muted: #1f1f1e;
+  --color-fd-secondary: #2c2c2b;
+}
+
 /* Dark mode — restore visible active states */
 .dark #nd-sidebar [data-active=true] {
   background-color: rgba(255, 255, 255, 0.1) !important;
