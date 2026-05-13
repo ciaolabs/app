@@ -36,12 +36,10 @@ body {
   background-color: #1a1a18 !important;
 }
 
-/* TOC active — uses text-fd-primary, override to dark */
+/* TOC active — same subtle gray as sidebar */
 #nd-toc [data-active=true] {
+  background-color: rgba(26, 26, 24, 0.08) !important;
   color: #1a1a18 !important;
-}
-#nd-toc [data-active=true] + * {
-  background-color: #1a1a18 !important;
 }
 
 /* Dark mode — restore visible active states */
