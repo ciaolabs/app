@@ -1,4 +1,5 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
+import { Github } from "lucide-react";
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -38,6 +39,12 @@ export function baseOptions(): BaseLayoutProps {
         text: "Demo",
         url: "/docs/demo",
         active: "nested-url",
+      },
+      {
+        text: "GitHub",
+        url: "https://github.com/ciaobang/app",
+        icon: <Github />,
+        external: true,
       },
     ],
   };
