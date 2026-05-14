@@ -238,6 +238,17 @@ textarea:focus-visible {
     var(--background);
 }
 
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0.5rem;
+  z-index: 60;
+  pointer-events: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 1.75rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.42);
+}
+
 html,
 body {
   overflow-x: hidden;
@@ -349,71 +360,62 @@ html[data-theme="dark"] .hero-blob-4 {
   position: relative;
   isolation: isolate;
   background:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
-    linear-gradient(180deg, #eef1f8 0%, #e3e9f3 60%, #d8dfee 100%);
-  background-size: 240px 240px, 100% 100%;
-  background-repeat: repeat, no-repeat;
-}
-
-.hero-sun > .hero-noise {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  background-size: 240px 240px;
-  background-repeat: repeat;
-  mix-blend-mode: multiply;
-  opacity: 0.55;
+    radial-gradient(ellipse 62% 46% at 52% 3%, rgba(191, 203, 224, 0.78), transparent 72%),
+    radial-gradient(ellipse 54% 56% at 90% 58%, rgba(199, 212, 234, 0.72), transparent 68%),
+    radial-gradient(ellipse 40% 48% at 42% 98%, rgba(200, 215, 239, 0.58), transparent 70%),
+    linear-gradient(180deg, #fcfdfb 0%, #f4fbfb 54%, #fbfcfa 100%);
+  background-repeat: no-repeat;
 }
 
 .hero-sun > * {
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 
 .hero-sun > .hero-lottie-bg {
   position: absolute;
-  inset: -10%;
-  z-index: -1;
+  inset: -18%;
+  z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 38% 30% at 18% 22%, rgba(150, 170, 205, 0.7), transparent 65%),
-    radial-gradient(ellipse 42% 34% at 78% 30%, rgba(165, 180, 210, 0.65), transparent 65%),
-    radial-gradient(ellipse 36% 28% at 30% 70%, rgba(155, 175, 210, 0.7), transparent 65%),
-    radial-gradient(ellipse 44% 32% at 82% 78%, rgba(170, 185, 215, 0.6), transparent 65%),
-    radial-gradient(ellipse 30% 24% at 55% 50%, rgba(180, 195, 220, 0.55), transparent 70%);
-  filter: blur(18px);
-  animation: hero-clouds-drift 28s ease-in-out infinite alternate;
+    radial-gradient(ellipse 40% 28% at 14% 4%, rgba(222, 244, 242, 0.8), transparent 72%),
+    radial-gradient(ellipse 45% 34% at 44% 5%, rgba(176, 190, 216, 0.72), transparent 70%),
+    radial-gradient(ellipse 30% 40% at 86% 8%, rgba(225, 247, 246, 0.85), transparent 72%),
+    radial-gradient(ellipse 46% 38% at 93% 62%, rgba(185, 199, 225, 0.8), transparent 70%),
+    radial-gradient(ellipse 30% 38% at 45% 104%, rgba(199, 214, 238, 0.68), transparent 72%);
+  filter: blur(26px);
+  opacity: 0.84;
+  transform: translate3d(0, 0, 0) scale(1.02);
+  animation: hero-clouds-drift 44s ease-in-out infinite alternate;
 }
 
 @keyframes hero-clouds-drift {
   0% {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(-0.8%, 0.3%, 0) scale(1.02);
     background-position:
       0% 0%,
+      45% 0%,
       100% 0%,
-      0% 100%,
-      100% 100%,
-      50% 50%;
+      100% 64%,
+      48% 100%;
   }
   50% {
-    transform: translate3d(-1.5%, 1%, 0) scale(1.04);
+    transform: translate3d(0.6%, -0.2%, 0) scale(1.035);
     background-position:
-      8% 6%,
-      92% 10%,
-      6% 92%,
-      94% 90%,
-      52% 48%;
+      4% 2%,
+      43% 1%,
+      96% 3%,
+      98% 60%,
+      50% 98%;
   }
   100% {
-    transform: translate3d(1.5%, -1%, 0) scale(1.06);
+    transform: translate3d(0.9%, 0.6%, 0) scale(1.04);
     background-position:
-      14% 12%,
-      86% 18%,
-      12% 86%,
-      88% 82%,
-      48% 52%;
+      7% 4%,
+      40% 0%,
+      93% 5%,
+      96% 58%,
+      53% 96%;
   }
 }
 
@@ -422,15 +424,17 @@ html[data-theme="dark"] .hero-blob-4 {
   content: "";
   position: absolute;
   left: 50%;
-  top: 0;
-  width: min(110%, 1200px);
+  top: -4%;
+  width: min(150%, 1580px);
   aspect-ratio: 1.18 / 1;
-  transform: translate(-50%, -42%);
+  transform: translate(-50%, -38%);
   background-image: url("/gradient_global.png");
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center;
-  z-index: 0;
+  filter: saturate(1.18) contrast(1.05);
+  opacity: 0.95;
+  z-index: 1;
 }
 
 /* white morphing blob anchored top, top cropped */
@@ -439,16 +443,16 @@ html[data-theme="dark"] .hero-blob-4 {
   position: absolute;
   left: 50%;
   top: 0;
-  width: min(52%, 560px);
+  width: min(70%, 760px);
   aspect-ratio: 1 / 1;
-  transform: translate(-50%, -22%);
+  transform: translate(-50%, -24%);
   background: #ffffff;
   border-radius: 48% 52% 49% 51% / 50% 48% 52% 50%;
   box-shadow: 0 16px 70px -12px rgba(40, 30, 20, 0.22);
   animation:
     hero-blob-morph 16s ease-in-out infinite,
     hero-blob-float 12s ease-in-out infinite;
-  z-index: 0;
+  z-index: 2;
 }
 
 @keyframes hero-gradient-drift {
@@ -458,10 +462,10 @@ html[data-theme="dark"] .hero-blob-4 {
 }
 
 @keyframes hero-blob-float {
-  0%, 100% { transform: translate(-50%, -22%) rotate(0deg); }
-  25%      { transform: translate(-49%, -23.5%) rotate(2deg); }
-  50%      { transform: translate(-51%, -20.5%) rotate(-1.5deg); }
-  75%      { transform: translate(-50.5%, -22.5%) rotate(1deg); }
+  0%, 100% { transform: translate(-50%, -24%) rotate(0deg); }
+  25%      { transform: translate(-49%, -25.5%) rotate(2deg); }
+  50%      { transform: translate(-51%, -22.5%) rotate(-1.5deg); }
+  75%      { transform: translate(-50.5%, -24.5%) rotate(1deg); }
 }
 
 @keyframes hero-blob-morph {
@@ -495,6 +499,7 @@ html[data-theme="dark"] .hero-sun::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hero-sun > .hero-lottie-bg,
   .hero-sun::before {
     animation: none;
   }
@@ -1030,4 +1035,3 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
     animation: none;
   }
 }
-
