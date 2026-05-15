@@ -48,3 +48,4 @@ next-env.d.ts
 
 # Local issue tracker (private)
 .scratch/
+.env*.local

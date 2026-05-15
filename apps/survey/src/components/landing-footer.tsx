@@ -75,9 +75,10 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
     <footer className="mt-6">
       {/* Landscape container with the tulip image */}
       <div
-        className="relative h-189.75 w-full overflow-hidden rounded-t-3xl border border-(--line) shadow-(--shadow-soft) [html[data-theme='dark']_&]:border-(--line)"
+        className="relative h-189.75 w-full overflow-hidden rounded-t-3xl border-2 shadow-(--shadow-soft)"
         style={{
           background: `var(--surface-panel) url('${footerImage}') no-repeat center top / cover`,
+          borderColor: theme === "dark" ? "#0a0907" : "#000000",
         }}
       >
         {/* White card pinned to the upper (white-sky) zone of the image */}
