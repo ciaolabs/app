@@ -22,7 +22,7 @@ export default async function HomePage() {
 
         <div className="relative">
           <div className="flex flex-col items-center text-center">
-            <h1 className="max-w-5xl font-display text-5xl font-black leading-tight text-(--ink) sm:text-6xl lg:text-7xl">
+            <h1 className="max-w-5xl font-display text-5xl font-black leading-tight text-(--ink) [html[data-theme='dark']_&]:text-[#1a1815] sm:text-6xl lg:text-7xl">
               A closer read of <em className="italic">who you are</em>, one question at a time.
             </h1>
 

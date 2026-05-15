@@ -178,9 +178,17 @@ html[data-theme="dark"] {
   box-sizing: border-box;
 }
 
+:root {
+  --frame-color: #fdfbf0;
+}
+
+html[data-theme="dark"] {
+  --frame-color: #1a1815;
+}
+
 html {
   scroll-behavior: smooth;
-  background: #fdfbf0;
+  background: var(--frame-color);
   overflow-x: clip;
 }
 
@@ -193,7 +201,7 @@ html[data-theme="light"] {
 }
 
 body {
-  background: #fdfbf0;
+  background: var(--frame-color);
   overflow-x: clip;
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
@@ -235,18 +243,18 @@ textarea:focus-visible {
 .app-shell {
   position: relative;
   min-height: 100vh;
-  background: #fdfbf0;
+  background: var(--frame-color);
   padding: 1rem 1rem 0.7rem 1rem;
 }
 
 .app-shell::after {
   content: "";
   position: fixed;
-  inset: 0.7rem;
+  inset: 1rem;
   z-index: 100;
   pointer-events: none;
-  border-radius: 2rem;
-  box-shadow: 0 0 0 100vmax #fdfbf0;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 100vmax var(--frame-color);
 }
 
 .app-shell::before {
@@ -436,7 +444,7 @@ html[data-theme="dark"] .hero-blob-4 {
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center;
-  filter: saturate(1.18) contrast(1.05);
+  filter: saturate(1.18) contrast(1.05) brightness(1.3);
   opacity: 0.95;
   z-index: 1;
 }
@@ -483,19 +491,6 @@ html[data-theme="dark"] .hero-sun {
   background: linear-gradient(160deg, #1a1815 0%, #211e1a 50%, #181613 100%);
 }
 
-html[data-theme="dark"] .hero-sun::before {
-  background:
-    conic-gradient(
-      from 0deg,
-      #f58dd7 0%,
-      #c97df0 18%,
-      #7aa2ff 36%,
-      #4cd0e8 54%,
-      #ff8db0 72%,
-      #f58dd7 100%
-    );
-  filter: blur(30px) saturate(0.95);
-}
 
 html[data-theme="dark"] .hero-sun::after {
   background: #f7f4ee;
@@ -514,12 +509,12 @@ html[data-theme="dark"] .hero-sun::after {
   --dot-pointer-y: -20rem;
   pointer-events: none;
   position: fixed;
-  inset: 0.7rem;
+  inset: 1rem;
   z-index: 0;
-  border-radius: 2rem;
+  border-radius: 0.5rem;
   overflow: hidden;
   opacity: 1;
-  background-color: var(--background);
+  background-color: transparent;
   background-image: radial-gradient(circle, var(--dot-color) 1.15px, transparent 1.35px);
   background-position: 0 0;
   background-size: 12px 12px;
