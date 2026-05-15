@@ -14,7 +14,7 @@ export default async function HomePage() {
   return (
     <>
       <LandingHeader isSignedIn={isSignedIn} signInHref={signInUrl ?? "/"} />
-      <main className="mx-auto flex min-h-screen w-full max-w-360 flex-col px-6 pt-0 sm:px-10 lg:px-12">
+      <main className="mx-auto flex min-h-screen w-full max-w-[min(1800px,calc(100vw-2rem))] flex-col px-4 pt-0 sm:max-w-[min(1800px,calc(100vw-3rem))] sm:px-8 lg:max-w-[min(1800px,calc(100vw-4rem))] lg:px-10 xl:px-12 2xl:max-w-[min(1900px,calc(100vw-5rem))] 2xl:px-14">
         <section
         className="hero-sun relative mt-6 overflow-hidden rounded-3xl border border-(--line-strong) px-4 py-10 shadow-(--shadow-soft) sm:px-8 sm:py-14 lg:px-10 lg:py-16"
       >

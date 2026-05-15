@@ -238,6 +238,18 @@ textarea:focus-visible {
     var(--background);
 }
 
+.app-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0.5rem;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 1.75rem;
+  background:
+    var(--app-background),
+    var(--background);
+}
+
 .app-shell::before {
   content: "";
   position: fixed;
