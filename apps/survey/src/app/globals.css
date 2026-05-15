@@ -86,8 +86,8 @@ html[data-theme="dark"] {
   --muted: rgba(250, 249, 245, 0.58);
   --surface: #26231f;
   --surface-secondary: #342f28;
-  --surface-panel: rgba(52, 47, 40, 0.88);
-  --surface-panel-strong: #3c352c;
+  --surface-panel: #1a1a1a;
+  --surface-panel-strong: #202322;
   --surface-inset: rgba(227, 218, 204, 0.12);
   --line: rgba(218, 212, 200, 0.22);
   --line-strong: rgba(238, 233, 223, 0.34);
@@ -183,7 +183,7 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="dark"] {
-  --frame-color: #1a1815;
+  --frame-color: #1a1a1a;
 }
 
 html {

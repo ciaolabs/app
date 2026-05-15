@@ -69,15 +69,15 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
     return () => observer.disconnect();
   }, []);
 
-  const footerImage = theme === "dark" ? "/footer-bg-dark.webp" : "/footer-bg-light.webp";
+  const footerImage = theme === "dark" ? "/60615acd-ca89-4a73-8244-9a774ed80678.png" : "/footer-bg-light.webp";
 
   return (
     <footer className="mt-6">
       {/* Landscape container with the tulip image */}
       <div
-        className="relative h-189.75 w-full overflow-hidden rounded-t-3xl border-2 shadow-(--shadow-soft)"
+        className="relative h-[60rem] w-full overflow-hidden rounded-t-3xl border-2 shadow-(--shadow-soft)"
         style={{
-          background: `var(--surface-panel) url('${footerImage}') no-repeat center top / cover`,
+          background: `var(--surface-panel) url('${footerImage}') no-repeat center bottom / cover`,
           borderColor: theme === "dark" ? "#0a0907" : "#000000",
         }}
       >
