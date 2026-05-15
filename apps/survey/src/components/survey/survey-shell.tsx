@@ -512,7 +512,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
           <main className="min-h-0">
             <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] shadow-[var(--shadow-strong)] backdrop-blur">
               <div className="border-b border-[var(--line)] px-6 py-4 sm:px-7">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="hidden flex-wrap items-center justify-between gap-3 sm:flex">
                   <div className="flex flex-wrap items-center gap-3">
                     <p className="clay-label">
                       Question {currentQuestion.order} of {questions.length}

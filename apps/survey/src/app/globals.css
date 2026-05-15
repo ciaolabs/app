@@ -61,7 +61,7 @@
     linear-gradient(135deg, rgba(251, 189, 65, 0.72), rgba(132, 231, 165, 0.48) 48%, rgba(255, 255, 255, 0.78));
   --hero-spotlight: radial-gradient(circle at center, rgba(59, 211, 253, 0.28), transparent 62%);
   --app-background:
-    linear-gradient(180deg, rgba(250, 249, 247, 0.98), rgba(250, 249, 247, 0.94));
+    linear-gradient(180deg, #faf9f7, #faf9f7);
   --glow-left: rgba(132, 231, 165, 0.18);
   --glow-right: rgba(193, 176, 255, 0.16);
   --skeleton-base: rgba(218, 212, 200, 0.62);
@@ -106,7 +106,7 @@ html[data-theme="dark"] {
     linear-gradient(135deg, rgba(67, 8, 159, 0.82), rgba(2, 73, 42, 0.74) 58%, rgba(52, 47, 40, 0.94));
   --hero-spotlight: radial-gradient(circle at center, rgba(230, 121, 109, 0.12), transparent 62%);
   --app-background:
-    linear-gradient(180deg, rgba(38, 35, 31, 0.98), rgba(44, 39, 33, 0.96));
+    linear-gradient(180deg, #26231f, #26231f);
   --glow-left: rgba(190, 229, 216, 0.14);
   --glow-right: rgba(184, 197, 255, 0.12);
   --skeleton-base: rgba(250, 249, 245, 0.08);
