@@ -46,7 +46,7 @@ const overviewSamples: GaugeSample[] = [
     id: "conscientiousness",
     label: "Conscientiousness",
     score: 35,
-    band: "Average",
+    band: "Middle",
     median: 32,
     iqrStart: 25,
     iqrEnd: 39,
@@ -81,7 +81,7 @@ const rankingsByFramework: Record<FrameworkId, Record<RankingMode, RankingSample
         description: "Capacity to recognize and share the emotions and perspectives of others.",
         score: 36,
         percentile: 64,
-        band: "Average",
+        band: "Middle",
       },
       {
         code: "assertiveness",
@@ -110,7 +110,7 @@ const rankingsByFramework: Record<FrameworkId, Record<RankingMode, RankingSample
         description: "Ability to follow through on tasks despite distractions or boredom.",
         score: 30,
         percentile: 52,
-        band: "Average",
+        band: "Middle",
       },
       {
         code: "warmth",
@@ -141,7 +141,7 @@ const rankingsByFramework: Record<FrameworkId, Record<RankingMode, RankingSample
         description: "Calm tolerance for delays, frustrations, and the perceived faults of others.",
         score: 33,
         percentile: 58,
-        band: "Average",
+        band: "Middle",
       },
       {
         code: "boldness",
@@ -170,7 +170,7 @@ const rankingsByFramework: Record<FrameworkId, Record<RankingMode, RankingSample
         description: "Drive to work hard and pursue goals with persistence and effort.",
         score: 28,
         percentile: 48,
-        band: "Average",
+        band: "Middle",
       },
       {
         code: "creativity",
@@ -201,7 +201,7 @@ const rankingsByFramework: Record<FrameworkId, Record<RankingMode, RankingSample
         description: "Preference for planning, reflection, and a careful approach to decisions.",
         score: 32,
         percentile: 55,
-        band: "Average",
+        band: "Middle",
       },
       {
         code: "aggression",
@@ -230,7 +230,7 @@ const rankingsByFramework: Record<FrameworkId, Record<RankingMode, RankingSample
         description: "Enjoyment of demanding work, competition, and the pursuit of mastery.",
         score: 29,
         percentile: 51,
-        band: "Average",
+        band: "Middle",
       },
       {
         code: "social-closeness",
