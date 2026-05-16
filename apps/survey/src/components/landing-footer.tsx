@@ -81,7 +81,7 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
         }}
       >
         {/* White card pinned to the upper (white-sky) zone of the image */}
-        <div className="absolute inset-x-10 top-10 max-h-100 overflow-hidden rounded-2xl border border-(--line) bg-[#f5f3ef] px-6 py-6 [html[data-theme='dark']_&]:bg-[#4B463F] sm:inset-x-12 sm:top-12 sm:px-7 sm:py-7">
+        <div className="absolute inset-x-10 top-10 max-h-100 overflow-hidden rounded-2xl border border-(--line) bg-[#f5f3ef] px-6 py-6 [html[data-theme='dark']_&]:bg-[#202322] sm:inset-x-12 sm:top-12 sm:px-7 sm:py-7">
 
           {/* Top row: tagline + CTAs | logo */}
           <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:justify-between">

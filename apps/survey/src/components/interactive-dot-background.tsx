@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { AnimatedGradientBackdrop } from "@/components/animated-gradient-backdrop";
+
 const BASE_RADIUS_REM = 3;
 const SQUASH_AMOUNT = 0.16;
 const STRETCH_REFERENCE_PX = 150;
@@ -124,5 +126,10 @@ export function InteractiveDotBackground() {
     };
   }, []);
 
-  return <div ref={backgroundRef} aria-hidden="true" className="interactive-dot-background" />;
+  return (
+    <div ref={backgroundRef} aria-hidden="true" className="interactive-dot-background">
+      <AnimatedGradientBackdrop className="interactive-dot-background__gradient" />
+      <div className="interactive-dot-background__grain" aria-hidden="true" />
+    </div>
+  );
 }
