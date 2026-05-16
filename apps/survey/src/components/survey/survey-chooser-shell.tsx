@@ -311,8 +311,7 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                     onPointerEnter={() => prefetchPath(reviewHref)}
                     onFocus={() => prefetchPath(reviewHref)}
                     disabled={navigatingPath !== null}
-                    className={buttonClassName("primary")}
-                    style={{ backgroundColor: "#C1B0FF" }}
+                    className={`${buttonClassName("primary")} !bg-black !text-white [html[data-theme='dark']_&]:!bg-white [html[data-theme='dark']_&]:!text-black`}
                   >
                     Review results →
                   </button>
