@@ -23,6 +23,7 @@ const { routerMock, routerPushMock, routerPrefetchMock } = vi.hoisted(() => {
 
 vi.mock("next/navigation", () => ({
   useRouter: () => routerMock,
+  usePathname: () => "/surveys",
 }));
 
 function makeStatus(overrides?: Partial<SurveyUserStatus>): SurveyUserStatus {

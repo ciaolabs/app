@@ -17,6 +17,31 @@ const NO_INITIAL_AUTH = {
   user: null,
 } satisfies InitialAuth;
 
+export const LOCAL_DEV_USER_ID = "local-dev-user";
+
+const LOCAL_DEV_INITIAL_AUTH = {
+  user: {
+    object: "user",
+    id: LOCAL_DEV_USER_ID,
+    email: "local@dev.local",
+    emailVerified: true,
+    profilePictureUrl: null,
+    firstName: "Local",
+    lastName: "Dev",
+    lastSignInAt: null,
+    locale: null,
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
+    externalId: null,
+    metadata: {},
+  },
+  sessionId: "local-dev-session",
+} as unknown as InitialAuth;
+
+export function isLocalDevAuthBypass() {
+  return process.env.NODE_ENV === "development";
+}
+
 export function isWorkOSConfigured() {
   return Boolean(
     process.env.WORKOS_API_KEY &&
@@ -49,6 +74,10 @@ export async function getCurrentUserId({
   acceptsSessionToken = false,
   request,
 }: GetCurrentUserIdOptions = {}) {
+  if (isLocalDevAuthBypass()) {
+    return LOCAL_DEV_USER_ID;
+  }
+
   if (!isWorkOSConfigured()) {
     return null;
   }
@@ -77,6 +106,10 @@ export async function getCurrentUserId({
 }
 
 export async function requireCurrentUserId() {
+  if (isLocalDevAuthBypass()) {
+    return LOCAL_DEV_USER_ID;
+  }
+
   if (!isWorkOSConfigured()) {
     redirect("/sign-in");
   }
@@ -97,6 +130,10 @@ export async function requireCurrentUserId() {
 }
 
 export async function getInitialAuth(): Promise<InitialAuth> {
+  if (isLocalDevAuthBypass()) {
+    return LOCAL_DEV_INITIAL_AUTH;
+  }
+
   if (!isWorkOSConfigured()) {
     return NO_INITIAL_AUTH;
   }

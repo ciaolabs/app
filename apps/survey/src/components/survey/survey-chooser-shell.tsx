@@ -234,30 +234,39 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
   return (
     <>
       <section
-        className="clay-section relative mt-6 overflow-hidden rounded-3xl border border-(--line-strong) px-6 py-8 sm:px-8 sm:py-10"
-        style={{ background: "var(--hero-gradient)" }}
+        className="hero-sun-surveys clay-section relative mt-6 overflow-hidden rounded-3xl border border-(--line-strong) px-6 pb-8 pt-32 sm:px-8 sm:pb-10 sm:pt-44 lg:pt-56"
       >
-        <div className="hero-blob hero-blob-1" aria-hidden="true" />
-        <div className="hero-blob hero-blob-2" aria-hidden="true" />
-        <div className="hero-blob hero-blob-3" aria-hidden="true" />
-        <div className="hero-blob hero-blob-4" aria-hidden="true" />
-
         <div className="relative">
-          <p className="clay-label">
-            Survey selection
-          </p>
-        <h1 className="mt-4 font-display text-5xl text-(--ink) sm:text-6xl">
-          Choose which survey you want to take next.
-        </h1>
-        <p className="mt-5 max-w-3xl text-lg leading-8 text-(--ink-soft)">
-          Each survey keeps its own draft, saved submissions, and attempt limit. Repeat actions stay
-          available only until the final allowed submission is used.
-        </p>
+          <div className="flex justify-center">
+            <h1
+              className="relative inline-flex items-center rounded-full bg-(--surface-panel-strong) px-5 py-2.5 font-display text-base text-(--ink) sm:px-6 sm:py-3 sm:text-lg lg:px-8 lg:py-4 lg:text-xl xl:px-10 xl:py-5 xl:text-2xl"
+              style={{
+                boxShadow:
+                  "0 12px 24px -10px rgba(20, 15, 10, 0.22), 0 3px 6px -2px rgba(20, 15, 10, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(20, 15, 10, 0.04)",
+                filter:
+                  "drop-shadow(2px 4px 4px rgba(20, 15, 10, 0.10))",
+              }}
+            >
+              Survey selection!
+              <svg
+                aria-hidden="true"
+                className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 lg:-bottom-[12px] lg:w-[20px] lg:h-[17px] xl:-bottom-[14px] xl:w-[24px] xl:h-[20px]"
+                width="16"
+                height="14"
+                viewBox="0 0 16 14"
+                fill="none"
+              >
+                <path
+                  d="M 16 0 L 0 0 Q 4 2 7 8 Q 9 13 10.5 13.5 Q 12 14 12.5 12 Q 13 8 16 1 Z"
+                  fill="var(--surface-panel-strong)"
+                />
+              </svg>
+            </h1>
+          </div>
         </div>
-      </section>
 
-      <section className="mt-4 grid gap-6 lg:grid-cols-2">
-        {surveys.map((survey) => {
+        <div className="relative mt-12 grid gap-6 sm:mt-14 lg:grid-cols-2">
+          {surveys.map((survey) => {
           const status = initialStatuses[survey.type] ?? null;
           const primaryAction = buildPrimaryAction(survey, status);
           const showRepeatAction = shouldOfferRepeatAction(survey, status);
@@ -337,6 +346,7 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
             </article>
           );
         })}
+        </div>
       </section>
 
       {repeatSurvey ? (

@@ -12,6 +12,11 @@ vi.mock("@/lib/survey/server", () => ({
   getInitialSurveyStatuses: getInitialSurveyStatusesMock,
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), prefetch: vi.fn() }),
+  usePathname: () => "/surveys",
+}));
+
 function makeStatus(
   surveyType: SurveyUserStatus["surveyType"],
   overrides?: Partial<SurveyUserStatus>,
@@ -54,7 +59,7 @@ describe("SurveysPage", () => {
 
     render(React.createElement(ResolvedSurveyChooserContent, { initialStatuses }));
 
-    expect(screen.getByText("Choose which survey you want to take next.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Survey selection!" })).toBeInTheDocument();
     expect(screen.queryByText("Preparing your survey")).not.toBeInTheDocument();
     expect(screen.queryByText("Loading your survey status...")).not.toBeInTheDocument();
   });

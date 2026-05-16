@@ -429,6 +429,12 @@ html[data-theme="dark"] .hero-sun::before {
   opacity: 0.85;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .connector-blob {
+    animation: none;
+  }
+}
+
 html[data-theme="dark"] .connector-blob {
   mix-blend-mode: screen;
   filter: invert(1) hue-rotate(180deg);
@@ -505,6 +511,45 @@ html[data-theme="dark"] .connector-blob {
   .hero-blob {
     animation: none;
   }
+}
+
+/* surveys-page sun: image-based sphere background */
+.hero-sun-surveys {
+  position: relative;
+  isolation: isolate;
+  background-color: #ebc3d2;
+}
+
+.hero-sun-surveys::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("/surveys-sun.png");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-sun-surveys::after {
+  content: none;
+}
+
+.hero-sun-surveys > * {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-theme="dark"] .hero-sun-surveys {
+  background-color: #2a1520;
+}
+
+html[data-theme="dark"] .hero-sun-surveys::before {
+  filter: brightness(0.45) saturate(0.8);
 }
 
 .app-glow-left {

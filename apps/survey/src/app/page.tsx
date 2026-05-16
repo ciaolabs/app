@@ -58,7 +58,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="mt-10">
+          <div className="relative z-10 mt-10">
             <SurveyPreview />
           </div>
 
@@ -66,7 +66,6 @@ export default async function HomePage() {
             <div
               aria-hidden="true"
               className="connector-blob pointer-events-none absolute left-0 right-0 top-1/2 h-[36rem] -translate-y-[85%] sm:h-[42rem]"
-              style={{ zIndex: -1 }}
             />
             <div
               aria-hidden="true"
@@ -128,7 +127,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div>
+          <div className="relative z-10">
             <SurveyResultsPreview />
           </div>
         </div>

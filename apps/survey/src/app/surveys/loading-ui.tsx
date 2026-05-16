@@ -115,14 +115,29 @@ export function SurveyChooserLoadingContent({
   description,
 }: Pick<SurveyLoadingFallbackProps, "title" | "description">) {
   return (
-    <>
-      <LoadingHeaderSection title={title} description={description} />
-
-      <section className="mt-4 grid gap-6 lg:grid-cols-2">
+    <section className="hero-sun clay-section relative mt-6 overflow-hidden rounded-3xl border border-(--line-strong) px-6 pb-8 pt-32 sm:px-8 sm:pb-10 sm:pt-44 lg:pt-56">
+      <h1 className="sr-only">{title}</h1>
+      <p className="sr-only">{description}</p>
+      <div className="relative">
+        <div className="flex justify-center">
+          <div
+            aria-hidden="true"
+            className="relative inline-flex items-center rounded-full bg-(--surface-panel-strong) px-5 py-2.5 font-display text-base text-(--ink) sm:px-6 sm:py-3 sm:text-lg"
+            style={{
+              boxShadow:
+                "0 12px 24px -10px rgba(20, 15, 10, 0.22), 0 3px 6px -2px rgba(20, 15, 10, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(20, 15, 10, 0.04)",
+              filter: "drop-shadow(2px 4px 4px rgba(20, 15, 10, 0.10))",
+            }}
+          >
+            Survey selection!
+          </div>
+        </div>
+      </div>
+      <div className="relative mt-12 grid gap-6 sm:mt-14 lg:grid-cols-2">
         <SurveyCardSkeleton />
         <SurveyCardSkeleton />
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
 
