@@ -16,7 +16,7 @@ export default async function HomePage() {
       <LandingHeader isSignedIn={isSignedIn} signInHref={signInUrl ?? "/"} />
       <main className="mx-auto flex min-h-screen w-full max-w-[min(1800px,calc(100vw-2rem))] flex-col px-4 pt-0 sm:max-w-[min(1800px,calc(100vw-3rem))] sm:px-8 lg:max-w-[min(1800px,calc(100vw-4rem))] lg:px-10 xl:px-12 2xl:max-w-[min(1900px,calc(100vw-5rem))] 2xl:px-14">
         <section
-        className="hero-sun relative mt-6 overflow-hidden rounded-3xl border-2 border-black px-4 py-10 shadow-(--shadow-soft) [html[data-theme='dark']_&]:border-[#0a0907] sm:px-8 sm:py-14 lg:px-10 lg:py-16"
+        className="hero-sun relative mt-6 overflow-hidden rounded-3xl border border-(--line) px-4 py-10 shadow-(--shadow-soft) sm:px-8 sm:py-14 lg:px-10 lg:py-16"
       >
         <div className="relative">
           <div className="flex flex-col items-center text-center">

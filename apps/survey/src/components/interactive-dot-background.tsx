@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-const BASE_RADIUS_REM = 6;
+const BASE_RADIUS_REM = 3;
 const SQUASH_AMOUNT = 0.16;
 const STRETCH_REFERENCE_PX = 150;
 const STRETCH_GROWTH = 0.09;

@@ -234,12 +234,12 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
   return (
     <>
       <section
-        className="hero-sun-surveys clay-section relative mt-6 overflow-hidden rounded-3xl border border-(--line-strong) px-6 pb-8 pt-32 sm:px-8 sm:pb-10 sm:pt-44 lg:pt-56"
+        className="hero-sun-surveys clay-section relative mt-6 overflow-hidden rounded-3xl border border-(--line-strong) px-6 pb-8 pt-16 sm:px-8 sm:pb-10 sm:pt-20 lg:pt-8 lg:pb-6"
       >
         <div className="relative">
           <div className="flex justify-center">
             <h1
-              className="relative inline-flex items-center rounded-full bg-(--surface-panel-strong) px-5 py-2.5 font-display text-base text-(--ink) sm:px-6 sm:py-3 sm:text-lg lg:px-8 lg:py-4 lg:text-xl xl:px-10 xl:py-5 xl:text-2xl"
+              className="relative inline-flex items-center text-center rounded-2xl bg-(--surface-panel-strong) px-6 py-3 font-display text-xl text-(--ink) sm:px-8 sm:py-4 sm:text-2xl lg:rounded-3xl lg:px-14 lg:py-6 lg:text-5xl xl:px-16 xl:py-8 xl:text-6xl"
               style={{
                 boxShadow:
                   "0 12px 24px -10px rgba(20, 15, 10, 0.22), 0 3px 6px -2px rgba(20, 15, 10, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(20, 15, 10, 0.04)",
@@ -247,10 +247,10 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                   "drop-shadow(2px 4px 4px rgba(20, 15, 10, 0.10))",
               }}
             >
-              Survey selection!
+              Choose which survey<br />you want to take next.
               <svg
                 aria-hidden="true"
-                className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 lg:-bottom-[12px] lg:w-[20px] lg:h-[17px] xl:-bottom-[14px] xl:w-[24px] xl:h-[20px]"
+                className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 lg:-bottom-[20px] lg:w-[32px] lg:h-[28px] xl:-bottom-[24px] xl:w-[38px] xl:h-[32px]"
                 width="16"
                 height="14"
                 viewBox="0 0 16 14"
@@ -265,7 +265,7 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
           </div>
         </div>
 
-        <div className="relative mt-12 grid gap-6 sm:mt-14 lg:grid-cols-2">
+        <div className="relative mt-16 grid gap-6 sm:mt-20 lg:mt-12 lg:grid-cols-2">
           {surveys.map((survey) => {
           const status = initialStatuses[survey.type] ?? null;
           const primaryAction = buildPrimaryAction(survey, status);

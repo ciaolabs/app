@@ -383,7 +383,7 @@ export function SurveyPreview() {
                     className={[
                       "group flex min-h-38 flex-col items-center justify-center rounded-[1.25rem] border px-3 py-5 text-center transition duration-200 sm:min-h-44",
                       selected
-                        ? "-rotate-2 border-black bg-(--accent-coral) text-(--selected-contrast) shadow-(--clay-hard-shadow)"
+                        ? "-rotate-2 border-black bg-[#2CA0AB] text-white shadow-(--clay-hard-shadow)"
                         : "border-(--line) bg-(--surface-panel) text-(--ink) shadow-(--shadow-soft) hover:-translate-y-1 hover:border-(--ink) hover:bg-(--accent-soft)",
                     ].join(" ")}
                   >

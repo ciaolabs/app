@@ -16,7 +16,7 @@ export function ShortcutKey({
   ariaLabel,
 }: ShortcutKeyProps) {
   const classes = [
-    "inline-flex h-8 items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-black shadow-[var(--keycap-shadow)]",
+    "inline-flex h-8 items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-[var(--ink)] shadow-[var(--keycap-shadow)]",
     wide ? "min-w-[3.3rem]" : "min-w-[2.2rem]",
     onClick ? "transition hover:border-[var(--line-strong)] disabled:cursor-not-allowed disabled:opacity-40" : "",
   ].join(" ");
@@ -38,7 +38,7 @@ export function ShortcutKey({
   return (
     <span
       className={[
-        "inline-flex h-8 items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-black shadow-[var(--keycap-shadow)]",
+        "inline-flex h-8 items-center justify-center rounded-[0.75rem] border border-[var(--line-strong)] bg-[var(--keycap-bg)] px-2.5 font-mono text-[11px] font-semibold text-[var(--ink)] shadow-[var(--keycap-shadow)]",
         wide ? "min-w-[3.3rem]" : "min-w-[2.2rem]",
       ].join(" ")}
     >

@@ -52,7 +52,7 @@ export const LikertScale = memo(function LikertScale({
                 "group clay-button-hover min-w-0 rounded-[1.25rem] border text-center duration-200",
                 isHero ? "flex h-full min-h-[10rem] flex-col items-center justify-center px-3 py-5" : "px-2 py-3",
                 selected
-                  ? "border-black bg-[var(--accent)] text-[var(--selected-contrast)] shadow-[var(--shadow-strong)]"
+                  ? "border-[#238E98] bg-[#2CA0AB] text-white shadow-[var(--shadow-strong)]"
                   : "border-[var(--line)] bg-[var(--surface-panel-strong)] text-[var(--ink)] shadow-[var(--shadow-soft)]",
               ].join(" ")}
               aria-pressed={selected}
@@ -62,7 +62,7 @@ export const LikertScale = memo(function LikertScale({
                   "inline-flex items-center justify-center border font-semibold shadow-[var(--keycap-shadow)]",
                   isHero ? "h-12 min-w-[3.2rem] rounded-[0.625rem] px-3 text-lg" : "h-9 min-w-[2.5rem] rounded-[0.75rem] px-2 text-sm",
                   selected
-                    ? "border-black/10 bg-white/35 text-[var(--selected-contrast)]"
+                    ? "border-white/20 bg-white/25 text-white"
                     : "border-[var(--line)] bg-[var(--keycap-bg)] text-[var(--muted)]",
                 ].join(" ")}
               >
@@ -73,7 +73,7 @@ export const LikertScale = memo(function LikertScale({
                   isHero
                     ? "mt-3 text-base font-semibold leading-6 sm:text-lg"
                     : "mt-2 text-[11px] font-semibold leading-4 sm:text-xs",
-                  selected ? "text-[var(--selected-contrast)] opacity-80" : "text-[var(--ink-soft)]",
+                  selected ? "text-white opacity-90" : "text-[var(--ink-soft)]",
                 ].join(" ")}
               >
                 {option.label}

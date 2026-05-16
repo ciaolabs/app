@@ -339,7 +339,7 @@ export function AiSearchBar() {
                     }}
                     placeholder="Ask a question..."
                     rows={1}
-                    className="flex-1 resize-none overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.06] px-3 py-2 text-[13px] text-white/80 placeholder:text-white/30 focus:border-white/20 focus:outline-none focus:ring-0"
+                    className="ai-chat-input flex-1 resize-none overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.06] px-3 py-2 text-[13px] text-white/80 placeholder:text-white/30 focus:border-white/20 focus:outline-none focus:ring-0"
                   />
                   <button
                     type="submit"
@@ -375,7 +375,7 @@ export function AiSearchBar() {
                 }
               }}
               placeholder="Ask Ciao!"
-              className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/40 outline-none focus:outline-none focus-visible:outline-none"
+              className="ai-chat-input flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/40 outline-none"
             />
             <div className="flex items-center gap-1.5">
               <kbd className="hidden items-center gap-0.5 rounded border border-white/[0.08] bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/30 sm:flex">

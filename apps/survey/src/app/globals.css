@@ -37,16 +37,16 @@
   --surface-inset: rgba(238, 233, 223, 0.86);
   --line: rgba(218, 212, 200, 0.9);
   --line-strong: #dad4c8;
-  --accent: #3bd3fd;
-  --accent-soft: rgba(59, 211, 253, 0.16);
+  --accent: var(--clay-pomegranate-400);
+  --accent-soft: rgba(59, 211, 210, 0.14);
   --accent-mint: #84e7a5;
   --accent-lilac: #c1b0ff;
   --accent-rose: #fc7981;
-  --accent-blue: #3bd3fd;
-  --accent-coral: #fc7981;
+  --accent-blue: #081F22;
+  --accent-coral: #081F22;
   --accent-lime: #f8cc65;
   --accent-sand: #eee9df;
-  --selected-contrast: #000000;
+  --selected-contrast: #ffffff;
   --keycap-bg: rgba(255, 255, 255, 0.98);
   --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
   --home-crumb-button-bg: #ffffff;
@@ -67,10 +67,10 @@
   --skeleton-base: rgba(218, 212, 200, 0.62);
   --skeleton-highlight: rgba(255, 255, 255, 0.92);
   --dot-color: rgba(38, 38, 36, 0.14);
-  --dot-hot-coral: rgba(224, 74, 64, 0.96);
-  --dot-hot-blue: rgba(32, 126, 210, 0.98);
-  --dot-hot-mint: rgba(39, 168, 131, 0.96);
-  --dot-hot-lilac: rgba(106, 93, 232, 0.96);
+  --dot-hot-coral: rgba(0, 0, 0, 0.96);
+  --dot-hot-blue: rgba(0, 0, 0, 0.98);
+  --dot-hot-mint: rgba(0, 0, 0, 0.96);
+  --dot-hot-lilac: rgba(0, 0, 0, 0.96);
   --dot-hot-opacity: 1;
   --dot-hot-size: 1.85px;
   --dot-hot-edge: 2.05px;
@@ -120,6 +120,8 @@ html[data-theme="dark"] {
   --dot-hot-opacity: 1;
   --dot-hot-size: 1.65px;
   --dot-hot-edge: 1.92px;
+  --accent-blue: #ffffff;
+  --accent-coral: #ffffff;
   --nav-glass-bg: rgba(30, 27, 23, 0.10);
   --nav-glass-border: rgba(238, 233, 223, 0.08);
 }
@@ -142,17 +144,17 @@ html[data-theme="dark"] {
   --surface-inset: rgba(238, 233, 223, 0.86);
   --line: rgba(218, 212, 200, 0.9);
   --line-strong: #dad4c8;
-  --accent: #3bd3fd;
-  --accent-soft: rgba(59, 211, 253, 0.16);
+  --accent: var(--clay-pomegranate-400);
+  --accent-soft: rgba(59, 211, 210, 0.14);
   --accent-mint: #84e7a5;
   --accent-lilac: #c1b0ff;
   --accent-rose: #fc7981;
-  --accent-blue: #3bd3fd;
-  --accent-coral: #fc7981;
+  --accent-blue: #081F22;
+  --accent-coral: #081F22;
   --accent-lime: #f8cc65;
   --accent-sand: #eee9df;
-  --selected-contrast: #000000;
-  --selected-contrast-strong: #000000;
+  --selected-contrast: #ffffff;
+  --selected-contrast-strong: #ffffff;
   --keycap-bg: rgba(255, 255, 255, 0.98);
   --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
   --shadow-soft: var(--clay-shadow);
@@ -238,6 +240,12 @@ select:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--clay-focus);
   outline-offset: 3px;
+}
+
+input.ai-chat-input:focus-visible,
+textarea.ai-chat-input:focus-visible {
+  outline: none;
+  outline-offset: 0;
 }
 
 .app-shell {
@@ -479,12 +487,12 @@ html[data-theme="dark"] .connector-blob {
   );
   animation: dot-spin 16s linear infinite;
   filter: saturate(1.45) contrast(1.12);
-  clip-path: var(--dot-clip-shape, circle(2.5rem at var(--dot-pointer-x) var(--dot-pointer-y)));
+  clip-path: var(--dot-clip-shape, circle(1.5rem at var(--dot-pointer-x) var(--dot-pointer-y)));
   mask-image: radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
   mask-position: 0 0;
   mask-size: 12px 12px;
   mask-repeat: repeat;
-  -webkit-clip-path: var(--dot-clip-shape, circle(2.5rem at var(--dot-pointer-x) var(--dot-pointer-y)));
+  -webkit-clip-path: var(--dot-clip-shape, circle(1.5rem at var(--dot-pointer-x) var(--dot-pointer-y)));
   -webkit-mask-image: radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
   -webkit-mask-position: 0 0;
   -webkit-mask-size: 12px 12px;
@@ -545,11 +553,11 @@ html[data-theme="dark"] .connector-blob {
 }
 
 html[data-theme="dark"] .hero-sun-surveys {
-  background-color: #2a1520;
+  background-color: #8b5a6e;
 }
 
 html[data-theme="dark"] .hero-sun-surveys::before {
-  filter: brightness(0.45) saturate(0.8);
+  filter: brightness(0.85) saturate(0.9);
 }
 
 .app-glow-left {
@@ -617,9 +625,9 @@ footer {
 }
 
 .clay-button-hover:hover:not(:disabled) {
-  background: var(--clay-pomegranate-400);
-  border-color: var(--clay-black);
-  color: var(--clay-black);
+  background: #2CA0AB !important;
+  border-color: var(--clay-black) !important;
+  color: #ffffff !important;
   box-shadow: var(--clay-hard-shadow);
   transform: translateY(-0.18rem) rotateZ(-3deg);
 }
