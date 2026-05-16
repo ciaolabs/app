@@ -48,8 +48,15 @@ export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHe
   const ctaClassName =
     "clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)";
 
+  const navLinks: { href: string; label: string; color: string; external?: boolean }[] = [
+    { href: "#surveys", label: "Surveys", color: "#f97316" },
+    { href: "#dashboards", label: "Dashboards", color: "#facc15" },
+    { href: "#chat", label: "Chat", color: "#ec4899" },
+    { href: "https://docs.ciaobang.com", label: "Documentation", color: "#22c55e", external: true },
+  ];
+
   return (
-    <header className="flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <header className="relative flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes ciaoHandWaveHeader {
           0%   { transform: rotate(0deg); }
@@ -89,12 +96,33 @@ export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHe
         />
       </Link>
 
+      <nav
+        aria-label="Sections"
+        className="pointer-events-none absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 md:flex lg:gap-10"
+      >
+        {navLinks.map((link) => (
+          <a
+            key={link.label}
+            href={link.href}
+            {...(link.external ? { target: "_blank", rel: "noreferrer" } : {})}
+            className="pointer-events-auto inline-flex items-center gap-2.5 text-base font-semibold text-(--ink) transition hover:opacity-80"
+          >
+            <span
+              aria-hidden="true"
+              className="inline-block size-2 rounded-full"
+              style={{ backgroundColor: link.color }}
+            />
+            {link.label}
+          </a>
+        ))}
+      </nav>
+
       <nav className="flex items-center gap-3">
         <a
           href="https://docs.ciaobang.com"
           target="_blank"
           rel="noreferrer"
-          className="clay-button-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-[var(--ink)] shadow-[var(--shadow-soft)]"
+          className="clay-button-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-[var(--ink)] shadow-[var(--shadow-soft)] md:hidden"
           aria-label="Documentation"
         >
           <BookIcon />

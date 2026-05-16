@@ -58,7 +58,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="relative z-10 mt-10">
+          <div id="surveys" className="relative z-10 mt-10 scroll-mt-24">
             <SurveyPreview />
           </div>
 
@@ -127,38 +127,10 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="relative z-10">
+          <div id="dashboards" className="relative z-10 scroll-mt-24">
             <SurveyResultsPreview />
           </div>
         </div>
-      </section>
-
-      <section className="grid gap-6 py-10 lg:grid-cols-3">
-        {[
-          {
-            title: "One live prompt at a time",
-            body: "The survey surface stays focused: a single statement, a six-point response ladder, and no hidden navigation traps.",
-          },
-          {
-            title: "Violin plot feedback",
-            body: "Each answer reveals a seeded comparison plot immediately so respondents see how the broader pattern bends around that item.",
-          },
-          {
-            title: "Persistent editable log",
-            body: "Every question remains visible in the sidebar with answered state and current rating, making revisions frictionless.",
-          },
-        ].map((feature) => (
-          <div
-            key={feature.title}
-            className="rounded-3xl border border-(--line) bg-(--surface-panel) p-6 shadow-(--shadow-soft)"
-          >
-            <p className="clay-label">
-              Feature
-            </p>
-            <h2 className="mt-4 font-display text-3xl text-(--ink)">{feature.title}</h2>
-            <p className="mt-4 text-base leading-8 text-(--ink-soft)">{feature.body}</p>
-          </div>
-        ))}
       </section>
 
         <LandingFooter isSignedIn={isSignedIn} signInHref={signInUrl ?? "/"} />
