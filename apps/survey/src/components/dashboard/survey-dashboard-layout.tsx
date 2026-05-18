@@ -146,8 +146,8 @@ type SurveyDashboardLayoutProps = {
   /** Links shown next to the PDF button in the hero info card. */
   heroActionLinks: ReactNode;
 
-  /** The submission history list rendered inside the hero info card. */
-  submissionHistory: ReactNode;
+  /** @deprecated No longer rendered. */
+  submissionHistory?: ReactNode;
 
   /** Optional content rendered at the bottom of the hero section, below the
    *  two-column grid. Used for e.g. a summary narrative specific to one
@@ -255,57 +255,40 @@ export function SurveyDashboardLayout({
             data-print-hide
             className="hero-sun-surveys clay-section overflow-hidden px-5 pb-6 pt-16 sm:px-8 sm:pb-8 sm:pt-20 lg:pt-8 lg:pb-6"
           >
-            <div className="grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_22rem] xl:items-start">
-              <div>
-                <p className="clay-label">
-                  Survey Results
-                </p>
-                <div className="mt-4 flex justify-center">
-                  <h1
-                    className="relative inline-flex items-center text-center rounded-2xl bg-(--surface-panel-strong) px-6 py-3 font-display text-xl text-(--ink) sm:px-8 sm:py-4 sm:text-2xl lg:rounded-3xl lg:px-14 lg:py-6 lg:text-5xl xl:px-16 xl:py-8 xl:text-6xl"
-                    style={{
-                      boxShadow:
-                        "0 12px 24px -10px rgba(20, 15, 10, 0.22), 0 3px 6px -2px rgba(20, 15, 10, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(20, 15, 10, 0.04)",
-                      filter: "drop-shadow(2px 4px 4px rgba(20, 15, 10, 0.10))",
-                    }}
+            <div>
+              <p className="clay-label">
+                Survey Results
+              </p>
+              <div className="mt-4 flex justify-center">
+                <h1
+                  className="relative inline-flex items-center text-center rounded-2xl bg-(--surface-panel-strong) px-6 py-3 font-display text-xl text-(--ink) sm:px-8 sm:py-4 sm:text-2xl lg:rounded-3xl lg:px-14 lg:py-6 lg:text-5xl xl:px-16 xl:py-8 xl:text-6xl"
+                  style={{
+                    boxShadow:
+                      "0 12px 24px -10px rgba(20, 15, 10, 0.22), 0 3px 6px -2px rgba(20, 15, 10, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(20, 15, 10, 0.04)",
+                    filter: "drop-shadow(2px 4px 4px rgba(20, 15, 10, 0.10))",
+                  }}
+                >
+                  {survey.resultsTitle}
+                  <svg
+                    aria-hidden="true"
+                    className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 lg:-bottom-[20px] lg:w-[32px] lg:h-[28px] xl:-bottom-[24px] xl:w-[38px] xl:h-[32px]"
+                    width="16"
+                    height="14"
+                    viewBox="0 0 16 14"
+                    fill="none"
                   >
-                    {survey.resultsTitle}
-                    <svg
-                      aria-hidden="true"
-                      className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 lg:-bottom-[20px] lg:w-[32px] lg:h-[28px] xl:-bottom-[24px] xl:w-[38px] xl:h-[32px]"
-                      width="16"
-                      height="14"
-                      viewBox="0 0 16 14"
-                      fill="none"
-                    >
-                      <path
-                        d="M 16 0 L 0 0 Q 4 2 7 8 Q 9 13 10.5 13.5 Q 12 14 12.5 12 Q 13 8 16 1 Z"
-                        fill="var(--surface-panel-strong)"
-                      />
-                    </svg>
-                  </h1>
-                </div>
-                <div className="mt-8">
-                  {heroDescription}
-                </div>
+                    <path
+                      d="M 16 0 L 0 0 Q 4 2 7 8 Q 9 13 10.5 13.5 Q 12 14 12.5 12 Q 13 8 16 1 Z"
+                      fill="var(--surface-panel-strong)"
+                    />
+                  </svg>
+                </h1>
               </div>
-
-              <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)]">
-                <p className="clay-label">
-                  Viewing saved results
-                </p>
-                <p className="mt-3 text-[1.65rem] text-[var(--ink)]">
-                  {formatSubmittedAt(submission.submittedAt)}
-                </p>
-                <p className="mt-3 text-sm leading-6 text-[var(--ink-soft)]">
-                  {submission.answerCount} responses were scored from the selected submission
-                  stored on this account.
-                </p>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  {heroActionLinks}
-                </div>
-
-                {submissionHistory}
+              <div className="mt-8">
+                {heroDescription}
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3">
+                {heroActionLinks}
               </div>
             </div>
 

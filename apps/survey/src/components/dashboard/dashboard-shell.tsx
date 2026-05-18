@@ -347,6 +347,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
   );
   const [rankingMode, setRankingMode] = useState<RankingMode>("highest");
   const [showAllRankings, setShowAllRankings] = useState(false);
+  const [showNarrative, setShowNarrative] = useState(false);
   const [hoveredScale, setHoveredScale] = useState<RankedScaleResult | null>(null);
   const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
   const [activeFrameworkId, setActiveFrameworkId] = useState(
@@ -534,7 +535,24 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
           onSelect={handleSelectSubmission}
         />
       }
-      heroFooter={results ? <SummaryNarrative results={results} /> : null}
+      heroFooter={results ? (
+        <div data-print-hide>
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={() => setShowNarrative((v) => !v)}
+              className="text-xl text-[var(--ink-soft)] underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--ink)]"
+            >
+              {showNarrative ? "Show less" : "Show more"}
+            </button>
+          </div>
+          {showNarrative ? (
+            <div className="mt-6">
+              <SummaryNarrative results={results} />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     >
       {results ? (
         <>
