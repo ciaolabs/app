@@ -32,6 +32,72 @@ function buildUsageLabel(survey: SurveyDefinition, status: SurveyUserStatus | nu
   return `${status.submittedCount} of ${survey.maxSubmissions} submissions used`;
 }
 
+function SubmissionDots({
+  survey,
+  status,
+}: {
+  survey: SurveyDefinition;
+  status: SurveyUserStatus | null;
+}) {
+  if (survey.availability === "coming-soon" || !status || !survey.maxSubmissions) {
+    return null;
+  }
+
+  const total = survey.maxSubmissions;
+  const completed = Math.min(status.submittedCount, total);
+  const hasInProgress =
+    status.hasActiveDraft && status.activeDraftAnswerCount > 0 && completed < total;
+  const inProgressIndex = hasInProgress ? completed : -1;
+  const label = buildUsageLabel(survey, status);
+
+  return (
+    <div
+      className="inline-flex items-center gap-1.5"
+      role="img"
+      aria-label={label}
+      title={label}
+    >
+      <span className="sr-only">{label}</span>
+      {Array.from({ length: total }).map((_, index) => {
+        const state =
+          index < completed
+            ? "completed"
+            : index === inProgressIndex
+              ? "in-progress"
+              : "not-started";
+
+        if (state === "completed") {
+          return (
+            <span
+              key={index}
+              aria-hidden="true"
+              className="h-2.5 w-2.5 rounded-full bg-[#2ECC71] shadow-[0_0_0_2px_rgba(46,204,113,0.20)]"
+            />
+          );
+        }
+
+        if (state === "in-progress") {
+          return (
+            <span
+              key={index}
+              aria-hidden="true"
+              className="h-2.5 w-2.5 rounded-full bg-[#F5C518] shadow-[0_0_0_2px_rgba(245,197,24,0.20)]"
+            />
+          );
+        }
+
+        return (
+          <span
+            key={index}
+            aria-hidden="true"
+            className="h-2.5 w-2.5 rounded-full border border-(--line-strong) bg-transparent"
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 function buildSurveyBadge(survey: SurveyDefinition, status: SurveyUserStatus | null) {
   if (survey.availability === "coming-soon") {
     return "Coming soon";
@@ -280,16 +346,20 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
               key={survey.type}
               className="relative overflow-hidden rounded-3xl border border-(--line) bg-(--surface-panel) p-6 shadow-(--shadow-soft)"
             >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="clay-label">
-                    {buildUsageLabel(survey, status)}
-                  </p>
-                  <h2 className="mt-3 font-display text-3xl text-(--ink)">{survey.title}</h2>
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  {survey.availability === "coming-soon" || !status ? (
+                    <p className="clay-label">
+                      {buildUsageLabel(survey, status)}
+                    </p>
+                  ) : (
+                    <SubmissionDots survey={survey} status={status} />
+                  )}
+                  <span className="rounded-full border border-dashed border-(--line) bg-(--surface-panel-strong) px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-(--ink)">
+                    {buildSurveyBadge(survey, status)}
+                  </span>
                 </div>
-                <span className="rounded-full border border-dashed border-(--line) bg-(--surface-panel-strong) px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-(--ink)">
-                  {buildSurveyBadge(survey, status)}
-                </span>
+                <h2 className="mt-3 font-display text-3xl text-(--ink)">{survey.title}</h2>
               </div>
 
               <p className="mt-4 text-base leading-8 text-(--ink-soft)">{survey.description}</p>

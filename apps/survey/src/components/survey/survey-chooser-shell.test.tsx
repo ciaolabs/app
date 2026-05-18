@@ -238,7 +238,7 @@ describe("SurveyChooserShell", () => {
       }),
     );
 
-    expect(screen.getAllByText("0 of 2 submissions used")).toHaveLength(2);
+    expect(screen.getAllByLabelText("0 of 2 submissions used")).toHaveLength(2);
     expect(screen.queryByText("Loading your survey status...")).not.toBeInTheDocument();
   });
 
