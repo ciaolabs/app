@@ -189,19 +189,25 @@ export function SurveyDashboardLayout({
           { label: "Survey Results" },
         ]}
         action={
-          <Link
-            href={SURVEYS_ROUTE}
-            className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-blue)] px-5 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
-          >
-            Start a survey →
-          </Link>
+          <div className="flex items-center gap-2">
+            {submission ? (
+              <DashboardPdfButton
+                fileName={`Ciao - ${survey.title} - ${formatSubmittedAt(submission.submittedAt)}.pdf`}
+              />
+            ) : null}
+            <Link
+              href={SURVEYS_ROUTE}
+              className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-blue)] px-5 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
+            >
+              Start a survey →
+            </Link>
+          </div>
         }
       />
 
       {error ? (
         <section
-          className="clay-section mt-6 px-8 py-10 sm:px-12"
-          style={{ background: "var(--hero-gradient)" }}
+          className="hero-sun-surveys clay-section mt-6 px-8 py-10 sm:px-12"
         >
           <p className="clay-label">
             Results unavailable
@@ -217,8 +223,7 @@ export function SurveyDashboardLayout({
 
       {!error && !hasResults ? (
         <section
-          className="clay-section mt-6 px-8 py-10 sm:px-12"
-          style={{ background: "var(--hero-gradient)" }}
+          className="hero-sun-surveys clay-section mt-6 px-8 py-10 sm:px-12"
         >
           <p className="clay-label">
             No submission yet
@@ -248,18 +253,41 @@ export function SurveyDashboardLayout({
           />
           <section
             data-print-hide
-            className="clay-section overflow-hidden px-5 py-6 sm:px-8 sm:py-8"
-            style={{ background: "var(--hero-gradient)" }}
+            className="hero-sun-surveys clay-section overflow-hidden px-5 pb-6 pt-16 sm:px-8 sm:pb-8 sm:pt-20 lg:pt-8 lg:pb-6"
           >
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_22rem] xl:items-start">
               <div>
                 <p className="clay-label">
                   Survey Results
                 </p>
-                <h1 className="mt-4 font-display text-4xl text-[var(--ink)] sm:text-5xl">
-                  {survey.resultsTitle}
-                </h1>
-                {heroDescription}
+                <div className="mt-4 flex justify-center">
+                  <h1
+                    className="relative inline-flex items-center text-center rounded-2xl bg-(--surface-panel-strong) px-6 py-3 font-display text-xl text-(--ink) sm:px-8 sm:py-4 sm:text-2xl lg:rounded-3xl lg:px-14 lg:py-6 lg:text-5xl xl:px-16 xl:py-8 xl:text-6xl"
+                    style={{
+                      boxShadow:
+                        "0 12px 24px -10px rgba(20, 15, 10, 0.22), 0 3px 6px -2px rgba(20, 15, 10, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(20, 15, 10, 0.04)",
+                      filter: "drop-shadow(2px 4px 4px rgba(20, 15, 10, 0.10))",
+                    }}
+                  >
+                    {survey.resultsTitle}
+                    <svg
+                      aria-hidden="true"
+                      className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 lg:-bottom-[20px] lg:w-[32px] lg:h-[28px] xl:-bottom-[24px] xl:w-[38px] xl:h-[32px]"
+                      width="16"
+                      height="14"
+                      viewBox="0 0 16 14"
+                      fill="none"
+                    >
+                      <path
+                        d="M 16 0 L 0 0 Q 4 2 7 8 Q 9 13 10.5 13.5 Q 12 14 12.5 12 Q 13 8 16 1 Z"
+                        fill="var(--surface-panel-strong)"
+                      />
+                    </svg>
+                  </h1>
+                </div>
+                <div className="mt-8">
+                  {heroDescription}
+                </div>
               </div>
 
               <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)]">
@@ -274,9 +302,6 @@ export function SurveyDashboardLayout({
                   stored on this account.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <DashboardPdfButton
-                    fileName={`Ciao - ${survey.title} - ${formatSubmittedAt(submission.submittedAt)}.pdf`}
-                  />
                   {heroActionLinks}
                 </div>
 
