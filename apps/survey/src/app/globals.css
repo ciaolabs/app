@@ -458,8 +458,8 @@ html[data-theme="dark"] .connector-blob {
   --dot-pointer-x: -20rem;
   --dot-pointer-y: -20rem;
   pointer-events: none;
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  inset: 1rem;
   z-index: 0;
   border-radius: 0.5rem;
   overflow: hidden;
