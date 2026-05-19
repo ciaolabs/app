@@ -515,25 +515,23 @@ export function ValuesBeliefsDashboardShell({
     >
       {results ? (
         <>
-          <section data-print-hide className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] sm:px-5">
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-              {(["beliefs", "values"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={[
-                    "rounded-full px-4 py-2.5 text-lg font-semibold uppercase tracking-[0.08em] transition",
-                    activeTab === tab
-                      ? "bg-[var(--accent-coral)] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
-                      : "text-[var(--ink)] hover:bg-[var(--surface-panel-strong)]",
-                  ].join(" ")}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          </section>
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+            {(["beliefs", "values"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={[
+                  "rounded-full px-4 py-2.5 text-lg font-semibold uppercase tracking-[0.08em] transition",
+                  activeTab === tab
+                    ? "bg-[var(--accent-coral)] text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
+                    : "bg-[var(--surface-panel-strong)] text-[var(--ink)]",
+                ].join(" ")}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
 
           {activeTab === "beliefs" ? (
             <section className="space-y-6">

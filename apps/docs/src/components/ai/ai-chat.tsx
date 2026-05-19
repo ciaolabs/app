@@ -86,7 +86,7 @@ function ChatMessages({
           if (msg.role === "user") {
             return (
               <div key={msg.id} className="flex justify-end">
-                <div className="max-w-[80%] rounded-2xl bg-white/15 px-4 py-3 text-[13px] leading-relaxed text-white backdrop-blur-sm">
+                <div className="ai-user-bubble max-w-[80%] rounded-2xl px-4 py-3 text-[13px] leading-relaxed backdrop-blur-sm">
                   {text}
                 </div>
               </div>
@@ -273,27 +273,28 @@ export function AiSearchBar() {
       }}
     >
       <div
-        className="flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-white/[0.06] shadow-2xl transition-all duration-300 ease-out"
-        style={{
-          maxHeight: expanded ? "min(75vh, 620px)" : "3rem",
-          background: expanded
-            ? "rgba(20, 20, 20, 0.6)"
-            : "rgba(20, 20, 20, 0.5)",
-          backdropFilter: "blur(40px) saturate(2)",
-          WebkitBackdropFilter: "blur(40px) saturate(2)",
-        }}
+        className={`ai-pill flex w-full max-w-lg flex-col overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 ease-out${expanded ? " ai-pill--expanded" : ""}`}
+        style={{ maxHeight: expanded ? "min(75vh, 620px)" : "3rem" }}
       >
         {expanded && (
           <>
             {/* Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-4 py-2.5">
+            <div className="ai-divider-b flex shrink-0 items-center justify-between px-4 py-2.5">
               <div className="flex shrink-0 items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/ciao-sparkle.svg"
+                  alt=""
+                  aria-hidden="true"
+                  className="ciao-wave ai-pill-sparkle-light"
+                  style={{ height: 24, width: 24, objectFit: "contain" }}
+                />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/ciao-sparkle-dark.svg"
                   alt=""
                   aria-hidden="true"
-                  className="ciao-wave"
+                  className="ciao-wave ai-pill-sparkle-dark"
                   style={{ height: 24, width: 24, objectFit: "contain" }}
                 />
                 <span className="text-[13px] font-medium leading-none text-white/80">
@@ -303,7 +304,8 @@ export function AiSearchBar() {
                 <img
                   src="/ciao-text.png"
                   alt="Ciao!"
-                  style={{ height: 16, width: "auto", filter: "invert(1)" }}
+                  className="ai-pill-logo"
+                  style={{ height: 16, width: "auto" }}
                 />
                 <span className="rounded-full bg-white/[0.08] px-2 py-0.5 text-[10px] text-white/40">
                   {settings.modelOption.label}
@@ -357,7 +359,7 @@ export function AiSearchBar() {
 
             {/* Expanded input */}
             {!showSettings && (
-              <div className="shrink-0 border-t border-white/[0.06] p-3">
+              <div className="ai-divider-t shrink-0 p-3">
                 <div className="flex items-end gap-2">
                   <textarea
                     ref={textareaRef}
@@ -371,7 +373,7 @@ export function AiSearchBar() {
                     }}
                     placeholder="Ask a question..."
                     rows={1}
-                    className="flex-1 resize-none overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.06] px-3 py-2 text-[13px] text-white/80 placeholder:text-white/30 focus:border-white/20 focus:outline-none focus:ring-0"
+                    className="ai-pill-textarea flex-1 resize-none overflow-hidden rounded-xl px-3 py-2 text-[13px] focus:outline-none focus:ring-0"
                   />
                   <button
                     type="submit"
@@ -408,10 +410,10 @@ export function AiSearchBar() {
                 }
               }}
               placeholder="Ask a question..."
-              className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/40 focus:outline-none"
+              className="ai-pill-input flex-1 bg-transparent text-[13px] focus:outline-none"
             />
             <div className="flex items-center gap-1.5">
-              <kbd className="hidden items-center gap-0.5 rounded border border-white/[0.08] bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/30 sm:flex">
+              <kbd className="ai-pill-kbd hidden items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] sm:flex">
                 Ctrl+I
               </kbd>
               <button
@@ -423,7 +425,7 @@ export function AiSearchBar() {
                     setExpanded(true);
                   }
                 }}
-                className="flex size-7 items-center justify-center rounded-full bg-white/15 text-white/80 transition-colors hover:bg-white/25"
+                className="ai-pill-btn flex size-7 items-center justify-center rounded-full transition-colors"
               >
                 <ArrowRight className="size-3.5" />
               </button>
