@@ -163,12 +163,12 @@ function RankingColumn({
 }) {
   return (
     <div>
-      <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-4 border-b border-[var(--line)] pb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+      <div className="flex justify-between gap-4 border-b border-(--line) pb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-(--muted)">
         <p>{label}</p>
         <p className="text-right">{valueLabel}</p>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-2 space-y-1">
         {items.map((item) => {
           const highlight = hoveredCode === item.code;
           const value = metric === "score" ? item.score : item.percentileMagnitude;
@@ -182,24 +182,24 @@ function RankingColumn({
               onFocus={(event) => onHover(item, event.currentTarget)}
               onBlur={() => onHover(null)}
               className={[
-                "grid w-full grid-cols-[minmax(0,1fr)_4rem] items-center gap-4 rounded-[1rem] p-2 text-left transition",
+                "grid w-full grid-cols-[minmax(0,1fr)_3rem] items-center gap-2 rounded-xl px-2 py-1 text-left transition",
                 highlight
                   ? "bg-[var(--surface-panel-strong)] shadow-[var(--shadow-soft)]"
                   : "hover:bg-[var(--surface-panel)]",
               ].join(" ")}
             >
               <div className="min-w-0">
-                <p className="line-clamp-1 text-[1.35rem] leading-tight text-[var(--ink)]">{item.displayName}</p>
-                <div className="mt-2">
+                <p className="line-clamp-1 text-sm leading-tight text-(--ink)">{item.displayName}</p>
+                <div className="mt-1">
                   <SegmentedScoreBar
                     value={value}
                     maxValue={metric === "score" ? 50 : 100}
                     band={item.band}
-                    className="h-12 rounded-[0.75rem]"
+                    className="h-7 rounded-lg"
                   />
                 </div>
               </div>
-              <p className="text-right text-xl font-semibold text-[var(--ink)]">{value}</p>
+              <p className="text-right text-sm font-semibold text-[var(--ink)]">{value}</p>
             </button>
           );
         })}
@@ -212,24 +212,24 @@ function DetailBars({ items }: { items: DashboardScaleLike[] }) {
   return (
     <div className="divide-y divide-[var(--line)] rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] shadow-[var(--shadow-soft)]">
       {items.map((item) => (
-        <div key={item.code} className="grid gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-center">
+        <div key={item.code} className="grid gap-3 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-center">
           <div>
-            <h4 className="text-[1.65rem] leading-tight text-[var(--ink)]">{item.displayName}</h4>
-            <p className="mt-2 max-w-2xl text-[15px] leading-7 text-[var(--ink-soft)]">
+            <h4 className="text-base leading-tight text-(--ink)">{item.displayName}</h4>
+            <p className="mt-1 max-w-2xl text-[13px] leading-6 text-(--ink-soft)">
               {item.description}
             </p>
           </div>
           <div>
-            <p className="text-right text-xl font-semibold text-[var(--ink)]">{item.score}/50</p>
-            <div className="mt-3">
+            <p className="text-right text-sm font-semibold text-(--ink)">{item.score}/50</p>
+            <div className="mt-2">
               <SegmentedScoreBar
                 value={item.score}
                 maxValue={50}
                 band={item.band}
-                className="h-12 rounded-[0.75rem]"
+                className="h-7 rounded-lg"
               />
             </div>
-            <p className="mt-3 text-right text-[1.1rem] text-[var(--ink-soft)]">{item.percentileText}</p>
+            <p className="mt-2 text-right text-xs text-(--ink-soft)">{item.percentileText}</p>
           </div>
         </div>
       ))}
@@ -238,6 +238,7 @@ function DetailBars({ items }: { items: DashboardScaleLike[] }) {
 }
 
 function FrameworkPanel({ framework }: { framework: SurveyResults["frameworks"][number] }) {
+  const [expanded, setExpanded] = useState(false);
   return (
     <section data-pdf-capture className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] px-5 py-6 shadow-[var(--shadow-soft)] sm:px-6 sm:py-7">
       <div className="mx-auto max-w-5xl text-center">
@@ -268,14 +269,20 @@ function FrameworkPanel({ framework }: { framework: SurveyResults["frameworks"][
 
       <div className="mx-auto mt-10 max-w-6xl">
         <p className="text-base leading-8 text-[var(--ink-soft)]">{framework.intro}</p>
-        <a
-          href={framework.readMoreHref}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-5 inline-flex text-base underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--accent-coral)]"
-        >
-          Read more
-        </a>
+        {framework.readMoreText ? (
+          <>
+            {expanded ? (
+              <p className="mt-4 text-base leading-8 text-[var(--ink-soft)]">{framework.readMoreText}</p>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="mt-5 inline-flex text-base underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--accent-coral)]"
+            >
+              {expanded ? "Show less" : "Read more"}
+            </button>
+          </>
+        ) : null}
       </div>
 
       <div className="mx-auto mt-7 max-w-6xl space-y-5">
@@ -504,12 +511,11 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
       emptyStateBody="Finish the questionnaire to generate AMBI-based score estimates, ranked traits, and the eight-framework breakdown on this page."
       heroDescription={
         <>
-          <p className="mt-4 max-w-4xl text-base leading-7 text-[var(--ink-soft)]">
+          <p className="mt-4 max-w-4xl text-center text-base leading-7 text-[var(--ink-soft)] font-semibold">
             The questions you answered are used to generate personality scores across several
-            different frameworks. This approach, based on the Analog to Multiple Broadband
-            Inventories, estimates your scores using a limited number of public-domain questions.
+            different frameworks.
           </p>
-          <p className="mt-3 max-w-4xl text-[15px] leading-7 text-[var(--ink-soft)]">
+          <p className="mt-3 max-w-4xl text-center text-[15px] leading-7 text-[var(--ink-soft)] font-semibold">
             Please note that the results provided below are for informational purposes only, and
             are not intended to be psychological or medical advice. The accuracy or completeness
             of the results are not guaranteed.
@@ -518,7 +524,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
       }
       heroActionLinks={
         <a
-          href={activeFramework?.readMoreHref ?? "https://doi.org/10.1016/j.jrp.2010.01.002"}
+          href="https://doi.org/10.1016/j.jrp.2010.01.002"
           target="_blank"
           rel="noreferrer"
           className="clay-button-hover inline-flex rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-4 py-2 text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)]"

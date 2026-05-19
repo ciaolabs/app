@@ -167,6 +167,15 @@ function buildPrimaryAction(
   }
 
   if (status.submittedCount === 1) {
+    if (status.hasActiveDraft && status.activeDraftAnswerCount > 0) {
+      return {
+        label: "Continue survey →",
+        href: survey.route,
+        intent: "primary",
+        disabled: false,
+      };
+    }
+
     return {
       label: "Repeat survey",
       href: survey.route,
@@ -226,7 +235,8 @@ function shouldOfferRepeatAction(survey: SurveyDefinition, status: SurveyUserSta
   return (
     survey.availability === "active" &&
     status !== null &&
-    status.submittedCount === 1
+    status.submittedCount === 1 &&
+    !(status.hasActiveDraft && status.activeDraftAnswerCount > 0)
   );
 }
 
@@ -406,7 +416,7 @@ export function SurveyChooserShell({ surveys, initialStatuses }: SurveyChooserSh
                     "Opening..."
                   ) : (
                     <>
-                      {primaryAction.label === "Repeat survey" ? <RepeatIcon /> : null}
+                      {(primaryAction.label === "Repeat survey" || primaryAction.label === "Continue survey →") ? <RepeatIcon /> : null}
                       {primaryAction.label}
                     </>
                   )}

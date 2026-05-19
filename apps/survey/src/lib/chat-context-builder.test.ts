@@ -47,7 +47,6 @@ const personalityResult: PersonalitySurveyResults = {
       heading: "Revised NEO Personality Inventory",
       methodology: "",
       intro: "",
-      readMoreHref: "",
       layout: "gauges",
       overview: [
         {

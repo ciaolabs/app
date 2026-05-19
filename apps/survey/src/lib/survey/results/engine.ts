@@ -345,7 +345,7 @@ function buildFrameworkResults(scaleResultsByNumber: Map<number, ScaleResult>) {
       heading: definition.heading,
       methodology: definition.methodology,
       intro: definition.intro,
-      readMoreHref: definition.readMoreHref,
+      readMoreText: definition.readMoreText,
       layout: definition.layout,
       overview: buildOverviewResults(definition, scaleResultsByNumber),
       sections: buildFrameworkSections(definition, scaleResultsByNumber),

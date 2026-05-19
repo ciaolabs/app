@@ -121,6 +121,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   }, [questions]);
 
   const answeredCount = Object.keys(answers).length;
+  const minAnswersRequired = process.env.NODE_ENV === "development" ? 1 : questions.length;
   const completion = Math.round((answeredCount / questions.length) * 100);
   const firstUnansweredIndex = useMemo(
     () => questions.findIndex((question) => !answers[question.id]),
@@ -387,7 +388,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   }, [isHelpOpen, isSubmitting]);
 
   async function handleSubmit() {
-    if (answeredCount !== questions.length || isSubmitting) {
+    if (answeredCount < minAnswersRequired || isSubmitting) {
       return;
     }
 
@@ -453,7 +454,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={answeredCount !== questions.length || isSubmitting}
+              disabled={answeredCount < minAnswersRequired || isSubmitting}
               className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-sand)] px-5 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isSubmitting ? "Submitting..." : "Submit survey →"}

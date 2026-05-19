@@ -86,7 +86,7 @@ export type FrameworkDefinition = {
   heading: string;
   methodology: string;
   intro: string;
-  readMoreHref: string;
+  readMoreText?: string;
   layout: FrameworkResultLayout;
   overview: OverviewMetricDefinition[];
   sections: FrameworkSectionDefinition[];
@@ -120,7 +120,7 @@ export type FrameworkResult = {
   heading: string;
   methodology: string;
   intro: string;
-  readMoreHref: string;
+  readMoreText?: string;
   layout: FrameworkResultLayout;
   overview: OverviewMetricResult[];
   sections: FrameworkSectionResult[];

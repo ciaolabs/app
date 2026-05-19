@@ -3,7 +3,6 @@ import {
   type InventoryCode,
 } from "@/lib/survey/results/types";
 
-const DOI_HREF = "https://doi.org/10.1016/j.jrp.2010.01.002";
 
 export const AMBI_METHODOLOGY_NOTE =
   "Based on the AMBI public-domain version. Scores range from 0 to 50.";
@@ -26,8 +25,9 @@ export const frameworkDefinitions: Record<InventoryCode, FrameworkDefinition> = 
     heading: "Revised NEO Personality Inventory",
     methodology: AMBI_METHODOLOGY_NOTE,
     intro:
-      "The Revised NEO Personality Inventory (NEO-PI-R) measures personality across 5 broad domains, each containing 6 underlying facets (30 facets in total). The NEO-PI-R is one of the most prominent assessments measuring the Big Five domains of personality: Neuroticism, Extraversion, Openness to Experience, Agreeableness, and Conscientiousness. The NEO acronym reflects the test's original development as a 3-factor personality framework, with Agreeableness and Conscientiousness being added as part of a major revision in the 1980s. Several versions have been released since, along with dozens of translations and numerous public-domain alternatives. Collectively, these five-factor inventories are, by far, the most widely used assessments of personality in social science research. The public-domain AMBI version used here has a total of 108 questions, and was created using correlations between scores on the original NEO-PI-R and responses to a large pool of public-domain personality questions.",
-    readMoreHref: DOI_HREF,
+      "The Revised NEO Personality Inventory (NEO-PI-R) measures personality across 5 broad domains, each containing 6 underlying facets (30 facets in total). The NEO-PI-R is one of the most prominent assessments measuring the Big Five domains of personality: Neuroticism, Extraversion, Openness to Experience, Agreeableness, and Conscientiousness.",
+    readMoreText:
+      "The NEO acronym reflects the test's original development as a 3-factor personality framework, with Agreeableness and Conscientiousness being added as part of a major revision in the 1980s. Several versions have been released since, along with dozens of translations and numerous public-domain alternatives. Collectively, these five-factor inventories are, by far, the most widely used assessments of personality in social science research. The public-domain AMBI version used here has a total of 108 questions, and was created using correlations between scores on the original NEO-PI-R and responses to a large pool of public-domain personality questions.",
     layout: "gauges",
     overview: [
       {
@@ -113,8 +113,9 @@ export const frameworkDefinitions: Record<InventoryCode, FrameworkDefinition> = 
     heading: "HEXACO Personality Inventory",
     methodology: AMBI_METHODOLOGY_NOTE,
     intro:
-      "The HEXACO Personality Inventory is among the most prominent 6-factor alternatives to the more famous Big Five personality models. In practice, the HEXACO and the Big Five have a lot in common. Both have highly similar dimensions in Extraversion, Conscientiousness, and Openness. But, instead of Neuroticism in the Big Five, the HEXACO has Emotionality which contains some similar content but less focus on emotional stability. The biggest difference between the two models is that the HEXACO contains an additional dimension labeled Honesty-Humility, and this inclusion also affects the ways that each model measures Agreeableness. Big Five Agreeableness includes facets of Trust and Straightforwardness, but these are part of Honesty-Humility in the HEXACO. HEXACO Agreeableness is more focused on patience and forgiveness than Big Five Agreeableness.",
-    readMoreHref: DOI_HREF,
+      "The HEXACO Personality Inventory is among the most prominent 6-factor alternatives to the more famous Big Five personality models. In practice, the HEXACO and the Big Five have a lot in common. Both have highly similar dimensions in Extraversion, Conscientiousness, and Openness. But, instead of Neuroticism in the Big Five, the HEXACO has Emotionality which contains some similar content but less focus on emotional stability. The biggest difference between the two models is that the HEXACO contains an additional dimension labeled Honesty-Humility, and this inclusion also affects the ways that each model measures Agreeableness.",
+    readMoreText:
+      "The HEXACO (Honesty/Humility, Emotionality, eXtraversion, Agreeableness, Conscientiousness, and Openness) is also newer than the Big Five, having been first introduced in the early 2000s. The public-domain AMBI version used here has a total of 88 questions, and was created using correlations between scores on the original HEXACO and responses to a large pool of public-domain personality questions.",
     layout: "gauges",
     overview: [
       {
@@ -216,7 +217,8 @@ export const frameworkDefinitions: Record<InventoryCode, FrameworkDefinition> = 
     methodology: AMBI_METHODOLOGY_NOTE,
     intro:
       "The Multidimensional Personality Questionnaire assesses 3 broad dimensions of temperament: Positive Emotionality, Negative Emotionality, and Constraint. Beneath these, the MPQ also measures 11 more narrow traits, though one of these 11 (Absorption) lies outside of the 3 higher dimensions.",
-    readMoreHref: DOI_HREF,
+    readMoreText:
+      "Importantly, the MPQ was created after many years of informal exploratory research into the dimensions of personality that seemed to show up repeatedly across personality and clinical psychology research projects. In this way, it has more in common with the JPI-R than the NEO and HEXACO models. That said, the MPQ is unique (among frameworks in the AMBI) in being more closely aligned with clinical psychology research topics—this may be due to 2 of the 3 broad factors being rooted in emotionality. The public-domain AMBI version used here has a total of 42 questions, and was created using correlations between scores on the original MPQ and responses to a large pool of public-domain personality questions.",
     layout: "gauges",
     overview: [
       {
@@ -279,7 +281,8 @@ export const frameworkDefinitions: Record<InventoryCode, FrameworkDefinition> = 
     methodology: AMBI_METHODOLOGY_NOTE,
     intro:
       "The California Personality Inventory (CPI) is the oldest personality framework among those captured by the AMBI, having been first introduced in 1956. It is related to a popular measure of clinical topics called the MMPI in that it was developed using a similar strategy of aggregating many individual questions that were expected to tap into enduring aspects of personality rather than being based on personality theory or the lexical structure of personality descriptions. Like the MMPI, the original CPI is also a very long assessment, with more than 400 questions.",
-    readMoreHref: DOI_HREF,
+    readMoreText:
+      "From these many questions, many scores can be produced, including 20 primary scales plus several others (9 more are included in the AMBI). The primary 20 scales of the CPI are sometimes aggregated into 4 broad categories, though these are too diverse to be converted into scored categories. They are Interpersonal Characteristics (which includes the scales for Dominance, Capacity for Status, Sociability, Social Presence, Self Acceptance, Independence, and Empathy), Self-Management Characteristics (Responsibility, Socialization, Self Control, Good Impression, Communality, Well Being, Tolerance), Motivational Style (Achievement via Conformance, Achievement via Independence, Intellectual Efficiency), and Cognitive Style (Psychological Mindedness, Flexibility, Sensitivity). The public-domain AMBI version used here has a total of 55 questions and was created using correlations between scores on the original version and responses to a large pool of public personality questions.",
     layout: "ranked-list",
     overview: [],
     sections: [
@@ -300,7 +303,8 @@ export const frameworkDefinitions: Record<InventoryCode, FrameworkDefinition> = 
     methodology: AMBI_METHODOLOGY_NOTE,
     intro:
       "The Jackson Personality Inventory was originally designed as a comprehensive measure of 15 important topics in personality and social psychology in the 1970s. While most of these continue to be researched frequently today, they often use different labels or framings. A revision of the JPI in the mid-1990s renamed 6 of the original scales and several subsequent research efforts have tried to organize these scales into the Big Five dimensions. Since these results have been inconsistent, no higher-level grouping of the scales is provided here.",
-    readMoreHref: DOI_HREF,
+    readMoreText:
+      "An important finding from research using the JPI-R has been evidence that several scales are not well (or consistently) captured by personality frameworks based on the Big Five. This evidence has contributed to increasing recognition that the Big Five is less comprehensive and generalizable than originally believed. The public-domain AMBI version of the JPI-R used here has a total of 66 questions, and was created using correlations between scores on the original JPI-R and responses to a large pool of public-domain personality questions.",
     layout: "ranked-list",
     overview: [],
     sections: [
@@ -318,7 +322,8 @@ export const frameworkDefinitions: Record<InventoryCode, FrameworkDefinition> = 
     methodology: AMBI_METHODOLOGY_NOTE,
     intro:
       'The Six-Factor Personality Questionnaire (6FPQ) was developed in the late 1990s as an extension and revision of an older framework called the Personality Research Form (PRF), which aimed to assess the 20 "manifest needs" described in a classic book about personality from the 1930s (Murray, 1938).',
-    readMoreHref: DOI_HREF,
+    readMoreText:
+      "Motivated by the growing popularity of the Big Five, the creator of the PRF (Douglas Jackson, who also developed the JPI-R) re-analyzed and reorganized its scales to produce a more simple six-factor framework—the 6FPQ. He labeled these dimensions Extraversion, Agreeableness, Independence, Openness to Experience, Methodicalness, and Industriousness. Each has 3 underlying scales. The public-domain AMBI version used here has a total of 69 questions, and was created using correlations between scores on the original 6FPQ and responses to a large pool of public-domain personality questions.",
     layout: "gauges",
     overview: [
       {
@@ -414,7 +419,8 @@ export const frameworkDefinitions: Record<InventoryCode, FrameworkDefinition> = 
     methodology: AMBI_METHODOLOGY_NOTE,
     intro:
       'The Temperament & Character Inventory (TCI) measures personality across 7 broad dimensions, and each of these contains 3-4 lower dimensions. The broad dimensions are loosely considered to represent "temperament" (the dimensions of Novelty Seeking, Harm Avoidance, Reward Dependence and Persistence), as well as "character" (Self Directedness, Cooperativeness, and Self Transcendence).',
-    readMoreHref: DOI_HREF,
+    readMoreText:
+      "The original version of the TCI was developed in the early 1990s by Robert Cloninger, and was based on an earlier assessment known as the Tridimensional Personality Questionnaire. Multiple versions have been published since the original, including translations of the TCI into more than a dozen languages. The public-domain AMBI version used here has a total of 100 questions and was created using correlations between scores on the original English version and responses to a large pool of public personality questions.",
     layout: "gauges",
     overview: [
       {
@@ -528,7 +534,8 @@ export const frameworkDefinitions: Record<InventoryCode, FrameworkDefinition> = 
     methodology: AMBI_METHODOLOGY_NOTE,
     intro:
       "The Hogan Personality Inventory was created in the 1980s and is one of the most well-validated personality frameworks available, mainly due to the fact that it has been updated frequently. The AMBI version used here can estimate HPI scores for 44 low-level scales, but other versions of the HPI provide a range of higher level scores, including ones similar to the Big Five and beyond. The HPI can also be used to predict certain aspects of job performance, like the potential for success in various job roles (managerial, clerical, etc) and work environments.",
-    readMoreHref: DOI_HREF,
+    readMoreText:
+      "The public-domain AMBI version used here generates estimates for the 44 lower level scales only (using 121 questions), and was created using correlations between scores on an older version of the HPI and responses to a large pool of public personality questions.",
     layout: "ranked-list",
     overview: [],
     sections: [

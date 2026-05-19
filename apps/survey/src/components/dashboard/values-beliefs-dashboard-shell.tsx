@@ -471,12 +471,12 @@ export function ValuesBeliefsDashboardShell({
       submission={submission}
       heroDescription={
         <>
-          <p className="mt-4 max-w-4xl text-base leading-7 text-[var(--ink-soft)]">
+          <p className="mt-4 max-w-4xl text-base leading-7 text-[var(--ink-soft)] font-semibold">
             Beliefs about the nature of the world shape our decisions, emotions, and reactions
             to daily events. Values guide our behavior by determining the relative importance of
-            different goals. Use the tabs below to switch between Beliefs and Values.
+            different goals.
           </p>
-          <p className="mt-3 max-w-4xl text-[15px] leading-7 text-[var(--ink-soft)]">
+          <p className="mt-3 max-w-4xl text-[15px] leading-7 text-[var(--ink-soft)] font-semibold">
             Please note that the results provided below are for informational purposes only, and
             are not intended to be psychological or medical advice. The accuracy or completeness
             of the results are not guaranteed.

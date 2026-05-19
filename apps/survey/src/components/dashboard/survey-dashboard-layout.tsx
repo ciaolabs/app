@@ -256,9 +256,11 @@ export function SurveyDashboardLayout({
             className="hero-sun-surveys clay-section overflow-hidden px-5 pb-6 pt-16 sm:px-8 sm:pb-8 sm:pt-20 lg:pt-8 lg:pb-6"
           >
             <div>
-              <p className="clay-label">
-                Survey Results
-              </p>
+              <div className="flex justify-center">
+                <span className="rounded-full border border-dashed border-(--line) bg-(--surface-panel-strong) px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-(--ink)">
+                  Survey Results
+                </span>
+              </div>
               <div className="mt-4 flex justify-center">
                 <h1
                   className="relative inline-flex items-center text-center rounded-2xl bg-(--surface-panel-strong) px-6 py-3 font-display text-xl text-(--ink) sm:px-8 sm:py-4 sm:text-2xl lg:rounded-3xl lg:px-14 lg:py-6 lg:text-5xl xl:px-16 xl:py-8 xl:text-6xl"
@@ -284,10 +286,10 @@ export function SurveyDashboardLayout({
                   </svg>
                 </h1>
               </div>
-              <div className="mt-8">
+              <div className="mt-8 flex flex-col items-center">
                 {heroDescription}
               </div>
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
                 {heroActionLinks}
               </div>
             </div>

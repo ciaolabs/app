@@ -32,6 +32,11 @@ export async function POST(request: Request, context: SurveyRouteContext) {
   try {
     const body = await request.json();
     const payload = submitPayloadSchema.parse(body);
+    if (process.env.NODE_ENV === "development") {
+      for (const id of definition.questionIds) {
+        if (!(id in payload.answers)) payload.answers[id] = 3;
+      }
+    }
     const answers = validateAnswerMap(definition.type, payload.answers);
     const repository = getSurveyRepository();
     const status = await repository.getSurveyStatus(userId, definition.type);

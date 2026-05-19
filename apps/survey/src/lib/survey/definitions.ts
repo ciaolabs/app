@@ -101,7 +101,7 @@ export const personalitySurveyDefinition = createActiveSurveyDefinition({
   questions: getSurveyQuestions("personality"),
   maxSubmissions: 2,
   ctaLabel: "Start survey",
-  resultsTitle: "200+ Measures of Your Personality",
+  resultsTitle: "Measures of Your Personality.",
   helpContent: {
     title: "Survey help",
     body:
