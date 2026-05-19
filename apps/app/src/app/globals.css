@@ -354,11 +354,55 @@ html[data-theme="dark"] .hero-blob-4 {
   position: fixed;
   inset: 0;
   z-index: 0;
-  opacity: 0.82;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: var(--background);
+  transition: opacity 180ms ease;
+}
+
+.interactive-dot-background__gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.interactive-dot-background__gradient canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.interactive-dot-background__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+  background-image: url("/noise.png");
+  background-size: 120px 120px;
+  background-repeat: repeat;
+}
+
+html[data-theme="dark"] .interactive-dot-background__grain {
+  mix-blend-mode: screen;
+  opacity: 0.1;
+}
+
+.interactive-dot-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
   background-image: radial-gradient(circle, var(--dot-color) 1.15px, transparent 1.35px);
   background-position: 0 0;
   background-size: 12px 12px;
-  transition: opacity 180ms ease;
+  opacity: 0.82;
 }
 
 @property --dot-spin-angle {
@@ -371,6 +415,7 @@ html[data-theme="dark"] .hero-blob-4 {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 3;
   opacity: 0;
   background: conic-gradient(
     from var(--dot-spin-angle, 20deg) at var(--dot-pointer-x) var(--dot-pointer-y),
@@ -382,12 +427,12 @@ html[data-theme="dark"] .hero-blob-4 {
   );
   animation: dot-spin 16s linear infinite;
   filter: saturate(1.45) contrast(1.12);
-  clip-path: var(--dot-clip-shape, circle(6rem at var(--dot-pointer-x) var(--dot-pointer-y)));
+  clip-path: var(--dot-clip-shape, circle(2.2rem at var(--dot-pointer-x) var(--dot-pointer-y)));
   mask-image: radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
   mask-position: 0 0;
   mask-size: 12px 12px;
   mask-repeat: repeat;
-  -webkit-clip-path: var(--dot-clip-shape, circle(6rem at var(--dot-pointer-x) var(--dot-pointer-y)));
+  -webkit-clip-path: var(--dot-clip-shape, circle(2.2rem at var(--dot-pointer-x) var(--dot-pointer-y)));
   -webkit-mask-image: radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
   -webkit-mask-position: 0 0;
   -webkit-mask-size: 12px 12px;

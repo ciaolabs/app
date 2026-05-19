@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 import { AnimatedGradientBackdrop } from "@/components/animated-gradient-backdrop";
 
-const BASE_RADIUS_REM = 3;
+const BASE_RADIUS_REM = 2.2;
 const SQUASH_AMOUNT = 0.16;
 const STRETCH_REFERENCE_PX = 150;
 const STRETCH_GROWTH = 0.09;
@@ -78,7 +78,7 @@ export function InteractiveDotBackground() {
       current.x += velocity.x;
       current.y += velocity.y;
 
-      clickBurst *= 0.985;
+      clickBurst *= 0.93;
 
       backgroundElement.style.setProperty("--dot-pointer-x", `${current.x}px`);
       backgroundElement.style.setProperty("--dot-pointer-y", `${current.y}px`);
