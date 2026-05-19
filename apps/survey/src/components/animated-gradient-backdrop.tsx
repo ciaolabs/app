@@ -137,11 +137,15 @@ export function AnimatedGradientBackdrop({ className }: { className?: string }) 
 
     function decaySurge() {
       surgeRaf = null;
-      surgeAmount *= 0.95;
+      surgeAmount *= 0.9;
       const lib = window.serendipity_ogl;
       if (!lib) return;
       const preset = presetForTheme();
-      lib.program.uniforms.uSpeed.value = preset.uSpeed * (1 + surgeAmount * 0.35);
+      // Tweak uScale (noise size) instead of uSpeed: visible "push" effect
+      // without advancing the shader's internal time accumulator. uSpeed-based
+      // surges would compound noise phase across many clicks → animation feels
+      // faster over time. uScale is purely visual and fully reversible.
+      lib.program.uniforms.uScale.value = preset.uScale * (1 - surgeAmount * 0.25);
 
       if (surgeAmount > 0.01) {
         surgeRaf = requestAnimationFrame(decaySurge);
