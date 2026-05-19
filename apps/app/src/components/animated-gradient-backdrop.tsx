@@ -132,6 +132,28 @@ export function AnimatedGradientBackdrop({ className }: { className?: string }) 
     if (!host) return;
 
     let cancelled = false;
+    let surgeAmount = 0;
+    let surgeRaf: number | null = null;
+
+    function decaySurge() {
+      surgeRaf = null;
+      surgeAmount *= 0.95;
+      const lib = window.serendipity_ogl;
+      if (!lib) return;
+      const preset = presetForTheme();
+      lib.program.uniforms.uSpeed.value = preset.uSpeed * (1 + surgeAmount * 0.35);
+
+      if (surgeAmount > 0.01) {
+        surgeRaf = requestAnimationFrame(decaySurge);
+      } else {
+        applyPreset(lib, preset);
+      }
+    }
+
+    function handleClickBurst() {
+      surgeAmount = 1.0;
+      if (surgeRaf === null) surgeRaf = requestAnimationFrame(decaySurge);
+    }
 
     loadScript()
       .then(() => {
@@ -158,9 +180,15 @@ export function AnimatedGradientBackdrop({ className }: { className?: string }) 
       attributeFilter: ["data-theme"],
     });
 
+    window.addEventListener("ciao:pointer-click", handleClickBurst);
+
     return () => {
       cancelled = true;
       themeObserver.disconnect();
+      window.removeEventListener("ciao:pointer-click", handleClickBurst);
+      if (surgeRaf !== null) {
+        cancelAnimationFrame(surgeRaf);
+      }
       const lib = window.serendipity_ogl;
       if (lib) {
         try {
