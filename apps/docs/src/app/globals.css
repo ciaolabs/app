@@ -230,6 +230,7 @@ article {
 
 /* Collapsed-sidebar floating pill (sidebar toggle + search icons) */
 [data-sidebar-panel] {
+  flex-direction: column;
   background-color: #ffffff !important;
   border-color: rgba(0, 0, 0, 0.12) !important;
 }

@@ -1845,12 +1845,12 @@ export function ChatShell({
             />
             <div
               aria-hidden="true"
-              className="fixed top-0 left-0 z-40 hidden h-screen w-2 lg:block"
+              className="fixed top-4 left-4 z-40 hidden h-[calc(100vh-2rem)] w-2 lg:block"
               onMouseEnter={showSidebarPeek}
             />
             <div
               className={cn(
-                "fixed top-2 bottom-2 left-2 z-40 hidden w-[280px] overflow-hidden rounded-2xl border border-(--line-strong) bg-(--surface-panel) shadow-(--shadow-strong) transition-transform duration-200 ease-out lg:block",
+                "fixed top-4 bottom-4 left-4 z-40 hidden w-[280px] overflow-hidden rounded-3xl border border-(--line-strong) bg-(--background) transition-transform duration-200 ease-out lg:block",
                 sidebarPeeked
                   ? "translate-x-0"
                   : "pointer-events-none -translate-x-[calc(100%+1rem)]",

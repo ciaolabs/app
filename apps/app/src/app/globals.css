@@ -94,13 +94,13 @@
   --nav-glass-bg: rgba(255, 255, 255, 0.08);
   --nav-glass-border: rgba(218, 212, 200, 0.22);
   --frame-color: rgba(0, 0, 0, 0.06);
-  --content-bg: #ffffff;
+  --content-bg: var(--background);
 }
 
 html[data-theme="dark"] {
   --background: #000000;
-  --frame-color: #000000;
-  --content-bg: #0a0a0a;
+  --frame-color: rgba(255, 255, 255, 0.06);
+  --content-bg: var(--background);
   --foreground: #ffffff;
   --ink: #ffffff;
   --ink-soft: rgba(255, 255, 255, 0.78);
@@ -261,7 +261,7 @@ textarea:focus-visible {
   position: fixed;
   inset: 0;
   background: var(--content-bg);
-  clip-path: inset(1rem round 0.5rem);
+  clip-path: inset(1rem round 1.5rem);
 }
 
 html,
