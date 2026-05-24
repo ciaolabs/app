@@ -1,6 +1,7 @@
 import { StartSurveyButton } from "@/components/auth/start-survey-button";
 import { LandingFooter } from "@/components/landing-footer";
 import { LandingHeader } from "@/components/landing-header";
+import { SurveyChatPreview } from "@/components/home/survey-chat-preview";
 import { SurveyPreview } from "@/components/home/survey-preview";
 import { SurveyResultsPreview } from "@/components/home/survey-results-preview";
 import { getCurrentUserId } from "@/lib/auth";
@@ -129,6 +130,83 @@ export default async function HomePage() {
 
           <div id="dashboards" className="relative z-10 scroll-mt-24">
             <SurveyResultsPreview />
+          </div>
+
+          <div className="relative h-20 sm:h-24">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-4 -right-4 top-1/2 h-[36rem] -translate-y-[15%] bg-center bg-no-repeat sm:-left-8 sm:-right-8 sm:h-[42rem] lg:-left-10 lg:-right-10"
+              style={{
+                backgroundImage: 'url("/surveys-sun.png")',
+                backgroundSize: "100% auto",
+                maskImage:
+                  "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
+              }}
+            />
+            <div
+              aria-hidden="true"
+              className="absolute left-1/2 top-0 h-full w-px border-l border-dashed border-(--line-strong)"
+            />
+
+            <div className="absolute top-4 left-[8%] sm:left-[12%] lg:left-[15%]">
+              <div
+                className="relative inline-flex items-center rounded-full bg-(--surface-panel-strong) px-4 py-2 font-display text-sm text-(--ink) sm:px-5 sm:py-2.5 sm:text-[15px]"
+                style={{
+                  boxShadow:
+                    "0 12px 24px -10px rgba(20, 15, 10, 0.22), 0 3px 6px -2px rgba(20, 15, 10, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(20, 15, 10, 0.04)",
+                  filter:
+                    "drop-shadow(2px 4px 4px rgba(20, 15, 10, 0.10))",
+                }}
+              >
+                Got your scores?
+                <svg
+                  aria-hidden="true"
+                  className="absolute -top-[10px] right-7"
+                  width="16"
+                  height="14"
+                  viewBox="0 0 16 14"
+                  fill="none"
+                >
+                  <path
+                    d="M 16 14 L 0 14 Q 4 12 7 6 Q 9 1 10.5 0.5 Q 12 0 12.5 2 Q 13 6 16 13 Z"
+                    fill="var(--surface-panel-strong)"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            <div className="absolute bottom-4 right-[8%] sm:right-[12%] lg:right-[15%]">
+              <div
+                className="relative inline-flex items-center rounded-full bg-(--surface-panel-strong) px-4 py-2 font-display text-sm text-(--ink) sm:px-5 sm:py-2.5 sm:text-[15px]"
+                style={{
+                  boxShadow:
+                    "0 12px 24px -10px rgba(20, 15, 10, 0.22), 0 3px 6px -2px rgba(20, 15, 10, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(20, 15, 10, 0.04)",
+                  filter:
+                    "drop-shadow(2px 4px 4px rgba(20, 15, 10, 0.10))",
+                }}
+              >
+                Chat with Ciao! about them.
+                <svg
+                  aria-hidden="true"
+                  className="absolute -bottom-[10px] left-7"
+                  width="16"
+                  height="14"
+                  viewBox="0 0 16 14"
+                  fill="none"
+                >
+                  <path
+                    d="M 16 0 L 0 0 Q 4 2 7 8 Q 9 13 10.5 13.5 Q 12 14 12.5 12 Q 13 8 16 1 Z"
+                    fill="var(--surface-panel-strong)"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div id="chat" className="relative z-10 scroll-mt-24">
+            <SurveyChatPreview />
           </div>
         </div>
       </section>

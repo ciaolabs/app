@@ -167,19 +167,15 @@ body {
 
 /* Translucent panels for readability over the animated background.
    Light: soft warm-grey wash + blur. Dark: dim wash + blur. */
-article,
-#nd-toc {
+article {
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   border-radius: 0.75rem;
-}
-
-article {
   background-color: rgba(255, 255, 255, 0.82);
 }
 
 #nd-toc {
-  background-color: rgba(255, 255, 255, 0.55);
+  background-color: transparent;
 }
 
 /* Left sidebar: solid background, no translucency. */
@@ -194,18 +190,14 @@ article {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.dark article,
-.dark #nd-toc {
+.dark article {
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
-}
-
-.dark article {
   background-color: rgba(0, 0, 0, 0.78);
 }
 
 .dark #nd-toc {
-  background-color: rgba(0, 0, 0, 0.55);
+  background-color: transparent;
 }
 
 .dark #nd-sidebar {
@@ -236,6 +228,16 @@ article {
   color: #ffffff;
 }
 
+/* Collapsed-sidebar floating pill (sidebar toggle + search icons) */
+[data-sidebar-panel] {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+.dark [data-sidebar-panel] {
+  background-color: #000000 !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
 /* Top nav glass effect */
 #nd-nav {
   background-color: rgba(255, 255, 255, 0.6) !important;
@@ -256,9 +258,9 @@ article {
   background-color: #1a1a18 !important;
 }
 
-/* TOC active — same subtle gray as sidebar */
+/* TOC active — text-only emphasis, no background */
 #nd-toc [data-active=true] {
-  background-color: rgba(26, 26, 24, 0.08) !important;
+  background-color: transparent !important;
   color: #1a1a18 !important;
 }
 

@@ -93,10 +93,14 @@
   --dot-hot-edge: 2.05px;
   --nav-glass-bg: rgba(255, 255, 255, 0.08);
   --nav-glass-border: rgba(218, 212, 200, 0.22);
+  --frame-color: rgba(0, 0, 0, 0.06);
+  --content-bg: #ffffff;
 }
 
 html[data-theme="dark"] {
   --background: #000000;
+  --frame-color: #000000;
+  --content-bg: #0a0a0a;
   --foreground: #ffffff;
   --ink: #ffffff;
   --ink-soft: rgba(255, 255, 255, 0.78);
@@ -200,7 +204,7 @@ html[data-theme="dark"] {
 
 html {
   scroll-behavior: smooth;
-  background: var(--background);
+  background: var(--frame-color);
 }
 
 html[data-theme="dark"] {
@@ -212,7 +216,7 @@ html[data-theme="light"] {
 }
 
 body {
-  background: var(--background);
+  background: var(--frame-color);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
   font-feature-settings: "ss03", "ss10", "ss11", "ss12";
@@ -254,11 +258,10 @@ textarea:focus-visible {
 }
 
 .app-shell {
-  position: relative;
-  min-height: 100vh;
-  background:
-    var(--app-background),
-    var(--background);
+  position: fixed;
+  inset: 0;
+  background: var(--content-bg);
+  clip-path: inset(1rem round 0.5rem);
 }
 
 html,
@@ -536,21 +539,40 @@ footer {
 }
 
 .clay-button-hover {
+  transform-origin: center;
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
     color 160ms ease,
-    opacity 160ms ease;
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 .clay-button-hover:hover:not(:disabled) {
-  opacity: 0.85;
+  background: #2CA0AB !important;
+  border-color: var(--clay-black) !important;
+  color: #ffffff !important;
+  box-shadow: -7px 7px 0 #000000;
+  transform: translateY(-0.18rem) rotateZ(-3deg);
 }
 
-.clay-button-hover[data-clay-hover="dark"]:hover:not(:disabled),
-.clay-button-hover[data-clay-hover="blue"]:hover:not(:disabled),
+.clay-button-hover[data-clay-hover="dark"]:hover:not(:disabled) {
+  background: #434346 !important;
+  color: #ffffff !important;
+}
+
+.clay-button-hover[data-clay-hover="blue"]:hover:not(:disabled) {
+  background: var(--clay-slushie-500) !important;
+  color: var(--clay-black) !important;
+}
+
 .clay-button-hover[data-clay-hover="lemon"]:hover:not(:disabled) {
-  opacity: 0.85;
+  background: var(--clay-lemon-500) !important;
+  color: var(--clay-black) !important;
+}
+
+html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
+  box-shadow: -7px 7px 0 rgba(0, 0, 0, 0.9);
 }
 
 .clay-swatch-section {
@@ -856,7 +878,7 @@ footer {
 }
 
 .incognito-bg {
-  background-color: #080d24;
+  background-color: #0e2cb0;
   --dot-color: rgba(255, 255, 255, 0.22);
   --dot-hot-coral: rgba(255, 255, 255, 0.96);
   --dot-hot-blue: rgba(255, 255, 255, 0.96);

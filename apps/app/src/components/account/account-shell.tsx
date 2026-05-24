@@ -727,7 +727,7 @@ export function AccountShell({
 
   return (
     <main
-      className="fixed inset-0 flex overflow-hidden bg-(--background) text-(--ink)"
+      className="fixed inset-0 flex overflow-hidden bg-(--background) p-3 text-(--ink)"
       style={{ height: "100dvh" }}
     >
       <InteractiveDotBackground />

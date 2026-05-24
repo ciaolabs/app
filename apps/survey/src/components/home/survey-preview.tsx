@@ -282,7 +282,7 @@ export function SurveyPreview() {
               aria-hidden="true"
               className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-[linear-gradient(0deg,var(--surface-panel-strong)_0%,rgba(255,255,255,0)_100%)] [html[data-theme='dark']_&]:bg-[linear-gradient(0deg,var(--surface-panel-strong)_0%,rgba(0,0,0,0)_100%)]"
             />
-            <ol className="flex max-h-104 flex-col gap-3 overflow-hidden pr-1">
+            <ol className="flex max-h-72 flex-col gap-3 overflow-hidden pr-1 lg:max-h-104">
               {visibleProgressItems.map((question, index) => {
                 const answer = answers[survey][question.id];
                 const isActive = index === activeIndex;

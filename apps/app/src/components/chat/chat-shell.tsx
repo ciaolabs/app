@@ -2,7 +2,6 @@
 
 import {
   ArrowUpIcon,
-  BotIcon,
   CheckIcon,
   ChevronsUpDownIcon,
   CornerDownLeftIcon,
@@ -34,6 +33,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
@@ -119,6 +119,36 @@ const DEFAULT_SURVEY_URL = "https://survey.ciaobang.com";
 function getSurveyContextUrl() {
   const surveyUrl = process.env.NEXT_PUBLIC_SURVEY_URL || DEFAULT_SURVEY_URL;
   return `${surveyUrl.replace(/\/$/, "")}/api/internal/survey-context`;
+}
+
+function ThinkingLottie({ className }: { className?: string }) {
+  return (
+    <DotLottieReact
+      src="/loading.lottie"
+      loop
+      autoplay
+      className={className}
+      aria-label="Ciao! is thinking"
+    />
+  );
+}
+
+function CiaoIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="14"
+      height="13"
+      viewBox="0 0 63 58"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M43.8868 36.4415C39.2366 36.1663 34.5935 35.623 29.9504 35.6089C25.1026 35.5947 19.6974 34.4022 16.649 40.0191C16.5926 40.125 16.4374 40.1814 16.388 40.2873C15.8023 41.5786 14.9767 42.8276 14.7226 44.1824C14.4404 45.6784 16.1198 47.1108 18.3708 47.6824C23.4444 48.9808 28.6167 49.3195 33.8314 49.1431C35.525 49.1431 37.2255 49.1783 38.9191 49.1219C39.4624 49.1078 40.1822 49.0443 40.4997 48.7056C42.8283 46.2358 45.3404 43.879 46.4765 40.5342C47.2598 38.2197 46.1872 36.5685 43.8939 36.4345L43.8868 36.4415ZM28.2568 44.9233L27.4171 46.0876C24.2841 45.7066 21.645 45.4526 19.0482 45.0009C18.8365 44.9657 18.639 44.7822 18.4625 44.5493C18.0251 43.9848 18.1521 43.1663 18.7448 42.7923C18.9706 42.6512 19.1894 42.5524 19.4081 42.5594C21.9766 42.6582 24.5522 42.884 27.1067 43.1874C27.4242 43.2227 27.7206 43.3991 28.024 43.5967C28.4544 43.8931 28.5673 44.4929 28.2568 44.9233ZM29.7316 40.7883C29.5976 40.9153 29.4706 40.9929 29.3365 40.9929C28.0946 41.007 26.8597 40.7459 25.145 40.5342C24.5734 40.506 22.7035 40.379 21.6662 40.2096C21.645 40.2096 21.6238 40.2026 21.6027 40.1955C20.89 40.0262 21.1934 38.2974 21.8355 37.8316C21.9837 37.7258 22.1319 37.6552 22.273 37.6623C24.5734 37.7117 27.6641 38.1068 29.9574 38.3891C30.0068 38.3891 30.0562 38.4103 30.1056 38.4385C30.6843 38.756 30.2609 40.3014 29.7387 40.7883H29.7316ZM31.3828 45.9536C31.6298 44.133 32.4766 43.3074 34.5935 43.6249C36.6258 43.9284 38.7356 43.7943 40.9584 43.8649C40.528 47.2378 32.9494 46.7015 31.3828 45.9536ZM32.7588 40.5554C33.3798 39.0453 39.8153 38.6431 43.1671 39.9838C41.8687 42.1149 37.2044 42.3124 32.7588 40.5554Z" fill="currentColor"/>
+      <path d="M62.2406 6.93164C62.0148 4.99819 62.0289 2.41554 59.4181 1.90042C55.3254 1.08893 51.1832 0.545589 47.0341 0.0445839C45.6863 -0.117714 44.2821 0.206882 42.899 0.319784C35.9343 0.856072 28.9626 1.30063 22.0191 2.01332C20.8618 2.13328 19.38 3.16352 18.8155 4.19376C16.7691 7.91249 16.4445 12.1252 16.4445 16.2602C16.4445 20.3459 17.0302 24.4315 17.2137 28.5243C17.2489 29.2864 16.7903 30.2743 16.2399 30.8317C13.9536 33.118 11.6038 35.3549 9.15524 37.4647C5.9234 40.252 2.95265 43.1804 1.65427 47.4143C1.44258 48.1129 1.16032 48.8256 0.736935 49.4042C-0.483824 51.0836 -0.222737 52.3256 1.78128 53.0312C3.24902 53.5534 4.80143 53.885 6.33973 54.1602C13.008 55.3457 19.6834 56.4818 25.766 57.5332C31.2983 57.0322 36.1178 56.5171 40.9514 56.1854C42.7579 56.0584 44.0633 55.3104 45.1147 53.9626C46.9635 51.5846 48.7347 49.1431 50.6187 46.7933C54.2316 42.2913 57.2094 37.4295 59.0159 31.9255C59.4745 30.5283 59.2417 28.8489 59.8979 27.5928C61.7043 24.0928 62.5793 20.4164 62.6076 16.5354C62.6287 13.3318 62.6287 10.1 62.2547 6.93164H62.2406ZM50.1601 42.2772C48.4101 44.3377 46.9988 46.6945 45.5028 48.9667C43.6117 51.8316 41.0361 53.1441 37.5644 53.4828C31.6017 54.0614 25.6602 54.4354 19.7257 53.4969C14.7792 52.7137 9.87499 51.6623 4.94961 50.7449C3.58773 50.4909 3.36898 49.7429 3.89115 48.5786C5.79638 44.3165 8.43548 40.7107 12.3659 38.001C14.5746 36.4839 16.3739 34.3811 18.4626 32.6664C19.0977 32.1442 20.0927 31.742 20.883 31.7914C31.8063 32.5535 42.7297 32.9275 53.653 31.7914C54.1187 31.742 54.6056 31.869 55.3042 31.9396C54.1116 35.8982 52.6721 39.3135 50.1601 42.2702V42.2772ZM58.7618 22.9779C58.3455 24.742 57.2165 26.3791 56.1862 27.9174C55.8193 28.4678 54.782 28.7995 54.034 28.8206C47.2458 29.0323 40.4504 29.2017 33.6622 29.3005C31.3194 29.3358 28.9838 29.3005 26.641 29.2299C20.9394 29.0676 20.3326 29.5333 19.8034 25.8852C19.5564 24.1916 19.4435 22.4769 19.3235 20.7622C19.2247 19.365 19.2318 17.9679 19.3376 16.5778L20.0645 7.24213C20.1774 6.48003 21.5392 5.53447 22.4707 5.32984C25.3497 4.68065 28.2852 4.24315 31.2206 3.91856C35.264 3.474 39.3285 2.88832 43.3788 2.94477C47.4998 2.99417 51.6348 3.61513 55.7205 4.22198C58.7195 4.67359 59.03 5.32984 59.4675 8.32176C60.1872 13.2612 59.905 18.1655 58.7618 22.9709V22.9779Z" fill="currentColor"/>
+      <path d="M52.2445 25.5676C53.0317 24.392 53.8945 23.141 54.2126 21.7929V21.7875C55.0862 18.1154 55.3019 14.3677 54.7519 10.5931C54.4176 8.30679 54.1803 7.80531 51.8886 7.4602L51.7784 7.44384C48.6921 6.98536 45.5695 6.5215 42.4574 6.48419C39.3622 6.44106 36.2563 6.88862 33.1665 7.22833C30.9233 7.47638 28.6801 7.8107 26.48 8.30679C25.7682 8.46317 24.7275 9.18574 24.6413 9.76811L24.0858 16.9021C24.005 17.9644 23.9996 19.0321 24.0751 20.0998C24.1667 21.4101 24.253 22.7204 24.4417 24.0146C24.8462 26.8024 25.3099 26.4465 29.6669 26.5705C31.4571 26.6244 33.242 26.6514 35.0322 26.6244C40.2196 26.549 45.4124 26.4195 50.5998 26.2578C51.1714 26.2416 51.9641 25.9882 52.2445 25.5676Z" fill="currentColor"/>
+    </svg>
+  );
 }
 
 function toUIMessage(message: ChatMessage): UIMessage {
@@ -391,18 +421,18 @@ function SettingsMenu({
             aria-label="Settings"
             aria-expanded={open}
             onClick={() => setOpen((value) => !value)}
-            className={clayIconButton}
+            className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
           >
             <Settings2Icon className="size-5" />
           </button>
         </TooltipTrigger>
-        <TooltipContent>Settings</TooltipContent>
+        <TooltipContent side="right">Settings</TooltipContent>
       </Tooltip>
 
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-12 z-30 w-72 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-4 shadow-(--shadow-strong)"
+          className="absolute left-12 bottom-0 z-30 w-72 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-4 shadow-(--shadow-strong)"
         >
           <p className="clay-label">Appearance</p>
           <div className="mt-3">
@@ -466,17 +496,26 @@ function CollapsedSidebarToolbar({
   onSearch: () => void;
   onNewChat: () => void;
 }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <div className="absolute top-4 left-4 z-30 flex items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur">
+    <div className="absolute top-7 left-7 z-30 flex flex-col items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur">
       <Tooltip>
         <TooltipTrigger asChild>
           <button
             type="button"
             onClick={onExpand}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            onFocus={() => setHovered(true)}
+            onBlur={() => setHovered(false)}
             aria-label="Open sidebar"
             className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
           >
-            <PanelLeftIcon className="size-5" />
+            {hovered ? (
+              <PanelLeftIcon className="size-5" />
+            ) : (
+              <CiaoSparkleImg size={28} />
+            )}
           </button>
         </TooltipTrigger>
         <TooltipContent>Open sidebar</TooltipContent>
@@ -797,7 +836,7 @@ function CommandPalette({
   );
 }
 
-function CiaoLogo() {
+function useDocumentTheme() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
@@ -809,16 +848,35 @@ function CiaoLogo() {
     return () => observer.disconnect();
   }, []);
 
+  return theme;
+}
+
+function CiaoSparkleImg({
+  size,
+  className,
+}: {
+  size: number;
+  className?: string;
+}) {
+  const theme = useDocumentTheme();
+  return (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img
+      src={theme === "dark" ? "/ciao-sparkle-dark.svg" : "/ciao-sparkle.svg"}
+      alt=""
+      aria-hidden="true"
+      className={cn("ciao-wave", className)}
+      style={{ height: size, width: size, objectFit: "contain" }}
+    />
+  );
+}
+
+function CiaoLogo() {
+  const theme = useDocumentTheme();
+
   return (
     <div className="flex shrink-0 items-center gap-2">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={theme === "dark" ? "/ciao-sparkle-dark.svg" : "/ciao-sparkle.svg"}
-        alt=""
-        aria-hidden="true"
-        className="ciao-wave"
-        style={{ height: 36, width: 36, objectFit: "contain" }}
-      />
+      <CiaoSparkleImg size={36} />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/ciao-text.png"
@@ -1413,19 +1471,18 @@ function ChatMessageBubble({
   const hasContent = renderedParts.some(Boolean);
 
   return (
-    <div className="group flex w-full gap-4">
-      <Avatar className="mt-1 size-9 shrink-0 border border-(--ink) bg-(--accent-blue) shadow-(--shadow-soft)">
-        <AvatarFallback className="bg-transparent text-(--selected-contrast)">
-          <BotIcon className="size-4" />
-        </AvatarFallback>
-      </Avatar>
+    <div className="group flex w-full flex-col gap-1.5">
+      <div className="flex items-center gap-1.5 pl-1">
+        <CiaoIcon className="size-3.5 text-(--ink-soft)" />
+        <span className="text-[11px] font-medium text-(--ink-soft)">Ask Ciao!</span>
+      </div>
       <div className="flex max-w-[min(760px,85%)] flex-col gap-1">
         <div className="rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) px-5 py-4 text-base leading-7 text-(--ink) shadow-(--shadow-soft)">
           {hasContent ? (
             renderedParts
           ) : (
             <div className="flex items-center gap-2 text-(--ink-soft)">
-              <Loader2Icon className="size-4 animate-spin" />
+              <ThinkingLottie className="size-5" />
               <span className="text-sm">Thinking...</span>
             </div>
           )}
@@ -1535,6 +1592,10 @@ export function ChatShell({
 
   useEffect(() => {
     isTemporaryRef.current = isTemporary;
+    document.documentElement.dataset.incognito = isTemporary ? "true" : "false";
+    return () => {
+      delete document.documentElement.dataset.incognito;
+    };
   }, [isTemporary]);
   const hasSurveyContext = surveyContextHasResults(surveyContext);
 
@@ -1769,7 +1830,7 @@ export function ChatShell({
     <TooltipProvider>
       <main
         className={cn(
-          "fixed top-0 right-0 bottom-0 left-0 flex h-screen w-screen overflow-hidden text-(--ink) transition-colors",
+          "fixed top-0 right-0 bottom-0 left-0 flex h-screen w-screen overflow-hidden p-3 text-(--ink) transition-colors",
           isTemporary && "incognito-bg",
         )}
         style={{ height: "100dvh", width: "100dvw" }}
@@ -1853,7 +1914,7 @@ export function ChatShell({
               type="button"
               size="icon"
               variant="ghost"
-              className="absolute top-4 left-4 z-30 text-(--ink) hover:bg-(--surface-inset) lg:hidden"
+              className="absolute top-7 left-7 z-30 text-(--ink) hover:bg-(--surface-inset) lg:hidden"
               aria-label="Open chat history"
             >
               <MenuIcon className="size-5" />
@@ -1882,7 +1943,7 @@ export function ChatShell({
 
         <section className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <header className="z-20 flex shrink-0 justify-end px-4 pt-4">
-            <div className="flex items-center gap-2 rounded-full border border-(--line-strong) bg-(--surface-panel) px-2 py-2 shadow-(--shadow-soft) backdrop-blur">
+            <div className="flex flex-col items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -1891,10 +1952,9 @@ export function ChatShell({
                     aria-pressed={isTemporary}
                     onClick={toggleTemporary}
                     className={cn(
-                      clayIconButton,
-                      "group incognito-toggle-btn",
+                      "group incognito-toggle-btn inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)",
                       isTemporary &&
-                        "border-(--ink) bg-(--accent-blue) text-(--selected-contrast)",
+                        "bg-(--accent-blue) text-(--selected-contrast) hover:bg-(--accent-blue)",
                     )}
                   >
                     <IncognitoGhostIcon className="size-5" />
@@ -1909,23 +1969,26 @@ export function ChatShell({
                   </span>
                 </TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <a
-                    href="https://docs.ciaobang.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Open Ciao Docs"
-                    className={clayIconButton}
-                  >
-                    <DocsIcon className="size-5" />
-                  </a>
-                </TooltipTrigger>
-                <TooltipContent>Open Ciao Docs</TooltipContent>
-              </Tooltip>
-              <SettingsMenu surveyContext={surveyContext} />
             </div>
           </header>
+
+          <div className="absolute bottom-4 left-4 z-30 flex flex-col items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <a
+                  href="https://docs.ciaobang.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Open Ciao Docs"
+                  className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
+                >
+                  <DocsIcon className="size-5" />
+                </a>
+              </TooltipTrigger>
+              <TooltipContent side="right">Open Ciao Docs</TooltipContent>
+            </Tooltip>
+            <SettingsMenu surveyContext={surveyContext} />
+          </div>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-6 sm:px-8">
             {messages.length === 0 ? (

@@ -67,6 +67,21 @@ const DARK_PRESET: Preset = {
   uPattern: 0.18,
 };
 
+// Incognito: rich royal-blue clouds on deep blue base — clearly distinct from dark theme.
+const INCOGNITO_PRESET: Preset = {
+  uSpeed: 0.55,
+  uScale: 2.0,
+  uRed: 0.18,
+  uGreen: 0.3,
+  uBlue: 0.9,
+  uIntensity: 0.85,
+  uBackgroundRed: 0.04,
+  uBackgroundGreen: 0.08,
+  uBackgroundBlue: 0.42,
+  uInterpolation: 0.55,
+  uPattern: 0.18,
+};
+
 function loadScript(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (window.serendipity_ogl) return Promise.resolve();
@@ -121,7 +136,9 @@ function applyPreset(lib: SerendipityOgl, preset: Preset) {
 
 function presetForTheme(): Preset {
   if (typeof document === "undefined") return LIGHT_PRESET;
-  return document.documentElement.dataset.theme === "dark" ? DARK_PRESET : LIGHT_PRESET;
+  const root = document.documentElement;
+  if (root.dataset.incognito === "true") return INCOGNITO_PRESET;
+  return root.dataset.theme === "dark" ? DARK_PRESET : LIGHT_PRESET;
 }
 
 export function AnimatedGradientBackdrop({ className }: { className?: string }) {
@@ -181,7 +198,7 @@ export function AnimatedGradientBackdrop({ className }: { className?: string }) 
     });
     themeObserver.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["data-theme"],
+      attributeFilter: ["data-theme", "data-incognito"],
     });
 
     window.addEventListener("ciao:pointer-click", handleClickBurst);

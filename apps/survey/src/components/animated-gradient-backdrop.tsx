@@ -184,9 +184,15 @@ export function AnimatedGradientBackdrop({ className }: { className?: string }) 
       attributeFilter: ["data-theme"],
     });
 
+    window.addEventListener("ciao:pointer-click", handleClickBurst);
+
     return () => {
       cancelled = true;
       themeObserver.disconnect();
+      window.removeEventListener("ciao:pointer-click", handleClickBurst);
+      if (surgeRaf !== null) {
+        cancelAnimationFrame(surgeRaf);
+      }
       const lib = window.serendipity_ogl;
       if (lib) {
         try {
