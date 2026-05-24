@@ -37,7 +37,7 @@ type AccountShellProps = {
 type Section = "general" | "models";
 
 const clayPrimaryButton =
-  "clay-button-hover inline-flex items-center justify-center gap-2 rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)";
+  "clay-button-hover inline-flex items-center justify-center gap-2 rounded-full border border-(--ink) bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)";
 
 const claySecondaryButton =
   "clay-button-hover inline-flex items-center justify-center gap-2 rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold text-(--ink) shadow-(--shadow-soft)";
@@ -46,7 +46,7 @@ const clayDangerButton =
   "clay-button-hover inline-flex items-center justify-center gap-2 rounded-full border border-(--accent-rose) bg-(--surface-panel-strong) px-5 text-sm font-semibold text-(--accent-rose) shadow-(--shadow-soft)";
 
 const accountInputClass =
-  "h-11 rounded-full border-(--line-strong) bg-(--surface-panel-strong) px-4 text-(--ink) placeholder:text-(--muted) shadow-(--shadow-soft) focus-visible:border-black";
+  "h-11 rounded-full border-(--line-strong) bg-(--surface-panel-strong) px-4 text-(--ink) placeholder:text-(--muted) shadow-(--shadow-soft) focus-visible:border-(--ink)";
 
 async function getResponseErrorMessage(response: Response, fallback: string) {
   try {
@@ -76,7 +76,7 @@ function SectionNav({
           className={cn(
             "flex min-h-11 w-full items-center rounded-2xl border px-4 text-left text-sm font-semibold shadow-(--shadow-soft) transition",
             active === s
-              ? "border-black bg-(--accent-blue) text-(--selected-contrast)"
+              ? "border-(--ink) bg-(--accent-blue) text-(--selected-contrast)"
               : "border-(--line-strong) bg-(--surface-panel-strong) text-(--ink-soft) hover:bg-(--surface-inset) hover:text-(--ink)",
           )}
         >
@@ -648,7 +648,7 @@ function AccountSidebar({
         <div className="px-4">
           <Link
             href="/"
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft) transition hover:opacity-90"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-(--ink) bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft) transition hover:opacity-90"
           >
             <PlusIcon className="size-4" />
             New Chat
@@ -695,7 +695,35 @@ export function AccountShell({
 }: AccountShellProps) {
   const router = useRouter();
   const [section, setSection] = useState<Section>("general");
+  useEffect(() => {
+    const applyHash = () => {
+      const hash = window.location.hash.replace(/^#/, "");
+      if (hash === "models" || hash === "general") setSection(hash);
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, []);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarPeeked, setSidebarPeeked] = useState(false);
+  const peekTimerRef = useRef<number>(0);
+
+  const showSidebarPeek = () => {
+    window.clearTimeout(peekTimerRef.current);
+    setSidebarPeeked(true);
+  };
+  const hideSidebarPeek = (delay = 200) => {
+    window.clearTimeout(peekTimerRef.current);
+    peekTimerRef.current = window.setTimeout(() => setSidebarPeeked(false), delay);
+  };
+
+  useEffect(() => {
+    if (!sidebarCollapsed) setSidebarPeeked(false);
+  }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    return () => window.clearTimeout(peekTimerRef.current);
+  }, []);
 
   return (
     <main
@@ -705,6 +733,35 @@ export function AccountShell({
       <InteractiveDotBackground />
       {!sidebarCollapsed && (
         <AccountSidebar threads={threads} onCollapse={() => setSidebarCollapsed(true)} />
+      )}
+
+      {sidebarCollapsed && (
+        <>
+          <div
+            aria-hidden="true"
+            className="fixed top-0 left-0 z-40 h-screen w-2"
+            onMouseEnter={showSidebarPeek}
+          />
+          <div
+            className={cn(
+              "fixed top-2 bottom-2 left-2 z-40 w-[280px] overflow-hidden rounded-2xl border border-(--line-strong) bg-(--surface-panel) shadow-(--shadow-strong) transition-transform duration-200 ease-out",
+              sidebarPeeked
+                ? "translate-x-0"
+                : "pointer-events-none -translate-x-[calc(100%+1rem)]",
+            )}
+            onMouseEnter={showSidebarPeek}
+            onMouseLeave={() => hideSidebarPeek(300)}
+          >
+            <AccountSidebar
+              threads={threads}
+              onCollapse={() => {
+                window.clearTimeout(peekTimerRef.current);
+                setSidebarPeeked(false);
+                setSidebarCollapsed(false);
+              }}
+            />
+          </div>
+        </>
       )}
 
       {sidebarCollapsed && (

@@ -3,70 +3,87 @@
 :root {
   --clay-black: #000000;
   --clay-white: #ffffff;
-  --clay-cream: #faf9f7;
-  --clay-oat: #dad4c8;
-  --clay-oat-light: #eee9df;
-  --clay-warm-silver: #9f9b93;
-  --clay-warm-charcoal: #55534e;
-  --clay-matcha-300: #84e7a5;
-  --clay-matcha-600: #078a52;
-  --clay-matcha-800: #02492a;
-  --clay-slushie-500: #3bd3fd;
-  --clay-slushie-800: #0089ad;
-  --clay-lemon-400: #f8cc65;
-  --clay-lemon-500: #fbbd41;
-  --clay-lemon-700: #d08a11;
-  --clay-ube-300: #c1b0ff;
-  --clay-ube-800: #43089f;
-  --clay-pomegranate-400: #fc7981;
-  --clay-blueberry-800: #01418d;
-  --clay-focus: #146ef5;
+  --clay-cream: #ffffff;
+  --clay-oat: rgba(0, 0, 0, 0.12);
+  --clay-oat-light: rgba(0, 0, 0, 0.04);
+  --clay-warm-silver: rgba(0, 0, 0, 0.5);
+  --clay-warm-charcoal: rgba(0, 0, 0, 0.75);
+  --clay-matcha-300: #000000;
+  --clay-matcha-600: #000000;
+  --clay-matcha-800: #000000;
+  --clay-slushie-500: #000000;
+  --clay-slushie-800: #000000;
+  --clay-lemon-400: #000000;
+  --clay-lemon-500: #000000;
+  --clay-lemon-700: #000000;
+  --clay-ube-300: #000000;
+  --clay-ube-800: #000000;
+  --clay-pomegranate-400: #000000;
+  --clay-blueberry-800: #000000;
+  --clay-focus: rgba(0, 0, 0, 0.4);
   --clay-radius-card: 1.5rem;
   --clay-radius-section: 2.5rem;
-  --clay-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset, 0 -0.5px 1px rgba(0, 0, 0, 0.05);
-  --clay-hard-shadow: -7px 7px 0 #000000;
-  --background: #faf9f7;
+  --clay-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --clay-hard-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --background: #ffffff;
   --foreground: #000000;
   --ink: #000000;
-  --ink-soft: #55534e;
-  --muted: #9f9b93;
-  --surface: #faf9f7;
-  --surface-secondary: #eee9df;
-  --surface-panel: rgba(255, 255, 255, 0.92);
+  --ink-soft: rgba(0, 0, 0, 0.78);
+  --muted: rgba(0, 0, 0, 0.6);
+  --surface: #ffffff;
+  --surface-secondary: rgba(0, 0, 0, 0.04);
+  --surface-panel: rgba(255, 255, 255, 0.6);
   --surface-panel-strong: #ffffff;
-  --surface-inset: rgba(238, 233, 223, 0.86);
-  --line: rgba(218, 212, 200, 0.9);
-  --line-strong: #dad4c8;
-  --accent: #3bd3fd;
-  --accent-soft: rgba(59, 211, 253, 0.16);
-  --accent-mint: #84e7a5;
-  --accent-lilac: #c1b0ff;
-  --accent-rose: #fc7981;
-  --accent-blue: #3bd3fd;
-  --accent-coral: #fc7981;
-  --accent-lime: #f8cc65;
-  --accent-sand: #eee9df;
-  --selected-contrast: #000000;
+  --surface-inset: rgba(0, 0, 0, 0.04);
+  --line: rgba(0, 0, 0, 0.08);
+  --line-strong: rgba(0, 0, 0, 0.1);
+  --accent: #000000;
+  --accent-soft: rgba(0, 0, 0, 0.06);
+  --accent-mint: #000000;
+  --accent-lilac: #000000;
+  --accent-rose: #000000;
+  --accent-blue: #000000;
+  --accent-coral: #000000;
+  --accent-lime: #000000;
+  --accent-sand: rgba(0, 0, 0, 0.04);
+  --selected-contrast: #ffffff;
   --keycap-bg: rgba(255, 255, 255, 0.98);
-  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.08), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
   --home-crumb-button-bg: #ffffff;
   --shadow-soft: var(--clay-shadow);
-  --shadow-strong: var(--clay-shadow), -7px 7px 0 rgba(0, 0, 0, 0.12);
-  --plot-fill-start: rgba(252, 121, 129, 0.42);
-  --plot-fill-end: rgba(59, 211, 253, 0.72);
-  --plot-grid: rgba(38, 38, 36, 0.1);
-  --plot-label: rgba(38, 38, 36, 0.58);
-  --plot-stroke: rgba(38, 38, 36, 0.22);
-  --hero-gradient:
-    linear-gradient(135deg, rgba(251, 189, 65, 0.72), rgba(132, 231, 165, 0.48) 48%, rgba(255, 255, 255, 0.78));
-  --hero-spotlight: radial-gradient(circle at center, rgba(59, 211, 253, 0.28), transparent 62%);
-  --app-background:
-    linear-gradient(180deg, rgba(250, 249, 247, 0.98), rgba(250, 249, 247, 0.94));
-  --glow-left: rgba(132, 231, 165, 0.18);
-  --glow-right: rgba(193, 176, 255, 0.16);
-  --skeleton-base: rgba(218, 212, 200, 0.62);
+  --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+
+  /* Fumadocs-compatible aliases (mirror docs.ciaobang.com palette) */
+  --color-fd-background: var(--background);
+  --color-fd-foreground: var(--foreground);
+  --color-fd-muted: var(--surface-secondary);
+  --color-fd-muted-foreground: var(--muted);
+  --color-fd-popover: var(--surface-panel-strong);
+  --color-fd-popover-foreground: var(--ink);
+  --color-fd-card: var(--surface-panel-strong);
+  --color-fd-card-foreground: var(--ink);
+  --color-fd-border: var(--line-strong);
+  --color-fd-primary: var(--ink);
+  --color-fd-primary-foreground: var(--selected-contrast);
+  --color-fd-secondary: var(--surface-inset);
+  --color-fd-secondary-foreground: var(--ink);
+  --color-fd-accent: var(--surface-inset);
+  --color-fd-accent-foreground: var(--ink);
+  --color-fd-ring: rgba(0, 0, 0, 0.4);
+  --color-fd-overlay: rgba(0, 0, 0, 0.15);
+  --plot-fill-start: rgba(0, 0, 0, 0.42);
+  --plot-fill-end: rgba(0, 0, 0, 0.72);
+  --plot-grid: rgba(0, 0, 0, 0.1);
+  --plot-label: rgba(0, 0, 0, 0.58);
+  --plot-stroke: rgba(0, 0, 0, 0.22);
+  --hero-gradient: linear-gradient(135deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.02));
+  --hero-spotlight: radial-gradient(circle at center, rgba(0, 0, 0, 0.04), transparent 62%);
+  --app-background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.94));
+  --glow-left: rgba(0, 0, 0, 0.04);
+  --glow-right: rgba(0, 0, 0, 0.04);
+  --skeleton-base: rgba(0, 0, 0, 0.04);
   --skeleton-highlight: rgba(255, 255, 255, 0.92);
-  --dot-color: rgba(38, 38, 36, 0.14);
+  --dot-color: rgba(0, 0, 0, 0.14);
   --dot-hot-coral: rgba(0, 0, 0, 0.96);
   --dot-hot-blue: rgba(0, 0, 0, 0.98);
   --dot-hot-mint: rgba(0, 0, 0, 0.96);
@@ -79,40 +96,43 @@
 }
 
 html[data-theme="dark"] {
-  --background: #26231f;
-  --foreground: #faf9f5;
-  --ink: #faf9f5;
-  --ink-soft: rgba(250, 249, 245, 0.78);
-  --muted: rgba(250, 249, 245, 0.58);
-  --surface: #26231f;
-  --surface-secondary: #342f28;
-  --surface-panel: #1a1a1a;
-  --surface-panel-strong: #202322;
-  --surface-inset: rgba(227, 218, 204, 0.12);
-  --line: rgba(218, 212, 200, 0.22);
-  --line-strong: rgba(238, 233, 223, 0.34);
-  --selected-contrast: #262624;
-  --keycap-bg: rgba(52, 47, 40, 0.72);
-  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.34), 0 -1px 1px rgba(255, 255, 255, 0.08) inset;
-  --home-crumb-button-bg: #2a251f;
-  --shadow-soft: 0 1px 1px rgba(0, 0, 0, 0.4), 0 -1px 1px rgba(255, 255, 255, 0.06) inset, 0 -0.5px 1px rgba(255, 255, 255, 0.04);
-  --shadow-strong: var(--shadow-soft), -7px 7px 0 rgba(0, 0, 0, 0.48);
-  --plot-fill-start: rgba(252, 121, 129, 0.5);
-  --plot-fill-end: rgba(59, 211, 253, 0.78);
-  --plot-grid: rgba(250, 249, 245, 0.12);
-  --plot-label: rgba(250, 249, 245, 0.56);
-  --plot-stroke: rgba(250, 249, 245, 0.22);
-  --hero-gradient:
-    linear-gradient(135deg, rgba(67, 8, 159, 0.82), rgba(2, 73, 42, 0.74) 58%, rgba(52, 47, 40, 0.94));
-  --hero-spotlight: radial-gradient(circle at center, rgba(230, 121, 109, 0.12), transparent 62%);
-  --app-background:
-    linear-gradient(180deg, rgba(38, 35, 31, 0.98), rgba(44, 39, 33, 0.96));
-  --glow-left: rgba(190, 229, 216, 0.14);
-  --glow-right: rgba(184, 197, 255, 0.12);
-  --skeleton-base: rgba(250, 249, 245, 0.08);
-  --skeleton-highlight: rgba(250, 249, 245, 0.18);
-  --selected-contrast-strong: #faf9f5;
-  --dot-color: rgba(250, 249, 245, 0.18);
+  --background: #000000;
+  --foreground: #ffffff;
+  --ink: #ffffff;
+  --ink-soft: rgba(255, 255, 255, 0.78);
+  --muted: rgba(255, 255, 255, 0.6);
+  --surface: #000000;
+  --surface-secondary: rgba(255, 255, 255, 0.06);
+  --surface-panel: rgba(0, 0, 0, 0.6);
+  --surface-panel-strong: #0a0a0a;
+  --surface-inset: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.1);
+  --accent: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.1);
+  --accent-blue: #ffffff;
+  --selected-contrast: #000000;
+  --keycap-bg: rgba(18, 18, 18, 0.78);
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.4), 0 -1px 1px rgba(255, 255, 255, 0.06) inset;
+  --home-crumb-button-bg: #0a0a0a;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  --color-fd-ring: rgba(255, 255, 255, 0.4);
+  --color-fd-overlay: rgba(0, 0, 0, 0.5);
+  --plot-fill-start: rgba(255, 255, 255, 0.5);
+  --plot-fill-end: rgba(255, 255, 255, 0.78);
+  --plot-grid: rgba(255, 255, 255, 0.12);
+  --plot-label: rgba(255, 255, 255, 0.56);
+  --plot-stroke: rgba(255, 255, 255, 0.22);
+  --hero-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  --hero-spotlight: radial-gradient(circle at center, rgba(255, 255, 255, 0.04), transparent 62%);
+  --app-background: linear-gradient(180deg, rgba(0, 0, 0, 0.98), rgba(0, 0, 0, 0.94));
+  --glow-left: rgba(255, 255, 255, 0.04);
+  --glow-right: rgba(255, 255, 255, 0.04);
+  --skeleton-base: rgba(255, 255, 255, 0.06);
+  --skeleton-highlight: rgba(255, 255, 255, 0.12);
+  --selected-contrast-strong: #ffffff;
+  --dot-color: rgba(255, 255, 255, 0.18);
   --dot-hot-coral: rgba(255, 255, 255, 0.96);
   --dot-hot-blue: rgba(255, 255, 255, 0.96);
   --dot-hot-mint: rgba(255, 255, 255, 0.96);
@@ -130,35 +150,35 @@ html[data-theme="dark"] {
 
 /* Force light-theme token values on any subtree — used by the landing preview */
 [data-theme="light"] {
-  --background: #faf9f7;
+  --background: #ffffff;
   --foreground: #000000;
   --ink: #000000;
-  --ink-soft: #55534e;
-  --muted: #9f9b93;
-  --surface: #faf9f7;
-  --surface-secondary: #eee9df;
-  --surface-panel: rgba(255, 255, 255, 0.92);
+  --ink-soft: rgba(0, 0, 0, 0.78);
+  --muted: rgba(0, 0, 0, 0.6);
+  --surface: #ffffff;
+  --surface-secondary: rgba(0, 0, 0, 0.04);
+  --surface-panel: rgba(255, 255, 255, 0.6);
   --surface-panel-strong: #ffffff;
-  --surface-inset: rgba(238, 233, 223, 0.86);
-  --line: rgba(218, 212, 200, 0.9);
-  --line-strong: #dad4c8;
-  --accent: #3bd3fd;
-  --accent-soft: rgba(59, 211, 253, 0.16);
-  --accent-mint: #84e7a5;
-  --accent-lilac: #c1b0ff;
-  --accent-rose: #fc7981;
-  --accent-blue: #3bd3fd;
-  --accent-coral: #fc7981;
-  --accent-lime: #f8cc65;
-  --accent-sand: #eee9df;
-  --selected-contrast: #000000;
-  --selected-contrast-strong: #000000;
+  --surface-inset: rgba(0, 0, 0, 0.04);
+  --line: rgba(0, 0, 0, 0.08);
+  --line-strong: rgba(0, 0, 0, 0.1);
+  --accent: #000000;
+  --accent-soft: rgba(0, 0, 0, 0.06);
+  --accent-mint: #000000;
+  --accent-lilac: #000000;
+  --accent-rose: #000000;
+  --accent-blue: #000000;
+  --accent-coral: #000000;
+  --accent-lime: #000000;
+  --accent-sand: rgba(0, 0, 0, 0.04);
+  --selected-contrast: #ffffff;
+  --selected-contrast-strong: #ffffff;
   --keycap-bg: rgba(255, 255, 255, 0.98);
-  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.08), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
   --shadow-soft: var(--clay-shadow);
-  --shadow-strong: var(--clay-shadow), -7px 7px 0 rgba(0, 0, 0, 0.12);
-  --nav-glass-bg: rgba(255, 255, 255, 0.08);
-  --nav-glass-border: rgba(218, 212, 200, 0.22);
+  --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  --nav-glass-bg: rgba(255, 255, 255, 0.6);
+  --nav-glass-border: rgba(0, 0, 0, 0.08);
   --plot-fill-start: rgba(252, 121, 129, 0.42);
   --plot-fill-end: rgba(59, 211, 253, 0.72);
   --plot-grid: rgba(38, 38, 36, 0.1);
@@ -516,45 +536,26 @@ footer {
 }
 
 .clay-button-hover {
-  transform-origin: center;
   transition:
     background-color 160ms ease,
     border-color 160ms ease,
     color 160ms ease,
-    box-shadow 160ms ease,
-    transform 160ms ease;
+    opacity 160ms ease;
 }
 
 .clay-button-hover:hover:not(:disabled) {
-  background: var(--clay-pomegranate-400);
-  border-color: var(--clay-black);
-  color: var(--clay-black);
-  box-shadow: var(--clay-hard-shadow);
-  transform: translateY(-0.18rem) rotateZ(-3deg);
+  opacity: 0.85;
 }
 
-.clay-button-hover[data-clay-hover="dark"]:hover:not(:disabled) {
-  background: #434346;
-  color: #ffffff;
-}
-
-.clay-button-hover[data-clay-hover="blue"]:hover:not(:disabled) {
-  background: var(--clay-slushie-500);
-  color: var(--clay-black);
-}
-
+.clay-button-hover[data-clay-hover="dark"]:hover:not(:disabled),
+.clay-button-hover[data-clay-hover="blue"]:hover:not(:disabled),
 .clay-button-hover[data-clay-hover="lemon"]:hover:not(:disabled) {
-  background: var(--clay-lemon-500);
-  color: var(--clay-black);
+  opacity: 0.85;
 }
 
 .clay-swatch-section {
-  background: var(--clay-matcha-800);
-  color: #ffffff;
-}
-
-html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
-  box-shadow: -7px 7px 0 rgba(0, 0, 0, 0.9);
+  background: var(--ink);
+  color: var(--selected-contrast);
 }
 
 @keyframes fadeIn {

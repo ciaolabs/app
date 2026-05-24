@@ -3,21 +3,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ChatShell } from "@/components/chat/chat-shell";
 
+const defaultProviders = { anthropic: true, google: true };
+
 describe("ChatShell", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response(null, { status: 401 })));
   });
 
-  it("shows survey completion links when no survey context exists", () => {
+  it("offers survey completion links alongside generic prompts when no survey context exists", () => {
     render(
       <ChatShell
         initialThreads={[]}
         surveyContext={{ personality: null, valuesBeliefs: null }}
-        hasApiKeys={true}
+        apiKeyProviders={defaultProviders}
+        initialChatModel="gemini-flash-lite-latest"
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Complete a survey to start" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "How can I help you?" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Take Personality survey" })).toHaveAttribute(
       "href",
       "https://survey.ciaobang.com/surveys/personality",
@@ -28,7 +31,7 @@ describe("ChatShell", () => {
     );
   });
 
-  it("recovers from an empty server context by refreshing saved survey context in the browser", async () => {
+  it("hides survey completion CTAs once saved survey context loads from the browser refresh", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () =>
@@ -54,11 +57,12 @@ describe("ChatShell", () => {
       <ChatShell
         initialThreads={[]}
         surveyContext={{ personality: null, valuesBeliefs: null }}
-        hasApiKeys={true}
+        apiKeyProviders={defaultProviders}
+        initialChatModel="gemini-flash-lite-latest"
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Complete a survey to start" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Take Personality survey" })).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "How can I help you?" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Take Personality survey" })).not.toBeInTheDocument();
   });

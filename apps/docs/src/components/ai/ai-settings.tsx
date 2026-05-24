@@ -32,24 +32,24 @@ function ApiKeyField({
 
   if (hasKey && !editing) {
     return (
-      <div className="flex items-center justify-between rounded-lg border border-fd-border bg-fd-card px-3 py-2">
+      <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2">
         <div className="flex items-center gap-2 text-sm">
-          <Check className="size-4 text-green-500" />
-          <span className="text-fd-foreground">{PROVIDER_LABELS[provider]}</span>
-          <span className="text-fd-muted-foreground">configured</span>
+          <Check className="size-4 text-green-400" />
+          <span>{PROVIDER_LABELS[provider]}</span>
+          <span className="opacity-60">configured</span>
         </div>
         <div className="flex gap-1">
           <button
             type="button"
             onClick={() => { setEditing(true); setValue(""); }}
-            className="rounded p-1 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-foreground"
+            className="rounded p-1 hover:bg-white/10"
           >
             <KeyRound className="size-3.5" />
           </button>
           <button
             type="button"
             onClick={onRemove}
-            className="rounded p-1 text-fd-muted-foreground hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950"
+            className="rounded p-1 hover:bg-red-500/20 hover:text-red-400"
           >
             <Trash2 className="size-3.5" />
           </button>
@@ -60,7 +60,7 @@ function ApiKeyField({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-fd-foreground">
+      <label className="text-sm font-medium">
         {PROVIDER_LABELS[provider]} API Key
       </label>
       <div className="flex gap-2">
@@ -70,12 +70,12 @@ function ApiKeyField({
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder={`Enter ${PROVIDER_LABELS[provider]} key...`}
-            className="w-full rounded-lg border border-fd-border bg-fd-background px-3 py-2 pr-10 text-sm text-fd-foreground placeholder:text-fd-muted-foreground focus:border-fd-primary focus:outline-none focus:ring-1 focus:ring-fd-primary"
+            className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 pr-10 text-sm placeholder:opacity-40 focus:border-white/30 focus:outline-none"
           />
           <button
             type="button"
             onClick={() => setVisible(!visible)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-fd-muted-foreground hover:text-fd-foreground"
+            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100"
           >
             {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
@@ -89,7 +89,7 @@ function ApiKeyField({
             setEditing(false);
             setVisible(false);
           }}
-          className="rounded-lg bg-fd-primary px-3 py-2 text-sm font-medium text-fd-primary-foreground disabled:opacity-50 hover:bg-fd-primary/90"
+          className="rounded-lg bg-white/15 px-3 py-2 text-sm font-medium disabled:opacity-30 hover:bg-white/25"
         >
           Save
         </button>
@@ -97,7 +97,7 @@ function ApiKeyField({
           <button
             type="button"
             onClick={() => { setEditing(false); setValue(""); }}
-            className="rounded-lg border border-fd-border px-3 py-2 text-sm text-fd-muted-foreground hover:bg-fd-accent"
+            className="rounded-lg border border-white/10 px-3 py-2 text-sm hover:bg-white/[0.06]"
           >
             Cancel
           </button>
@@ -113,12 +113,12 @@ export function AiSettings({ onClose }: { onClose?: () => void }) {
   return (
     <div className="flex flex-col gap-6 p-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-fd-foreground">AI Settings</h3>
+        <h3 className="text-base font-semibold">AI Settings</h3>
         {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="text-fd-muted-foreground hover:text-fd-foreground"
+            className="opacity-60 hover:opacity-100"
           >
             &times;
           </button>
@@ -126,29 +126,29 @@ export function AiSettings({ onClose }: { onClose?: () => void }) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-fd-foreground">Model</label>
+        <label className="text-sm font-medium">Model</label>
         <select
           value={settings.model}
           onChange={(e) => settings.setModel(e.target.value as ChatModelValue)}
-          className="w-full rounded-lg border border-fd-border bg-fd-background px-3 py-2 text-sm text-fd-foreground focus:border-fd-primary focus:outline-none focus:ring-1 focus:ring-fd-primary"
+          className="w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm focus:border-white/30 focus:outline-none"
         >
           {MODEL_OPTIONS.map((m) => (
-            <option key={m.value} value={m.value}>
+            <option key={m.value} value={m.value} className="bg-neutral-900">
               {m.label}
             </option>
           ))}
         </select>
         {!settings.hasApiKey(settings.modelOption.provider) && (
-          <p className="text-xs text-amber-600 dark:text-amber-400">
+          <p className="text-xs text-amber-400">
             Add a {PROVIDER_LABELS[settings.modelOption.provider]} API key to use this model
           </p>
         )}
       </div>
 
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-fd-foreground">API Keys</h4>
-        <p className="text-xs text-fd-muted-foreground">
-          Keys are stored in your browser only and sent directly to the AI provider.
+        <h4 className="text-sm font-medium">API Keys</h4>
+        <p className="text-xs opacity-60">
+          Keys stored in your browser only and sent directly to the AI provider.
         </p>
         {API_KEY_PROVIDERS.map((provider) => (
           <ApiKeyField

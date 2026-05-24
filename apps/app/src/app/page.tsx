@@ -3,21 +3,31 @@ import { requireCurrentUserId } from "@ciaobang/auth";
 
 import { getChatRepository } from "@/lib/chat/repository";
 import { loadSurveyChatContext } from "@/lib/chat/survey-context.server";
-import { hasAnyApiKey } from "@/lib/account/repository";
+import { getApiKeyProviders, getPreferences } from "@/lib/account/repository";
+import { DEFAULT_CHAT_MODEL } from "@/lib/account/models";
 import { ChatShell } from "@/components/chat/chat-shell";
 import { ChatSkeleton } from "@/components/chat/chat-skeleton";
 
 async function ChatLoader() {
   const userId = await requireCurrentUserId();
-  const [threads, surveyContext, apiKeys] = await Promise.all([
+  const isDev = process.env.NODE_ENV === "development";
+  const [threads, surveyContext, providers, preferences] = await Promise.all([
     getChatRepository().listThreads(userId).catch(() => []),
     loadSurveyChatContext({ userId }),
-    process.env.NODE_ENV === "development"
-      ? Promise.resolve(true)
-      : hasAnyApiKey(userId).catch(() => false),
+    isDev
+      ? Promise.resolve({ anthropic: true, google: true })
+      : getApiKeyProviders(userId).catch(() => ({ anthropic: false, google: false })),
+    getPreferences(userId).catch(() => ({ chatModel: DEFAULT_CHAT_MODEL })),
   ]);
 
-  return <ChatShell initialThreads={threads} surveyContext={surveyContext} hasApiKeys={apiKeys} />;
+  return (
+    <ChatShell
+      initialThreads={threads}
+      surveyContext={surveyContext}
+      apiKeyProviders={providers}
+      initialChatModel={preferences.chatModel}
+    />
+  );
 }
 
 export default function HomePage() {

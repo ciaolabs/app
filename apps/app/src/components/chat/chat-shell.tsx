@@ -61,12 +61,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { MODEL_OPTIONS, type ApiKeyProvider } from "@/lib/account/models";
 const InteractiveDotBackground = dynamic(
   () => import("@/components/interactive-dot-background").then((m) => ({ default: m.InteractiveDotBackground })),
   { ssr: false },
 );
 import { IncognitoGhostIcon } from "@/components/incognito-ghost-icon";
-import { MazeGhostIcon } from "@/components/maze-ghost-icon";
+import { DocsIcon } from "@/components/docs-icon";
 import type { SurveyChatContext } from "@/lib/chat/survey-context";
 import { surveyContextHasResults } from "@/lib/chat/survey-context";
 import type { ChatMessage, ChatThreadSummary, ChatThreadWithMessages } from "@/lib/chat/types";
@@ -74,7 +75,8 @@ import type { ChatMessage, ChatThreadSummary, ChatThreadWithMessages } from "@/l
 type ChatShellProps = {
   initialThreads: ChatThreadSummary[];
   surveyContext: SurveyChatContext;
-  hasApiKeys: boolean;
+  apiKeyProviders: { anthropic: boolean; google: boolean };
+  initialChatModel: string;
 };
 
 type ThemeMode = "light" | "dark" | "system";
@@ -93,8 +95,15 @@ const starterPrompts = [
   "What blind spots should I watch for?",
 ];
 
+const genericStarterPrompts = [
+  "What is the Ciao personality assessment?",
+  "How are personality traits scored?",
+  "What's the difference between values and beliefs?",
+  "Which survey should I start with?",
+];
+
 const clayPrimaryButton =
-  "clay-button-hover inline-flex items-center justify-center gap-2 rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)";
+  "clay-button-hover inline-flex items-center justify-center gap-2 rounded-full border border-(--ink) bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)";
 
 const claySecondaryButton =
   "clay-button-hover inline-flex items-center justify-center gap-2 rounded-full border border-(--line-strong) bg-(--surface-panel-strong) px-5 text-sm font-semibold text-(--ink) shadow-(--shadow-soft)";
@@ -103,7 +112,7 @@ const clayIconButton =
   "clay-button-hover inline-flex size-10 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) text-(--ink) shadow-(--shadow-soft)";
 
 const clayIconButtonAccent =
-  "clay-button-hover inline-flex size-11 items-center justify-center rounded-full border border-black bg-(--accent-blue) text-(--selected-contrast) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-60";
+  "clay-button-hover inline-flex size-11 items-center justify-center rounded-full border border-(--ink) bg-(--accent-blue) text-(--selected-contrast) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-60";
 
 const DEFAULT_SURVEY_URL = "https://survey.ciaobang.com";
 
@@ -332,7 +341,7 @@ function ThemeModeRow({
             className={cn(
               "clay-button-hover inline-flex flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-3 text-xs font-semibold shadow-(--shadow-soft) transition",
               isActive
-                ? "border-black bg-(--accent-blue) text-(--selected-contrast)"
+                ? "border-(--ink) bg-(--accent-blue) text-(--selected-contrast)"
                 : "border-(--line-strong) bg-(--surface-panel-strong) text-(--ink)",
             )}
           >
@@ -498,6 +507,118 @@ function CollapsedSidebarToolbar({
         </TooltipTrigger>
         <TooltipContent>New chat</TooltipContent>
       </Tooltip>
+    </div>
+  );
+}
+
+function ModelPicker({
+  value,
+  onChange,
+  providers,
+  disabled,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  providers: { anthropic: boolean; google: boolean };
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(event: MouseEvent) {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [open]);
+
+  const current = MODEL_OPTIONS.find((m) => m.value === value) ?? MODEL_OPTIONS[0]!;
+  const hasAnyKey = providers.anthropic || providers.google;
+  const isProviderReady = (provider: ApiKeyProvider) =>
+    provider === "anthropic" ? providers.anthropic : providers.google;
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        aria-label="Select AI model"
+        aria-expanded={open}
+        disabled={disabled}
+        onClick={() => setOpen((value) => !value)}
+        className={cn(
+          "inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-sm font-semibold text-(--ink) transition hover:bg-(--surface-inset) disabled:cursor-not-allowed disabled:opacity-60",
+        )}
+      >
+        <span className="truncate">{current.label}</span>
+        <ChevronsUpDownIcon className="size-3.5 shrink-0 text-(--ink-soft)" />
+      </button>
+
+      {open ? (
+        <div
+          role="menu"
+          className="absolute bottom-full left-0 z-30 mb-2 w-72 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-1.5 shadow-(--shadow-strong)"
+        >
+          <p className="px-3 pt-2 pb-1 text-xs font-semibold tracking-wide text-(--ink-soft) uppercase">
+            AI model
+          </p>
+          {MODEL_OPTIONS.map((option) => {
+            const ready = isProviderReady(option.provider);
+            const selected = option.value === current.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="menuitemradio"
+                aria-checked={selected}
+                disabled={!ready}
+                onClick={() => {
+                  if (!ready) return;
+                  onChange(option.value);
+                  setOpen(false);
+                }}
+                className={cn(
+                  "flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm transition",
+                  ready
+                    ? "text-(--ink) hover:bg-(--surface-inset)"
+                    : "cursor-not-allowed text-(--ink-soft) opacity-60",
+                )}
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium">{option.label}</span>
+                  <span className="block truncate text-xs text-(--ink-soft)">
+                    {option.provider === "anthropic" ? "Anthropic" : "Google"}
+                    {!ready ? " — no API key" : ""}
+                  </span>
+                </span>
+                {selected ? <CheckIcon className="size-4 shrink-0 text-(--ink)" /> : null}
+              </button>
+            );
+          })}
+
+          <Separator className="my-1.5 bg-(--line)" />
+
+          <Link
+            href="/account#models"
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm font-medium text-(--ink) transition hover:bg-(--surface-inset)"
+          >
+            <span>{hasAnyKey ? "Manage models & API keys" : "Set up models & API keys"}</span>
+            <WrenchIcon className="size-4 text-(--ink-soft)" />
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -1006,7 +1127,7 @@ function ThreadSidebar({
             value={search}
             onChange={(event) => onSearch(event.target.value)}
             placeholder="Search your threads..."
-            className="h-11 rounded-full border border-(--line-strong) bg-(--surface-panel-strong) pl-10 text-(--ink) placeholder:text-(--muted) shadow-(--shadow-soft) focus-visible:border-black"
+            className="h-11 rounded-full border border-(--line-strong) bg-(--surface-panel-strong) pl-10 text-(--ink) placeholder:text-(--muted) shadow-(--shadow-soft) focus-visible:border-(--ink)"
           />
         </div>
       </div>
@@ -1154,17 +1275,15 @@ function EmptyChat({
 }) {
   const heading = isTemporary
     ? "You’re incognito"
-    : !hasSurveyContext
-      ? "Complete a survey to start"
-      : !hasApiKeys
-        ? "Add API keys to start"
-        : "How can I help you?";
+    : !hasApiKeys
+      ? "Add API keys to start"
+      : "How can I help you?";
   const subtitle = isTemporary
     ? "Threads you create won’t save to your history and expire after 24 hours."
-    : !hasSurveyContext
-      ? "The chat needs at least one submitted survey result before it can personalize feedback."
-      : !hasApiKeys
-        ? "Add your Anthropic or Google API key in Account Settings to enable the chat."
+    : !hasApiKeys
+      ? "Add your Anthropic or Google API key in Account Settings to enable the chat."
+      : !hasSurveyContext
+        ? "Ask about the Ciao platform, personality science, or methodology. Complete a survey to unlock personalised feedback."
         : "Ask for a reflective read on your saved survey results, or start with one of these prompts.";
 
   return (
@@ -1186,34 +1305,43 @@ function EmptyChat({
         {subtitle}
       </p>
 
-      {isTemporary ? null : !hasSurveyContext ? (
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link href="https://survey.ciaobang.com/surveys/personality" className={cn(clayPrimaryButton, "h-12")}>
-            Take Personality survey
-          </Link>
-          <Link href="https://survey.ciaobang.com/surveys/values-beliefs" className={cn(claySecondaryButton, "h-12")}>
-            Take Values and Beliefs survey
-          </Link>
-        </div>
-      ) : !hasApiKeys ? (
+      {isTemporary ? null : !hasApiKeys ? (
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link href="/account" className={cn(clayPrimaryButton, "h-12")}>
             Go to Account Settings
           </Link>
         </div>
       ) : (
-        <div className="mt-10 grid w-full max-w-3xl gap-3 text-left sm:grid-cols-2">
-          {starterPrompts.map((prompt) => (
-            <button
-              key={prompt}
-              type="button"
-              onClick={() => onPrompt(prompt)}
-              className="clay-button-hover rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) px-5 py-4 text-base font-medium text-(--ink) shadow-(--shadow-soft)"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="mt-10 grid w-full max-w-3xl gap-3 text-left sm:grid-cols-2">
+            {(hasSurveyContext ? starterPrompts : genericStarterPrompts).map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                onClick={() => onPrompt(prompt)}
+                className="clay-button-hover rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) px-5 py-4 text-base font-medium text-(--ink) shadow-(--shadow-soft)"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+          {!hasSurveyContext ? (
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="https://survey.ciaobang.com/surveys/personality"
+                className={cn(clayPrimaryButton, "h-11")}
+              >
+                Take Personality survey
+              </Link>
+              <Link
+                href="https://survey.ciaobang.com/surveys/values-beliefs"
+                className={cn(claySecondaryButton, "h-11")}
+              >
+                Take Values and Beliefs survey
+              </Link>
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   );
@@ -1241,7 +1369,7 @@ function ChatMessageBubble({
     return (
       <div className="group flex w-full justify-end gap-4">
         <div className="flex max-w-[min(760px,85%)] flex-col items-end gap-1">
-          <div className="rounded-2xl border border-black bg-(--accent-blue) px-5 py-4 text-base leading-7 text-(--selected-contrast) shadow-(--shadow-soft)">
+          <div className="rounded-2xl border border-(--ink) bg-(--accent-blue) px-5 py-4 text-base leading-7 text-(--selected-contrast) shadow-(--shadow-soft)">
             <p className="whitespace-pre-wrap">{text}</p>
           </div>
           <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
@@ -1286,7 +1414,7 @@ function ChatMessageBubble({
 
   return (
     <div className="group flex w-full gap-4">
-      <Avatar className="mt-1 size-9 shrink-0 border border-black bg-(--accent-blue) shadow-(--shadow-soft)">
+      <Avatar className="mt-1 size-9 shrink-0 border border-(--ink) bg-(--accent-blue) shadow-(--shadow-soft)">
         <AvatarFallback className="bg-transparent text-(--selected-contrast)">
           <BotIcon className="size-4" />
         </AvatarFallback>
@@ -1346,8 +1474,24 @@ function ChatMessageBubble({
 export function ChatShell({
   initialThreads,
   surveyContext: initialSurveyContext,
-  hasApiKeys,
+  apiKeyProviders,
+  initialChatModel,
 }: ChatShellProps) {
+  const hasApiKeys = apiKeyProviders.anthropic || apiKeyProviders.google;
+  const [chatModel, setChatModel] = useState(initialChatModel);
+  const handleChatModelChange = useCallback(async (next: string) => {
+    setChatModel(next);
+    try {
+      const response = await fetch("/api/account/preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatModel: next }),
+      });
+      if (!response.ok) throw new Error("Failed to save model preference.");
+    } catch {
+      toast.error("Couldn't save your model preference.");
+    }
+  }, []);
   const [threads, setThreads] = useState(initialThreads);
   const [surveyContext, setSurveyContext] = useState(initialSurveyContext);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
@@ -1366,8 +1510,28 @@ export function ChatShell({
     }
   });
   const sidebarLayout = useSidebarLayout();
+  const [sidebarPeeked, setSidebarPeeked] = useState(false);
+  const peekTimerRef = useRef<number>(0);
   const activeThreadRef = useRef<string | null>(null);
   const isTemporaryRef = useRef(false);
+
+  const showSidebarPeek = useCallback(() => {
+    window.clearTimeout(peekTimerRef.current);
+    setSidebarPeeked(true);
+  }, []);
+
+  const hideSidebarPeek = useCallback((delay = 200) => {
+    window.clearTimeout(peekTimerRef.current);
+    peekTimerRef.current = window.setTimeout(() => setSidebarPeeked(false), delay);
+  }, []);
+
+  useEffect(() => {
+    if (!sidebarLayout.collapsed) setSidebarPeeked(false);
+  }, [sidebarLayout.collapsed]);
+
+  useEffect(() => {
+    return () => window.clearTimeout(peekTimerRef.current);
+  }, []);
 
   useEffect(() => {
     isTemporaryRef.current = isTemporary;
@@ -1539,7 +1703,7 @@ export function ChatShell({
 
   const submitPrompt = useCallback(
     async (prompt: string) => {
-      if (!prompt.trim() || !hasSurveyContext || !hasApiKeys || isBusy) {
+      if (!prompt.trim() || !hasApiKeys || isBusy) {
         return;
       }
 
@@ -1551,7 +1715,7 @@ export function ChatShell({
         toast.error(sendError instanceof Error ? sendError.message : "Unable to send the message.");
       }
     },
-    [hasSurveyContext, hasApiKeys, isBusy, sendMessage],
+    [hasApiKeys, isBusy, sendMessage],
   );
 
   const handleDeleteThread = useCallback(
@@ -1611,28 +1775,55 @@ export function ChatShell({
         style={{ height: "100dvh", width: "100dvw" }}
       >
         <InteractiveDotBackground />
-        {isTemporary ? (
-          <div aria-hidden="true" className="incognito-maze">
-            <span className="maze-ghost maze-ghost-1">
-              <MazeGhostIcon className="size-full" />
-            </span>
-            <span className="maze-ghost maze-ghost-2">
-              <MazeGhostIcon className="size-full" />
-            </span>
-            <span className="maze-ghost maze-ghost-3">
-              <MazeGhostIcon className="size-full" />
-            </span>
-            <span className="maze-ghost maze-ghost-4">
-              <MazeGhostIcon className="size-full" />
-            </span>
-          </div>
-        ) : null}
         {sidebarLayout.collapsed ? (
-          <CollapsedSidebarToolbar
-            onExpand={() => sidebarLayout.setCollapsed(false)}
-            onSearch={() => setIsPaletteOpen(true)}
-            onNewChat={startNewChat}
-          />
+          <>
+            <CollapsedSidebarToolbar
+              onExpand={() => sidebarLayout.setCollapsed(false)}
+              onSearch={() => setIsPaletteOpen(true)}
+              onNewChat={startNewChat}
+            />
+            <div
+              aria-hidden="true"
+              className="fixed top-0 left-0 z-40 hidden h-screen w-2 lg:block"
+              onMouseEnter={showSidebarPeek}
+            />
+            <div
+              className={cn(
+                "fixed top-2 bottom-2 left-2 z-40 hidden w-[280px] overflow-hidden rounded-2xl border border-(--line-strong) bg-(--surface-panel) shadow-(--shadow-strong) transition-transform duration-200 ease-out lg:block",
+                sidebarPeeked
+                  ? "translate-x-0"
+                  : "pointer-events-none -translate-x-[calc(100%+1rem)]",
+              )}
+              onMouseEnter={showSidebarPeek}
+              onMouseLeave={() => hideSidebarPeek(300)}
+            >
+              <ThreadSidebar
+                threads={threads}
+                activeThreadId={activeThreadId}
+                loadingThreadId={loadingThreadId}
+                search={search}
+                onSearch={setSearch}
+                onNewChat={() => {
+                  setSidebarPeeked(false);
+                  startNewChat();
+                }}
+                onSelectThread={(id) => {
+                  setSidebarPeeked(false);
+                  loadThread(id);
+                }}
+                onDeleteThread={handleDeleteThread}
+                onRenameThread={handleRenameThread}
+                onPinThread={handlePinThread}
+                pinnedThreadIds={pinnedThreadIds}
+                onCollapse={() => {
+                  window.clearTimeout(peekTimerRef.current);
+                  setSidebarPeeked(false);
+                  sidebarLayout.setCollapsed(false);
+                }}
+                onOpenSearch={() => setIsPaletteOpen(true)}
+              />
+            </div>
+          </>
         ) : (
           <div
             className="relative hidden shrink-0 border-r border-(--line-strong) lg:block"
@@ -1703,7 +1894,7 @@ export function ChatShell({
                       clayIconButton,
                       "group incognito-toggle-btn",
                       isTemporary &&
-                        "border-black bg-(--accent-blue) text-(--selected-contrast)",
+                        "border-(--ink) bg-(--accent-blue) text-(--selected-contrast)",
                     )}
                   >
                     <IncognitoGhostIcon className="size-5" />
@@ -1717,6 +1908,20 @@ export function ChatShell({
                     </span>
                   </span>
                 </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href="https://docs.ciaobang.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Open Ciao Docs"
+                    className={clayIconButton}
+                  >
+                    <DocsIcon className="size-5" />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>Open Ciao Docs</TooltipContent>
               </Tooltip>
               <SettingsMenu surveyContext={surveyContext} />
             </div>
@@ -1764,7 +1969,7 @@ export function ChatShell({
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
                   placeholder="Type your message here..."
-                  disabled={!hasSurveyContext || !hasApiKeys || isBusy}
+                  disabled={!hasApiKeys || isBusy}
                   className="max-h-44 min-h-20 border-0 bg-transparent px-2 py-2 text-base text-(--ink) placeholder:text-(--muted) focus-visible:border-0"
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && !event.shiftKey) {
@@ -1777,7 +1982,12 @@ export function ChatShell({
                   <div className="flex min-w-0 items-center gap-2 text-sm text-(--ink-soft)">
                     <span className="truncate font-semibold">{getContextLabel(surveyContext)}</span>
                     <Separator orientation="vertical" className="h-4 bg-(--line)" />
-                    <span className="hidden sm:inline">Vercel AI Gateway</span>
+                    <ModelPicker
+                      value={chatModel}
+                      onChange={(next) => void handleChatModelChange(next)}
+                      providers={apiKeyProviders}
+                      disabled={isBusy}
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     {isBusy ? (
@@ -1792,7 +2002,7 @@ export function ChatShell({
                     ) : null}
                     <button
                       type="submit"
-                      disabled={!hasSurveyContext || !hasApiKeys || isBusy || !input.trim()}
+                      disabled={!hasApiKeys || isBusy || !input.trim()}
                       className={clayIconButtonAccent}
                       aria-label="Send message"
                     >

@@ -1,6 +1,7 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { convertToModelMessages, streamText } from "ai";
+import { surveyContextHasResults } from "@ciaobang/chat-context";
 import { getModelOption, MODEL_OPTIONS } from "@/lib/ai-models";
 import { getCurrentUserId } from "@/lib/auth";
 import { loadSurveyChatContext } from "@/lib/chat-context-loader";
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
     const userId = await getCurrentUserId();
     if (userId) {
       const ctx = await loadSurveyChatContext(userId);
-      if (ctx) {
+      if (ctx && surveyContextHasResults(ctx)) {
         userContext = JSON.stringify(ctx, null, 2);
       }
     }

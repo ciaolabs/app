@@ -13,6 +13,7 @@ import {
   Loader2,
   Edit,
   ChevronDown,
+  Maximize2,
 } from "lucide-react";
 
 function ThinkingLottie({ className }: { className?: string }) {
@@ -237,15 +238,17 @@ export function AiSearchBar() {
 
   return createPortal(
     <div
-      className="fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-4 pt-2 transition-opacity duration-300"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-4 pt-2 transition-opacity duration-300"
       style={{
         opacity: nearBottom && !expanded ? 0 : 1,
-        pointerEvents: nearBottom && !expanded ? "none" : "auto",
       }}
     >
       <div
-        className={`ai-pill flex w-full max-w-lg flex-col overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 ease-out${expanded ? " ai-pill--expanded" : ""}`}
-        style={{ maxHeight: expanded ? "min(75vh, 620px)" : "3rem" }}
+        className={`ai-pill pointer-events-auto flex w-full max-w-lg flex-col overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 ease-out${expanded ? " ai-pill--expanded" : ""}`}
+        style={{
+          maxHeight: expanded ? "min(75vh, 620px)" : "3rem",
+          pointerEvents: nearBottom && !expanded ? "none" : "auto",
+        }}
       >
         {expanded && (
           <>
@@ -282,6 +285,15 @@ export function AiSearchBar() {
                 </span>
               </div>
               <div className="flex items-center gap-0.5">
+                <a
+                  href="https://app.ciaobang.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg p-1.5 text-white/30 hover:bg-white/[0.06] hover:text-white/60"
+                  title="Open full chat in app.ciaobang.com"
+                >
+                  <Maximize2 className="size-3.5" />
+                </a>
                 <button
                   type="button"
                   onClick={() => setShowSettings(!showSettings)}

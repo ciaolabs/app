@@ -97,9 +97,10 @@ describe("POST /api/chat (HTTP shape)", () => {
     expect(runChatTurn).not.toHaveBeenCalled();
   });
 
-  it("returns 409 when no survey results exist server-side or in the body", async () => {
+  it("falls through to a generic chat turn when no survey results exist", async () => {
     getCurrentUserId.mockResolvedValue("user_1");
     loadSurveyChatContext.mockResolvedValue({ personality: null, valuesBeliefs: null });
+    runChatTurn.mockResolvedValue(new Response("ok"));
     const { POST } = await import("@/app/api/chat/route");
 
     const response = await POST(
@@ -108,8 +109,13 @@ describe("POST /api/chat (HTTP shape)", () => {
       }),
     );
 
-    expect(response.status).toBe(409);
-    expect(runChatTurn).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(runChatTurn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "user_1",
+        surveyContext: { personality: null, valuesBeliefs: null },
+      }),
+    );
   });
 
   it("returns 402 when no API key is configured for the chosen provider", async () => {

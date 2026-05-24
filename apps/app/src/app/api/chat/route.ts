@@ -6,7 +6,11 @@ import { NextResponse } from "next/server";
 import { getCurrentUserId } from "@ciaobang/auth";
 import { getReadyDb } from "@ciaobang/db";
 import { getChatRepository } from "@/lib/chat/repository";
-import { surveyContextHasResults, type SurveyChatContext } from "@/lib/chat/survey-context";
+import {
+  EMPTY_SURVEY_CHAT_CONTEXT,
+  surveyContextHasResults,
+  type SurveyChatContext,
+} from "@/lib/chat/survey-context";
 import { loadSurveyChatContext } from "@/lib/chat/survey-context.server";
 import { runChatTurn, type RagSearchCapability } from "@/lib/chat/turn";
 import { runDevChatTurn } from "@/lib/chat/turn.dev-mock";
@@ -91,19 +95,14 @@ export async function POST(request: Request) {
     });
   }
 
-  const serverSurveyContext = await loadSurveyChatContext({ request, userId });
+  const serverSurveyContext = await loadSurveyChatContext({ request, userId }).catch(
+    () => EMPTY_SURVEY_CHAT_CONTEXT,
+  );
   const surveyContext = surveyContextHasResults(serverSurveyContext)
     ? serverSurveyContext
     : body.surveyContext && surveyContextHasResults(body.surveyContext)
       ? body.surveyContext
       : serverSurveyContext;
-
-  if (!surveyContextHasResults(surveyContext)) {
-    return NextResponse.json(
-      { error: "Complete at least one survey before chatting." },
-      { status: 409 },
-    );
-  }
 
   let model: LanguageModel;
   let participantGoogleApiKey: string | null;

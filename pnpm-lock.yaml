@@ -170,6 +170,9 @@ importers:
       '@ciaobang/rag':
         specifier: workspace:*
         version: link:../../packages/rag
+      '@lottiefiles/dotlottie-react':
+        specifier: ^0.19.2
+        version: 0.19.2(react@19.2.6)
       ai:
         specifier: ^6.0.172
         version: 6.0.174(zod@4.4.3)
@@ -5708,6 +5711,11 @@ snapshots:
     dependencies:
       '@lottiefiles/dotlottie-web': 0.72.1
       react: 19.2.5
+
+  '@lottiefiles/dotlottie-react@0.19.2(react@19.2.6)':
+    dependencies:
+      '@lottiefiles/dotlottie-web': 0.72.1
+      react: 19.2.6
 
   '@lottiefiles/dotlottie-web@0.72.1': {}
 

@@ -19,6 +19,7 @@
     "@ciaobang/chat-context": "workspace:*",
     "@ciaobang/db": "workspace:*",
     "@ciaobang/rag": "workspace:*",
+    "@lottiefiles/dotlottie-react": "^0.19.2",
     "ai": "^6.0.172",
     "fumadocs-core": "^16.8.9",
     "fumadocs-mdx": "^15.0.2",
