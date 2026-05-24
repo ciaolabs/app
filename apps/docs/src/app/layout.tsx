@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import localFont from "next/font/local";
 
+import { InteractiveDotBackground } from "@/components/interactive-dot-background";
+
 import "./globals.css";
 
 const uncutSans = localFont({
@@ -24,6 +26,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${uncutSans.variable} flex min-h-screen flex-col`}>
+        <InteractiveDotBackground />
         <RootProvider>{children}</RootProvider>
       </body>
     </html>

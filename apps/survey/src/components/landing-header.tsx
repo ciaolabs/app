@@ -122,7 +122,7 @@ export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHe
           href="https://docs.ciaobang.com"
           target="_blank"
           rel="noreferrer"
-          className="clay-button-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-[var(--ink)] shadow-[var(--shadow-soft)] md:hidden"
+          className="clay-button-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-[var(--ink)] shadow-[var(--shadow-soft)]"
           aria-label="Documentation"
         >
           <BookIcon />

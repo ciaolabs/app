@@ -68,7 +68,7 @@ export function DashboardPdfButton({ fileName }: DashboardPdfButtonProps) {
       onClick={handleDownload}
       disabled={status === "preparing"}
       aria-label="Download dashboard as PDF"
-      className="clay-button-hover inline-flex h-10 items-center gap-2 rounded-full border border-black bg-[var(--accent-blue)] px-4 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-70"
+      className="clay-button-hover inline-flex h-10 items-center gap-2 rounded-full border border-black bg-[var(--selected-contrast)] px-4 text-sm font-semibold text-[var(--accent-blue)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-70"
     >
       <DownloadIcon />
       <span>{label}</span>
