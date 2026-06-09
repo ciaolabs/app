@@ -2,8 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getCurrentUserId = vi.fn();
 const loadSurveyChatContext = vi.fn();
-const getPreferences = vi.fn();
-const getDecryptedApiKey = vi.fn();
+const getChatTurnCredentials = vi.fn();
 const createAnthropic = vi.fn();
 const runChatTurn = vi.fn();
 const runDevChatTurn = vi.fn();
@@ -13,7 +12,7 @@ const getChatRepository = vi.fn();
 vi.mock("@ciaobang/auth", () => ({ getCurrentUserId }));
 vi.mock("@/lib/chat/repository", () => ({ getChatRepository }));
 vi.mock("@/lib/chat/survey-context.server", () => ({ loadSurveyChatContext }));
-vi.mock("@/lib/account/repository", () => ({ getPreferences, getDecryptedApiKey }));
+vi.mock("@/lib/account/repository", () => ({ getChatTurnCredentials }));
 vi.mock("@ai-sdk/anthropic", () => ({ createAnthropic }));
 vi.mock("@ai-sdk/google", () => ({ createGoogleGenerativeAI: vi.fn() }));
 vi.mock("@ciaobang/db", () => ({ getReadyDb }));
@@ -39,8 +38,7 @@ describe("POST /api/chat (HTTP shape)", () => {
     vi.resetModules();
     getCurrentUserId.mockReset();
     loadSurveyChatContext.mockReset();
-    getPreferences.mockReset();
-    getDecryptedApiKey.mockReset();
+    getChatTurnCredentials.mockReset();
     createAnthropic.mockReset();
     runChatTurn.mockReset();
     runDevChatTurn.mockReset();
@@ -49,8 +47,11 @@ describe("POST /api/chat (HTTP shape)", () => {
 
     getChatRepository.mockReturnValue({});
     getReadyDb.mockResolvedValue({});
-    getPreferences.mockResolvedValue({ chatModel: "claude-sonnet-4-6" });
-    getDecryptedApiKey.mockResolvedValue("sk-test-key");
+    getChatTurnCredentials.mockResolvedValue({
+      chatModel: "claude-sonnet-4-6",
+      anthropicKey: "sk-test-key",
+      googleKey: "sk-test-key",
+    });
     createAnthropic.mockReturnValue(() => "mock-model");
     loadSurveyChatContext.mockResolvedValue(surveyContext);
     runChatTurn.mockResolvedValue(new Response("ok", { headers: { "x-chat-thread-id": "t1" } }));
@@ -120,7 +121,11 @@ describe("POST /api/chat (HTTP shape)", () => {
 
   it("returns 402 when no API key is configured for the chosen provider", async () => {
     getCurrentUserId.mockResolvedValue("user_1");
-    getDecryptedApiKey.mockResolvedValue(null);
+    getChatTurnCredentials.mockResolvedValue({
+      chatModel: "claude-sonnet-4-6",
+      anthropicKey: null,
+      googleKey: null,
+    });
     const { POST } = await import("@/app/api/chat/route");
 
     const response = await POST(
@@ -178,9 +183,11 @@ describe("POST /api/chat (HTTP shape)", () => {
 
   it("omits the RAG capability when no Google API key is configured", async () => {
     getCurrentUserId.mockResolvedValue("user_1");
-    getDecryptedApiKey.mockImplementation(async (_userId: string, provider: string) =>
-      provider === "google" ? null : "sk-anthropic",
-    );
+    getChatTurnCredentials.mockResolvedValue({
+      chatModel: "claude-sonnet-4-6",
+      anthropicKey: "sk-anthropic",
+      googleKey: null,
+    });
     const { POST } = await import("@/app/api/chat/route");
 
     await POST(
@@ -192,13 +199,56 @@ describe("POST /api/chat (HTTP shape)", () => {
     expect(runChatTurn).toHaveBeenCalledWith(expect.objectContaining({ ragSearch: null }));
   });
 
+  it("uses the per-turn model from the request body in preference to the stored model", async () => {
+    getCurrentUserId.mockResolvedValue("user_1");
+    const inner = vi.fn(() => "mock-model");
+    createAnthropic.mockReturnValue(inner);
+    const { POST } = await import("@/app/api/chat/route");
+
+    await POST(
+      buildRequest({
+        model: "claude-haiku-4-5-20251001",
+        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
+      }),
+    );
+
+    // body model wins over the stored preference for this turn
+    expect(inner).toHaveBeenCalledWith("claude-haiku-4-5-20251001");
+  });
+
+  it("falls back to a usable provider's model instead of 402 when the chosen provider has no key", async () => {
+    getCurrentUserId.mockResolvedValue("user_1");
+    // Anthropic-only user whose (stored) model is a Google one.
+    getChatTurnCredentials.mockResolvedValue({
+      chatModel: "gemini-flash-lite-latest",
+      anthropicKey: "sk-anthropic",
+      googleKey: null,
+    });
+    const inner = vi.fn(() => "mock-model");
+    createAnthropic.mockReturnValue(inner);
+    const { POST } = await import("@/app/api/chat/route");
+
+    const response = await POST(
+      buildRequest({
+        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    // resolved to an Anthropic model rather than 402ing on the unusable Google default
+    expect(inner).toHaveBeenCalledWith(expect.stringMatching(/^claude-/));
+    expect(runChatTurn).toHaveBeenCalledTimes(1);
+  });
+
   it("does not use server Google env vars for RAG when the participant has no Google key", async () => {
     process.env.RAG_GOOGLE_API_KEY = "server-google-key";
     process.env.GOOGLE_API_KEY = "server-google-key";
     getCurrentUserId.mockResolvedValue("user_1");
-    getDecryptedApiKey.mockImplementation(async (_userId: string, provider: string) =>
-      provider === "google" ? null : "sk-anthropic",
-    );
+    getChatTurnCredentials.mockResolvedValue({
+      chatModel: "claude-sonnet-4-6",
+      anthropicKey: "sk-anthropic",
+      googleKey: null,
+    });
     const { POST } = await import("@/app/api/chat/route");
 
     await POST(

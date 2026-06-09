@@ -1,7 +1,7 @@
 import { AUTH_PROVIDER, getReadyDb, type Sql } from "@ciaobang/db";
 
 import { decryptApiKey, encryptApiKey } from "./crypto";
-import { DEFAULT_CHAT_MODEL, type ApiKeyProvider } from "./models";
+import { normalizeModelId, type ApiKeyProvider } from "./models";
 
 type AccountRow = { id: string; display_name: string | null; organization: string | null };
 type ApiKeyRow = { provider: ApiKeyProvider; encrypted_key: string };
@@ -94,7 +94,47 @@ export async function getPreferences(userId: string, sql?: Sql): Promise<{ chatM
   const [row] = await db<PrefsRow[]>`
     select chat_model from app_private.user_preferences where user_account_id = ${account.id}
   `;
-  return { chatModel: row?.chat_model ?? DEFAULT_CHAT_MODEL };
+  return { chatModel: normalizeModelId(row?.chat_model) };
+}
+
+/**
+ * Resolve everything a chat turn needs in a single account lookup: the model
+ * preference plus both decrypted provider keys. Folds what used to be three
+ * separate calls (getPreferences + getDecryptedApiKey twice) — each of which
+ * re-ran the account upsert — into one upsert and two parallel reads.
+ */
+export async function getChatTurnCredentials(
+  userId: string,
+  sql?: Sql,
+): Promise<{ chatModel: string; anthropicKey: string | null; googleKey: string | null }> {
+  const db = sql ?? (await getReadyDb());
+  const account = await getOrCreateAccount(userId, db);
+
+  const [prefRows, keyRows] = await Promise.all([
+    db<PrefsRow[]>`
+      select chat_model from app_private.user_preferences where user_account_id = ${account.id}
+    `,
+    db<ApiKeyRow[]>`
+      select provider, encrypted_key from app_private.user_api_keys
+      where user_account_id = ${account.id}
+    `,
+  ]);
+
+  const decrypt = (provider: ApiKeyProvider): string | null => {
+    const row = keyRows.find((r) => r.provider === provider);
+    if (!row) return null;
+    try {
+      return decryptApiKey(row.encrypted_key);
+    } catch {
+      return null;
+    }
+  };
+
+  return {
+    chatModel: normalizeModelId(prefRows[0]?.chat_model),
+    anthropicKey: decrypt("anthropic"),
+    googleKey: decrypt("google"),
+  };
 }
 
 export async function updatePreferences(userId: string, chatModel: string, sql?: Sql) {

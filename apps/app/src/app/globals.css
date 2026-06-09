@@ -204,7 +204,10 @@ html[data-theme="dark"] {
 
 html {
   scroll-behavior: smooth;
-  background: var(--frame-color);
+  /* Layer the translucent frame tint over the opaque theme background so the
+     gutter around the app-shell renders deterministically, instead of
+     compositing over the browser's UA canvas color (which varies per browser). */
+  background: linear-gradient(var(--frame-color), var(--frame-color)), var(--background);
 }
 
 html[data-theme="dark"] {
@@ -216,7 +219,7 @@ html[data-theme="light"] {
 }
 
 body {
-  background: var(--frame-color);
+  background: linear-gradient(var(--frame-color), var(--frame-color)), var(--background);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
   font-feature-settings: "ss03", "ss10", "ss11", "ss12";

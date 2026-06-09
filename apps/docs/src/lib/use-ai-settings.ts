@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback, useSyncExternalStore } from "react";
+import { useState, useCallback } from "react";
 import {
   type ApiKeyProvider,
   type ChatModelValue,
-  DEFAULT_CHAT_MODEL,
   getModelOption,
+  normalizeModelId,
 } from "./ai-models";
 
 const STORAGE_PREFIX = "ciao-docs-ai";
@@ -34,7 +34,7 @@ export function useAiSettings() {
 
   const bump = useCallback(() => rerender((n) => n + 1), []);
 
-  const model = (readStorage("model") as ChatModelValue) ?? DEFAULT_CHAT_MODEL;
+  const model = normalizeModelId(readStorage("model"));
   const modelOption = getModelOption(model);
 
   const getApiKey = (provider: ApiKeyProvider) => readStorage(`key-${provider}`);

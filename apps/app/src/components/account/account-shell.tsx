@@ -739,12 +739,12 @@ export function AccountShell({
         <>
           <div
             aria-hidden="true"
-            className="fixed top-4 left-4 z-40 h-[calc(100vh-2rem)] w-2"
+            className="fixed top-4 left-4 z-40 hidden h-[calc(100vh-2rem)] w-2 lg:block"
             onMouseEnter={showSidebarPeek}
           />
           <div
             className={cn(
-              "fixed top-4 bottom-4 left-4 z-40 w-[280px] overflow-hidden rounded-3xl border border-(--line-strong) bg-(--background) transition-transform duration-200 ease-out",
+              "fixed top-4 bottom-4 left-4 z-40 hidden w-[280px] overflow-hidden rounded-3xl border border-(--line-strong) bg-(--background) transition-transform duration-200 ease-out lg:block",
               sidebarPeeked
                 ? "translate-x-0"
                 : "pointer-events-none -translate-x-[calc(100%+1rem)]",

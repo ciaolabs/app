@@ -1,7 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { useState } from "react";
+import dynamic from "next/dynamic";
+
+// Lazy-load the Lottie player so its WASM/canvas runtime stays out of the
+// landing-page critical bundle (this preview is decorative chrome).
+const DotLottieReact = dynamic(
+  () => import("@lottiefiles/dotlottie-react").then((m) => ({ default: m.DotLottieReact })),
+  { ssr: false },
+);
 
 type ChatScenario = "patterns" | "values" | "strengths";
 
@@ -36,13 +43,17 @@ function ThinkingLottie({ className }: { className?: string }) {
 }
 
 function WavingDots() {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => (t + 1) % 4), 400);
-    return () => clearInterval(id);
-  }, []);
-  const count = [3, 2, 1, 2][tick];
-  return <span aria-hidden="true">{".".repeat(count)}</span>;
+  // CSS-animated dots: no perpetual setInterval / React re-render on this static
+  // marketing preview, and the browser pauses the animation when off-screen.
+  return (
+    <span aria-hidden="true" className="inline-flex">
+      {[0, 1, 2].map((i) => (
+        <span key={i} className="ciao-wave-dot" style={{ animationDelay: `${i * 0.18}s` }}>
+          .
+        </span>
+      ))}
+    </span>
+  );
 }
 
 type ChatMessage =

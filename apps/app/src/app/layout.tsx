@@ -63,10 +63,8 @@ export default async function RootLayout({
       </head>
       <body className={`${uncutSans.variable} ${monoFont.variable} antialiased`}>
         <AuthKitProvider initialAuth={initialAuth}>
-          <div className="app-shell">
-            {children}
-            <Toaster />
-          </div>
+          <div className="app-shell">{children}</div>
+          <Toaster />
         </AuthKitProvider>
         <SpeedInsights />
       </body>
