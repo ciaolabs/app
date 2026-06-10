@@ -33,7 +33,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
@@ -61,9 +60,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { MODEL_OPTIONS, type ApiKeyProvider } from "@/lib/account/models";
+import { MODEL_OPTIONS, resolveUsableModel, type ApiKeyProvider } from "@/lib/account/models";
 const InteractiveDotBackground = dynamic(
   () => import("@/components/interactive-dot-background").then((m) => ({ default: m.InteractiveDotBackground })),
+  { ssr: false },
+);
+// Lazy-load the Lottie player so its WASM/canvas runtime isn't in the initial
+// chat bundle — it's only needed transiently for the "Thinking..." indicator.
+const DotLottieReact = dynamic(
+  () => import("@lottiefiles/dotlottie-react").then((m) => ({ default: m.DotLottieReact })),
   { ssr: false },
 );
 import { IncognitoGhostIcon } from "@/components/incognito-ghost-icon";
@@ -761,7 +766,9 @@ function CommandPalette({
     }
   }
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 pt-[12vh] backdrop-blur-sm"
       onMouseDown={(event) => {
@@ -832,7 +839,8 @@ function CommandPalette({
           <span>Type to search or start a new chat</span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -1536,7 +1544,18 @@ export function ChatShell({
 }: ChatShellProps) {
   const hasApiKeys = apiKeyProviders.anthropic || apiKeyProviders.google;
   const [chatModel, setChatModel] = useState(initialChatModel);
+  // The model the server will actually run: if the saved model's provider has
+  // no key but another does, fall back to a usable one so the picker label
+  // matches what runs (and an Anthropic-only user on the Google default isn't
+  // shown a model that 402s on every send).
+  const effectiveModel = resolveUsableModel(chatModel, apiKeyProviders) ?? chatModel;
+  // Mirror the effective model into a ref so the chat transport can read the
+  // live selection at request time — the turn uses this, not a stale DB read,
+  // so a message sent before the preference PUT commits still uses the model
+  // the user just picked.
+  const chatModelRef = useRef(effectiveModel);
   const handleChatModelChange = useCallback(async (next: string) => {
+    const previous = chatModelRef.current;
     setChatModel(next);
     try {
       const response = await fetch("/api/account/preferences", {
@@ -1546,6 +1565,8 @@ export function ChatShell({
       });
       if (!response.ok) throw new Error("Failed to save model preference.");
     } catch {
+      // Revert so the picker never claims a preference the server didn't store.
+      setChatModel(previous);
       toast.error("Couldn't save your model preference.");
     }
   }, []);
@@ -1591,12 +1612,23 @@ export function ChatShell({
   }, []);
 
   useEffect(() => {
+    chatModelRef.current = effectiveModel;
+  }, [effectiveModel]);
+
+  useEffect(() => {
+    // Overwrite (don't delete-then-reset) on each toggle so the backdrop's
+    // MutationObserver fires once per change. The previous cleanup deleted the
+    // attribute on every toggle — not just unmount — causing a double observer
+    // fire and a one-frame preset flicker.
     isTemporaryRef.current = isTemporary;
     document.documentElement.dataset.incognito = isTemporary ? "true" : "false";
+  }, [isTemporary]);
+
+  useEffect(() => {
     return () => {
       delete document.documentElement.dataset.incognito;
     };
-  }, [isTemporary]);
+  }, []);
   const hasSurveyContext = surveyContextHasResults(surveyContext);
 
   useEffect(() => {
@@ -1664,6 +1696,7 @@ export function ChatShell({
         body: () => ({
           threadId: isTemporaryRef.current ? null : activeThreadRef.current,
           temporary: isTemporaryRef.current,
+          model: chatModelRef.current,
           surveyContext: surveyContextHasResults(surveyContext) ? surveyContext : undefined,
         }),
         fetch: async (input, init) => {
@@ -2046,7 +2079,7 @@ export function ChatShell({
                     <span className="truncate font-semibold">{getContextLabel(surveyContext)}</span>
                     <Separator orientation="vertical" className="h-4 bg-(--line)" />
                     <ModelPicker
-                      value={chatModel}
+                      value={effectiveModel}
                       onChange={(next) => void handleChatModelChange(next)}
                       providers={apiKeyProviders}
                       disabled={isBusy}

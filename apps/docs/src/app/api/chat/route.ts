@@ -1,6 +1,6 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { convertToModelMessages, streamText } from "ai";
+import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import {
   formatSurveyChatContext,
   getSurveyContextAvailability,
@@ -40,9 +40,26 @@ If you don't know something, say so rather than guessing.`;
   return `${base}${surveySection}${pageSection}`;
 }
 
+type ChatRequestBody = {
+  messages?: UIMessage[];
+  model?: string;
+  provider?: string;
+  pageContent?: string;
+};
+
 export async function POST(request: Request) {
-  const body = await request.json();
+  let body: ChatRequestBody;
+  try {
+    body = (await request.json()) as ChatRequestBody;
+  } catch {
+    return new Response("Invalid request body", { status: 400 });
+  }
+
   const { messages, model: modelValue, provider, pageContent } = body;
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return new Response("Messages are required", { status: 400 });
+  }
 
   const apiKey = request.headers.get("x-api-key");
   if (!apiKey) {
@@ -67,7 +84,7 @@ export async function POST(request: Request) {
     ? `Data availability: ${getSurveyContextAvailability(surveyContext)}\n\n${formatSurveyChatContext(surveyContext)}`
     : null;
 
-  const languageModel = createModel(modelValue, apiKey);
+  const languageModel = createModel(validModel.value, apiKey);
 
   const result = streamText({
     model: languageModel,
@@ -76,5 +93,10 @@ export async function POST(request: Request) {
     temperature: 0.6,
   });
 
-  return result.toUIMessageStreamResponse();
+  return result.toUIMessageStreamResponse({
+    onError: (error) => {
+      console.error("Docs chat stream failed", error);
+      return "Something went wrong generating a response. Please try again.";
+    },
+  });
 }

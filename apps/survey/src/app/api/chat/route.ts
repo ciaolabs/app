@@ -1,10 +1,11 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { convertToModelMessages, streamText } from "ai";
+import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { surveyContextHasResults } from "@ciaobang/chat-context";
 import { getModelOption, MODEL_OPTIONS } from "@/lib/ai-models";
 import { getCurrentUserId } from "@/lib/auth";
 import { loadSurveyChatContext } from "@/lib/chat-context-loader";
+import { logger } from "@/lib/logger";
 
 function createModel(modelValue: string, apiKey: string) {
   const option = getModelOption(modelValue);
@@ -33,9 +34,25 @@ ${userContext}
 </user-survey-results>`;
 }
 
+type ChatRequestBody = {
+  messages?: UIMessage[];
+  model?: string;
+  provider?: string;
+};
+
 export async function POST(request: Request) {
-  const body = await request.json();
+  let body: ChatRequestBody;
+  try {
+    body = (await request.json()) as ChatRequestBody;
+  } catch {
+    return new Response("Invalid request body", { status: 400 });
+  }
+
   const { messages, model: modelValue, provider } = body;
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return new Response("Messages are required", { status: 400 });
+  }
 
   const apiKey = request.headers.get("x-api-key");
   if (!apiKey) {
@@ -64,7 +81,7 @@ export async function POST(request: Request) {
     // anon user or context unavailable — fall through with base prompt
   }
 
-  const languageModel = createModel(modelValue, apiKey);
+  const languageModel = createModel(validModel.value, apiKey);
 
   const result = streamText({
     model: languageModel,
@@ -73,5 +90,10 @@ export async function POST(request: Request) {
     temperature: 0.6,
   });
 
-  return result.toUIMessageStreamResponse();
+  return result.toUIMessageStreamResponse({
+    onError: (error) => {
+      logger.error({ error }, "Survey chat stream failed");
+      return "Something went wrong generating a response. Please try again.";
+    },
+  });
 }

@@ -14,8 +14,8 @@ import {
 import { loadSurveyChatContext } from "@/lib/chat/survey-context.server";
 import { runChatTurn, type RagSearchCapability } from "@/lib/chat/turn";
 import { runDevChatTurn } from "@/lib/chat/turn.dev-mock";
-import { MODEL_OPTIONS } from "@/lib/account/models";
-import { getDecryptedApiKey, getPreferences } from "@/lib/account/repository";
+import { MODEL_OPTIONS, resolveUsableModel } from "@/lib/account/models";
+import { getChatTurnCredentials } from "@/lib/account/repository";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -26,26 +26,9 @@ type ChatRequestBody = {
   threadId?: string | null;
   messages?: UIMessage[];
   temporary?: boolean;
+  model?: string;
   surveyContext?: SurveyChatContext;
 };
-
-async function selectModelForParticipant(userId: string): Promise<LanguageModel> {
-  const { chatModel } = await getPreferences(userId);
-  const option = MODEL_OPTIONS.find((m) => m.value === chatModel) ?? MODEL_OPTIONS[0]!;
-  const apiKey = await getDecryptedApiKey(userId, option.provider);
-
-  if (!apiKey) {
-    const label = option.provider === "anthropic" ? "Anthropic" : "Google";
-    throw new Error(
-      `No ${label} API key configured. Add one in Account Settings to start chatting.`,
-    );
-  }
-
-  if (option.provider === "anthropic") {
-    return createAnthropic({ apiKey })(option.value);
-  }
-  return createGoogleGenerativeAI({ apiKey })(option.value);
-}
 
 function getLatestUserText(messages: UIMessage[]) {
   const latest = [...messages].reverse().find((m) => m.role === "user");
@@ -95,32 +78,47 @@ export async function POST(request: Request) {
     });
   }
 
-  const serverSurveyContext = await loadSurveyChatContext({ request, userId }).catch(
-    () => EMPTY_SURVEY_CHAT_CONTEXT,
-  );
+  // Survey context (a cross-service fetch) and the participant's credentials are
+  // independent, so resolve them together — the network round-trip overlaps with
+  // the DB/decrypt work instead of serializing ahead of it.
+  const [serverSurveyContext, credentials] = await Promise.all([
+    loadSurveyChatContext({ request, userId }).catch(() => EMPTY_SURVEY_CHAT_CONTEXT),
+    getChatTurnCredentials(userId),
+  ]);
+
   const surveyContext = surveyContextHasResults(serverSurveyContext)
     ? serverSurveyContext
     : body.surveyContext && surveyContextHasResults(body.surveyContext)
       ? body.surveyContext
       : serverSurveyContext;
 
-  let model: LanguageModel;
-  let participantGoogleApiKey: string | null;
-  try {
-    [model, participantGoogleApiKey] = await Promise.all([
-      selectModelForParticipant(userId),
-      getDecryptedApiKey(userId, "google"),
-    ]);
-  } catch (err) {
-    logger.error({ userId, err }, "Model selection failed");
+  // Prefer the per-turn model from the request body, falling back to the stored
+  // preference. resolveUsableModel substitutes a provider the user has a key for,
+  // so we only 402 when no key is configured at all.
+  const modelValue = resolveUsableModel(body.model ?? credentials.chatModel, {
+    anthropic: !!credentials.anthropicKey,
+    google: !!credentials.googleKey,
+  });
+
+  if (!modelValue) {
+    logger.warn({ userId }, "Chat turn rejected: no usable API key");
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "AI model not configured." },
+      {
+        error:
+          "No API key configured. Add an Anthropic or Google API key in Account Settings to start chatting.",
+      },
       { status: 402 },
     );
   }
 
-  const ragSearch: RagSearchCapability | null = participantGoogleApiKey
-    ? { googleApiKey: participantGoogleApiKey, sql: await getReadyDb() }
+  const option = MODEL_OPTIONS.find((m) => m.value === modelValue)!;
+  const model: LanguageModel =
+    option.provider === "anthropic"
+      ? createAnthropic({ apiKey: credentials.anthropicKey! })(option.value)
+      : createGoogleGenerativeAI({ apiKey: credentials.googleKey! })(option.value);
+
+  const ragSearch: RagSearchCapability | null = credentials.googleKey
+    ? { googleApiKey: credentials.googleKey, sql: await getReadyDb() }
     : null;
 
   logger.info(

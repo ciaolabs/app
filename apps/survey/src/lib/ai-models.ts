@@ -12,6 +12,17 @@ export const MODEL_OPTIONS = [
 export type ChatModelValue = (typeof MODEL_OPTIONS)[number]["value"];
 export const DEFAULT_CHAT_MODEL: ChatModelValue = "gemini-flash-lite-latest";
 
+/**
+ * Reconcile a persisted model id against the current option list. Renamed or
+ * removed ids (e.g. after a model-list update) fall back to the default so a
+ * stale preference never reaches a route or provider as an invalid model.
+ */
+export function normalizeModelId(value: string | null | undefined): ChatModelValue {
+  return MODEL_OPTIONS.some((m) => m.value === value)
+    ? (value as ChatModelValue)
+    : DEFAULT_CHAT_MODEL;
+}
+
 export function getModelOption(value: string) {
   return MODEL_OPTIONS.find((m) => m.value === value) ?? MODEL_OPTIONS[0];
 }

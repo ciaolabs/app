@@ -748,6 +748,15 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
   }
 }
 
+@keyframes ciao-wave-dot {
+  0%, 60%, 100% { opacity: 0.2; }
+  30% { opacity: 1; }
+}
+
+.ciao-wave-dot {
+  animation: ciao-wave-dot 1.4s ease-in-out infinite;
+}
+
 @keyframes dot-spin {
   from { --dot-spin-angle: 20deg; }
   to { --dot-spin-angle: 380deg; }
