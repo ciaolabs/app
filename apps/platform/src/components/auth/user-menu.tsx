@@ -5,7 +5,7 @@ import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { routes } from "@/lib/routes";
 
 function DashboardIcon() {
   return (
@@ -175,7 +175,7 @@ export function UserMenu({ trigger = "avatar", rowLabel = "Account" }: UserMenuP
         <div className="my-1 h-px bg-(--line)" />
 
         <Link
-          href={SURVEYS_ROUTE}
+          href={routes.surveys}
           role="menuitem"
           onClick={() => setIsOpen(false)}
           className="clay-button-hover flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-(--ink)"

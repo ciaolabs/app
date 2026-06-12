@@ -3,7 +3,7 @@
 import { type MouseEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { routes } from "@/lib/routes";
 
 type StartSurveyButtonProps = {
   children: ReactNode;
@@ -15,7 +15,7 @@ type StartSurveyButtonProps = {
 export function StartSurveyButton({
   children,
   className,
-  href = SURVEYS_ROUTE,
+  href = routes.surveys,
   pendingLabel = "Opening",
 }: StartSurveyButtonProps) {
   const router = useRouter();

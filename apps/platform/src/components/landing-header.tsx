@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { StartSurveyButton } from "@/components/auth/start-survey-button";
+import { routes } from "@/lib/routes";
 
 type LandingHeaderProps = {
   isSignedIn: boolean;
@@ -52,7 +53,7 @@ export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHe
     { href: "#surveys", label: "Surveys", color: "#f97316" },
     { href: "#dashboards", label: "Dashboards", color: "#facc15" },
     { href: "#chat", label: "Chat", color: "#ec4899" },
-    { href: "/docs", label: "Documentation", color: "#22c55e" },
+    { href: routes.docs(), label: "Documentation", color: "#22c55e" },
   ];
 
   return (
@@ -119,7 +120,7 @@ export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHe
 
       <nav className="flex items-center gap-3">
         <a
-          href="/docs"
+          href={routes.docs()}
           target="_blank"
           rel="noreferrer"
           className="clay-button-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-[var(--ink)] shadow-[var(--shadow-soft)]"

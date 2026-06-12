@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SiteTopNav } from "@/components/site-top-nav";
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { routes } from "@/lib/routes";
 
 describe("SiteTopNav", () => {
   afterEach(() => {
@@ -26,7 +26,7 @@ describe("SiteTopNav", () => {
 
     expect(screen.getByRole("menuitem", { name: /Dashboard/i })).toHaveAttribute(
       "href",
-      SURVEYS_ROUTE,
+      routes.surveys,
     );
   });
 

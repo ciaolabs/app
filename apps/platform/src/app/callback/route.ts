@@ -1,9 +1,9 @@
 import { handleAuth } from "@workos-inc/authkit-nextjs";
 
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { routes } from "@/lib/routes";
 
 export const GET = handleAuth({
-  returnPathname: SURVEYS_ROUTE,
+  returnPathname: routes.surveys,
   onError: ({ error }) => {
     const message = error instanceof Error ? error.message : String(error);
     console.error("[callback] auth error:", message);

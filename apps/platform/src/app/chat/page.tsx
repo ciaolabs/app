@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { requireCurrentUserId } from "@ciaobang/auth";
 
 import { getChatRepository } from "@/lib/chat/repository";
+import { routes } from "@/lib/routes";
 import { EMPTY_SURVEY_CHAT_CONTEXT } from "@/lib/chat/survey-context";
 import { loadSurveyChatContext } from "@/lib/chat-context-loader";
 import { getApiKeyProviders, getPreferences } from "@/lib/account/repository";
@@ -10,7 +11,7 @@ import { ChatShell } from "@/components/chat/chat-shell";
 import { ChatSkeleton } from "@/components/chat/chat-skeleton";
 
 async function ChatLoader() {
-  const userId = await requireCurrentUserId({ returnPathname: "/chat" });
+  const userId = await requireCurrentUserId({ returnPathname: routes.chat });
   const isDev = process.env.NODE_ENV === "development";
   const [threads, surveyContext, providers, preferences] = await Promise.all([
     getChatRepository().listThreads(userId).catch(() => []),

@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 
 import { UserMenu } from "@/components/auth/user-menu";
 import { SiteBreadcrumb } from "@/components/ui/site-breadcrumb";
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { routes } from "@/lib/routes";
 import {
   THEME_STORAGE_KEY,
   type ThemeMode,
@@ -295,7 +295,7 @@ export function SiteTopNav({
           ) : null}
 
           <a
-            href="/docs"
+            href={routes.docs()}
             target="_blank"
             rel="noreferrer"
             className={iconButtonClassName()}
@@ -379,7 +379,7 @@ export function SiteTopNav({
                     </Link>
 
                     <Link
-                      href={SURVEYS_ROUTE}
+                      href={routes.surveys}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="clay-button-hover flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-(--ink)"
                     >
@@ -388,7 +388,7 @@ export function SiteTopNav({
                     </Link>
 
                     <a
-                      href="/docs"
+                      href={routes.docs()}
                       target="_blank"
                       rel="noreferrer"
                       onClick={() => setIsMobileMenuOpen(false)}

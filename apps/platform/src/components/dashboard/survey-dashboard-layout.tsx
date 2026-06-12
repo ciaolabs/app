@@ -8,7 +8,7 @@ import { DashboardPrintHeader } from "@/components/dashboard/dashboard-print-hea
 import { SiteTopNav } from "@/components/site-top-nav";
 import { formatSubmittedAt } from "@/lib/date-format";
 import { type ActiveSurveyDefinition } from "@/lib/survey/definitions";
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { routes } from "@/lib/routes";
 import { type SurveySubmissionSummary } from "@/lib/survey/types";
 
 // ---------------------------------------------------------------------------
@@ -184,7 +184,7 @@ export function SurveyDashboardLayout({
     <>
       <SiteTopNav
         breadcrumbItems={[
-          { label: "Surveys", href: SURVEYS_ROUTE },
+          { label: "Surveys", href: routes.surveys },
           { label: survey.title, href: survey.route },
           { label: "Survey Results" },
         ]}
@@ -196,7 +196,7 @@ export function SurveyDashboardLayout({
               />
             ) : null}
             <Link
-              href={SURVEYS_ROUTE}
+              href={routes.surveys}
               className="clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-[var(--accent-blue)] px-5 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
             >
               Start a survey →
@@ -235,7 +235,7 @@ export function SurveyDashboardLayout({
             {emptyStateBody}
           </p>
           <Link
-            href={SURVEYS_ROUTE}
+            href={routes.surveys}
             className="clay-button-hover mt-8 inline-flex rounded-full border border-black bg-[var(--accent-blue)] px-5 py-3 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]"
           >
             Start a survey →

@@ -8,7 +8,7 @@ import { formatSubmittedAt } from "@/lib/date-format";
 import { getPendingResultsKey, personalitySurveyDefinition } from "@/lib/survey/definitions";
 import { surveyQuestions } from "@/lib/survey/questions";
 import { buildSurveyResults } from "@/lib/survey/results/engine";
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { routes } from "@/lib/routes";
 import type { SurveyAnswers, SurveySubmission, SurveySubmissionSummary } from "@/lib/survey/types";
 
 function makeAnswers(value: SurveyAnswers[string]) {
@@ -106,12 +106,12 @@ describe("DashboardShell", () => {
     );
 
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(screen.getByRole("link", { name: "Surveys" })).toHaveAttribute("href", SURVEYS_ROUTE);
+    expect(screen.getByRole("link", { name: "Surveys" })).toHaveAttribute("href", routes.surveys);
     expect(screen.getByRole("link", { name: "Measures of Your Personality" })).toHaveAttribute(
       "href",
       "/surveys/personality",
     );
-    expect(screen.getByRole("link", { name: "Start a survey →" })).toHaveAttribute("href", SURVEYS_ROUTE);
+    expect(screen.getByRole("link", { name: "Start a survey →" })).toHaveAttribute("href", routes.surveys);
     expect(screen.getAllByText("Survey Results").length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "HEXACO" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "JPIR" })).toBeInTheDocument();
@@ -229,7 +229,7 @@ describe("DashboardShell", () => {
     const startSurveyLinks = screen.getAllByRole("link", { name: "Start a survey →" });
     expect(startSurveyLinks.length).toBeGreaterThan(0);
     startSurveyLinks.forEach((link) => {
-      expect(link).toHaveAttribute("href", SURVEYS_ROUTE);
+      expect(link).toHaveAttribute("href", routes.surveys);
     });
   });
 });

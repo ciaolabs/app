@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { StartSurveyButton } from "@/components/auth/start-survey-button";
 import { ThemeModeToggle } from "@/components/theme-mode-toggle";
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { routes } from "@/lib/routes";
 
 type NavLink = { label: string; href: string; external?: boolean };
 type NavColumn = { heading: string; links: NavLink[] };
@@ -15,9 +15,9 @@ const NAV_COLUMNS: NavColumn[] = [
   {
     heading: "Survey",
     links: [
-      { label: "Personality", href: SURVEYS_ROUTE },
-      { label: "Values & Beliefs", href: SURVEYS_ROUTE },
-      { label: "Start survey", href: SURVEYS_ROUTE },
+      { label: "Personality", href: routes.surveys },
+      { label: "Values & Beliefs", href: routes.surveys },
+      { label: "Start survey", href: routes.surveys },
     ],
   },
   {

@@ -20,7 +20,7 @@ import {
   type ScaleResult,
   type SurveyResults,
 } from "@/lib/survey/results/types";
-import { getSurveyApiBasePath } from "@/lib/survey/routes";
+import { apiRoutes } from "@/lib/routes";
 import { type SurveySubmissionSummary } from "@/lib/survey/types";
 
 type RankingMode = "highest" | "lowest";
@@ -360,7 +360,7 @@ export function DashboardShell({ survey, initialPayload }: DashboardShellProps) 
   const [activeFrameworkId, setActiveFrameworkId] = useState(
     initialPayload.results?.frameworks[0]?.id ?? "NEO",
   );
-  const surveyApiBasePath = getSurveyApiBasePath(survey.type);
+  const surveyApiBasePath = apiRoutes.surveyBase(survey.type);
   const hasSyncedLatestResults = useRef(false);
 
   useEffect(() => {

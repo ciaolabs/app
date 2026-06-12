@@ -6,6 +6,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useAiSettings } from "@/lib/use-ai-settings";
+import { apiRoutes, routes } from "@/lib/routes";
 import { AiSettings } from "./ai-settings";
 import { useAssistPageContent } from "./assist-page-content";
 import { buildAssistBody } from "./assist-request";
@@ -181,7 +182,7 @@ export function AiSearchBar() {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
-        api: "/api/assist",
+        api: apiRoutes.assist,
         // /api/assist is single-key BYOK: it reads only x-api-key (no RAG step,
         // so no separate Google embedding key like the full /api/chat route).
         headers: () => ({
@@ -314,7 +315,7 @@ export function AiSearchBar() {
               </div>
               <div className="flex items-center gap-0.5">
                 <a
-                  href="/chat"
+                  href={routes.chat}
                   className="rounded-lg p-1.5 text-white/30 hover:bg-white/[0.06] hover:text-white/60"
                   title="Open the full chat"
                 >

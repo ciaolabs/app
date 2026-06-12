@@ -1,9 +1,5 @@
 import { getSurveyQuestions } from "@/lib/survey/questions";
-import {
-  getSurveyApiBasePath,
-  getSurveyDashboardRoute,
-  getSurveyRoute,
-} from "@/lib/survey/routes";
+import { apiRoutes, routes } from "@/lib/routes";
 import { type QuestionItem, type QuestionSection, type SurveyType } from "@/lib/survey/types";
 
 export type SurveyAvailability = "active" | "coming-soon";
@@ -83,9 +79,9 @@ function createActiveSurveyDefinition(config: {
     ...config,
     availability: "active",
     resultsEnabled: true,
-    route: getSurveyRoute(config.type),
-    dashboardRoute: getSurveyDashboardRoute(config.type),
-    apiBasePath: getSurveyApiBasePath(config.type),
+    route: routes.survey(config.type),
+    dashboardRoute: routes.surveyDashboard(config.type),
+    apiBasePath: apiRoutes.surveyBase(config.type),
     questionCount: config.questions.length,
     questionsById,
     questionIds: new Set(config.questions.map((question) => question.id)),

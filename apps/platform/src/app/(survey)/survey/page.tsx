@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { routes } from "@/lib/routes";
 
 export default function SurveyPage() {
-  redirect(SURVEYS_ROUTE);
+  redirect(routes.surveys);
 }

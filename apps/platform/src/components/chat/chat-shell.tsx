@@ -68,6 +68,7 @@ import {
   resolveTheme,
 } from "@/lib/theme";
 import { MODEL_OPTIONS, resolveUsableModel, type ApiKeyProvider } from "@/lib/account/models";
+import { apiRoutes, routes } from "@/lib/routes";
 const InteractiveDotBackground = dynamic(
   () => import("@/components/interactive-dot-background").then((m) => ({ default: m.InteractiveDotBackground })),
   { ssr: false },
@@ -123,7 +124,7 @@ const clayIconButton =
 const clayIconButtonAccent =
   "clay-button-hover inline-flex size-11 items-center justify-center rounded-full border border-(--ink) bg-(--accent-blue) text-(--selected-contrast) shadow-(--shadow-soft) disabled:cursor-not-allowed disabled:opacity-60";
 
-const SURVEY_CONTEXT_URL = "/api/survey-context";
+const SURVEY_CONTEXT_URL = apiRoutes.surveyContext;
 
 function ThinkingLottie({ className }: { className?: string }) {
   return (
@@ -631,7 +632,7 @@ function ModelPicker({
           <Separator className="my-1.5 bg-(--line)" />
 
           <Link
-            href="/chat/account#models"
+            href={routes.account("models")}
             onClick={() => setOpen(false)}
             className="flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm font-medium text-(--ink) transition hover:bg-(--surface-inset)"
           >
@@ -1259,7 +1260,7 @@ function AccountMenu() {
           className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-2 shadow-(--shadow-strong)"
         >
           <Link
-            href="/chat/account"
+            href={routes.account()}
             role="menuitem"
             onClick={() => setOpen(false)}
             className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-(--ink) hover:bg-(--surface-inset)"
@@ -1350,7 +1351,7 @@ function EmptyChat({
 
       {isTemporary ? null : !hasApiKeys ? (
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/chat/account" className={cn(clayPrimaryButton, "h-12")}>
+          <Link href={routes.account()} className={cn(clayPrimaryButton, "h-12")}>
             Go to Account Settings
           </Link>
         </div>
@@ -1371,13 +1372,13 @@ function EmptyChat({
           {!hasSurveyContext ? (
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
-                href="/surveys/personality"
+                href={routes.survey("personality")}
                 className={cn(clayPrimaryButton, "h-11")}
               >
                 Take Personality survey
               </Link>
               <Link
-                href="/surveys/values-beliefs"
+                href={routes.survey("values-beliefs")}
                 className={cn(claySecondaryButton, "h-11")}
               >
                 Take Values and Beliefs survey
@@ -1535,7 +1536,7 @@ export function ChatShell({
     const previous = chatModelRef.current;
     setChatModel(next);
     try {
-      const response = await fetch("/api/account/preferences", {
+      const response = await fetch(apiRoutes.accountPreferences, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chatModel: next }),
@@ -1656,7 +1657,7 @@ export function ChatShell({
 
 
   const refreshThreads = useCallback(async () => {
-    const response = await fetch("/api/chat/threads");
+    const response = await fetch(apiRoutes.chatThreads);
 
     if (!response.ok) {
       return;
@@ -1669,7 +1670,7 @@ export function ChatShell({
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
-        api: "/api/chat",
+        api: apiRoutes.chat,
         body: () => ({
           threadId: isTemporaryRef.current ? null : activeThreadRef.current,
           temporary: isTemporaryRef.current,
@@ -1751,7 +1752,7 @@ export function ChatShell({
       setLoadingThreadId(threadId);
 
       try {
-        const response = await fetch(`/api/chat/threads/${threadId}`);
+        const response = await fetch(apiRoutes.chatThread(threadId));
 
         if (!response.ok) {
           throw new Error("Unable to load that chat thread.");
@@ -1792,7 +1793,7 @@ export function ChatShell({
   const handleDeleteThread = useCallback(
     async (threadId: string) => {
       try {
-        const response = await fetch(`/api/chat/threads/${threadId}`, { method: "DELETE" });
+        const response = await fetch(apiRoutes.chatThread(threadId), { method: "DELETE" });
         if (!response.ok) throw new Error("Failed to delete thread.");
         setThreads((prev) => prev.filter((t) => t.id !== threadId));
         if (activeThreadRef.current === threadId) {
@@ -1809,7 +1810,7 @@ export function ChatShell({
 
   const handleRenameThread = useCallback(async (threadId: string, title: string) => {
     try {
-      const response = await fetch(`/api/chat/threads/${threadId}`, {
+      const response = await fetch(apiRoutes.chatThread(threadId), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title }),
@@ -1986,7 +1987,7 @@ export function ChatShell({
             <Tooltip>
               <TooltipTrigger asChild>
                 <a
-                  href="/docs"
+                  href={routes.docs()}
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Open Ciao Docs"

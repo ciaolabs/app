@@ -2,12 +2,13 @@ import { getInitialAuth, requireCurrentUserId } from "@ciaobang/auth";
 
 import { getApiKeyProviders, getOrCreateAccount, getPreferences } from "@/lib/account/repository";
 import { getChatRepository } from "@/lib/chat/repository";
+import { routes } from "@/lib/routes";
 import { AccountShell } from "@/components/account/account-shell";
 
 export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
-  const userId = await requireCurrentUserId({ returnPathname: "/chat/account" });
+  const userId = await requireCurrentUserId({ returnPathname: routes.account() });
 
   const [auth, account, apiKeys, preferences, threads] = await Promise.all([
     getInitialAuth(),

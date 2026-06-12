@@ -22,6 +22,7 @@ import type { ChatThreadSummary } from "@/lib/chat/types";
 
 import { MODEL_OPTIONS } from "@/lib/account/models";
 import type { ApiKeyProvider } from "@/lib/account/models";
+import { apiRoutes, routes } from "@/lib/routes";
 
 type AccountShellProps = {
   email: string;
@@ -133,7 +134,7 @@ function ApiKeyField({
     if (!value.trim() || disabled) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/account/api-keys/${provider}`, {
+      const res = await fetch(apiRoutes.accountApiKey(provider), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key: value }),
@@ -154,7 +155,7 @@ function ApiKeyField({
     if (disabled) return;
     setRemoving(true);
     try {
-      const res = await fetch(`/api/account/api-keys/${provider}`, { method: "DELETE" });
+      const res = await fetch(apiRoutes.accountApiKey(provider), { method: "DELETE" });
       if (!res.ok) throw new Error(await getResponseErrorMessage(res, "Failed to remove key"));
       setEditing(true);
       setValue("");
@@ -255,7 +256,7 @@ function GeneralSection({
     const setter = field === "name" ? setSavingName : setSavingOrg;
     setter(true);
     try {
-      const res = await fetch("/api/account/profile", {
+      const res = await fetch(apiRoutes.accountProfile, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ displayName, organization }),
@@ -273,7 +274,7 @@ function GeneralSection({
   async function handleDeleteAccount() {
     setDeleting(true);
     try {
-      const res = await fetch("/api/account", { method: "DELETE" });
+      const res = await fetch(apiRoutes.account, { method: "DELETE" });
       if (!res.ok) throw new Error();
       void signOut({ returnTo: window.location.origin });
     } catch {
@@ -405,7 +406,7 @@ function ModelsSection({
     if (disabled) return;
     setSavingModel(true);
     try {
-      const res = await fetch("/api/account/preferences", {
+      const res = await fetch(apiRoutes.accountPreferences, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chatModel }),
@@ -522,7 +523,7 @@ function SidebarAccountMenu() {
           className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-2 shadow-(--shadow-strong)"
         >
           <Link
-            href="/chat/account"
+            href={routes.account()}
             role="menuitem"
             onClick={() => setOpen(false)}
             className="flex min-h-10 items-center gap-3 rounded-xl bg-(--accent-soft) px-3 text-sm font-semibold text-(--ink)"
@@ -584,7 +585,7 @@ function AccountSidebar({
     <TooltipProvider delayDuration={300}>
       <aside className="flex h-full w-[280px] shrink-0 flex-col border-r border-(--line-strong) bg-(--surface-panel) text-(--ink)">
         <div className="flex h-16 shrink-0 items-center justify-between gap-2 px-5">
-          <Link href="/chat" className="flex items-center gap-2">
+          <Link href={routes.chat} className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={theme === "dark" ? "/ciao-sparkle-dark.svg" : "/ciao-sparkle.svg"}
@@ -606,7 +607,7 @@ function AccountSidebar({
                 <button
                   type="button"
                   aria-label="Search"
-                  onClick={() => router.push("/chat")}
+                  onClick={() => router.push(routes.chat)}
                   className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
                 >
                   <SearchIcon className="size-5" />
@@ -620,7 +621,7 @@ function AccountSidebar({
                 <button
                   type="button"
                   aria-label="New chat"
-                  onClick={() => router.push("/chat")}
+                  onClick={() => router.push(routes.chat)}
                   className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
                 >
                   <PlusIcon className="size-5" />
@@ -647,7 +648,7 @@ function AccountSidebar({
 
         <div className="px-4">
           <Link
-            href="/chat"
+            href={routes.chat}
             className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-(--ink) bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft) transition hover:opacity-90"
           >
             <PlusIcon className="size-4" />
@@ -663,7 +664,7 @@ function AccountSidebar({
             {threads.map((thread) => (
               <Link
                 key={thread.id}
-                href="/chat"
+                href={routes.chat}
                 className="flex min-h-14 w-full items-center gap-3 rounded-xl border border-transparent px-3 text-left text-(--ink-soft) transition hover:border-(--line) hover:bg-(--surface-inset) hover:text-(--ink)"
               >
                 <HistoryIcon className="size-4 shrink-0" />
@@ -785,7 +786,7 @@ export function AccountShell({
                 <button
                   type="button"
                   aria-label="Search"
-                  onClick={() => router.push("/chat")}
+                  onClick={() => router.push(routes.chat)}
                   className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
                 >
                   <SearchIcon className="size-5" />
@@ -798,7 +799,7 @@ export function AccountShell({
                 <button
                   type="button"
                   aria-label="New chat"
-                  onClick={() => router.push("/chat")}
+                  onClick={() => router.push(routes.chat)}
                   className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
                 >
                   <PlusIcon className="size-5" />

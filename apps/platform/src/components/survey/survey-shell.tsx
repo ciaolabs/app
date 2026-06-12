@@ -24,7 +24,7 @@ import { ViolinPlot } from "@/components/survey/violin-plot";
 import { formatTime } from "@/lib/date-format";
 import { sessionDraftStorage } from "@/lib/survey/draft-storage";
 import { type ActiveSurveyDefinition } from "@/lib/survey/definitions";
-import { getSurveyApiBasePath, SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { apiRoutes, routes } from "@/lib/routes";
 import { LikertValue, QuestionItem, SurveyAnswers, SurveyDraft } from "@/lib/survey/types";
 
 const SurveyHelpDialog = dynamic(() => import("@/components/survey/survey-help-dialog"), {
@@ -103,7 +103,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   const pendingControllers = useRef<Map<string, AbortController>>(new Map());
   const saveVersions = useRef<Map<string, number>>(new Map());
   const deferredAnswers = useDeferredValue(answers);
-  const surveyApiBasePath = getSurveyApiBasePath(survey.type);
+  const surveyApiBasePath = apiRoutes.surveyBase(survey.type);
 
   const sectionBounds = useMemo(() => {
     const map = new Map<string, { start: number; end: number }>();
@@ -432,7 +432,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
 
   const breadcrumbItems = useMemo(
     () => [
-      { label: "Surveys", href: SURVEYS_ROUTE },
+      { label: "Surveys", href: routes.surveys },
       { label: survey.title },
     ],
     [survey.title],

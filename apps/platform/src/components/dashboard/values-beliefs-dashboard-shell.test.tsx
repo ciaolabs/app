@@ -8,7 +8,7 @@ import { formatSubmittedAt } from "@/lib/date-format";
 import { getPendingResultsKey, valuesBeliefsSurveyDefinition } from "@/lib/survey/definitions";
 import { getSurveyQuestions } from "@/lib/survey/questions";
 import { buildSurveyResults } from "@/lib/survey/results/engine";
-import { SURVEYS_ROUTE } from "@/lib/survey/routes";
+import { routes } from "@/lib/routes";
 import type { SurveyAnswers, SurveySubmission, SurveySubmissionSummary } from "@/lib/survey/types";
 
 function expectInOrder(labels: string[]) {
@@ -119,10 +119,10 @@ describe("ValuesBeliefsDashboardShell", () => {
       }),
     );
 
-    expect(screen.getByRole("link", { name: "Surveys" })).toHaveAttribute("href", SURVEYS_ROUTE);
+    expect(screen.getByRole("link", { name: "Surveys" })).toHaveAttribute("href", routes.surveys);
     expect(screen.getByRole("link", { name: "Start a survey →" })).toHaveAttribute(
       "href",
-      SURVEYS_ROUTE,
+      routes.surveys,
     );
     expect(screen.getByRole("button", { name: "beliefs" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "values" })).toBeInTheDocument();
@@ -304,7 +304,7 @@ describe("ValuesBeliefsDashboardShell", () => {
     const goToSurveyLinks = screen.getAllByRole("link", { name: "Start a survey →" });
     expect(goToSurveyLinks.length).toBeGreaterThan(0);
     goToSurveyLinks.forEach((link) => {
-      expect(link).toHaveAttribute("href", SURVEYS_ROUTE);
+      expect(link).toHaveAttribute("href", routes.surveys);
     });
   });
 });

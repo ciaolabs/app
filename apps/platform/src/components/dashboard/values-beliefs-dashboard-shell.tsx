@@ -22,7 +22,7 @@ import {
   type ValuesBeliefsResults,
   type ValuesScaleResult,
 } from "@/lib/survey/results/types";
-import { getSurveyApiBasePath } from "@/lib/survey/routes";
+import { apiRoutes } from "@/lib/routes";
 import { type SurveySubmissionSummary } from "@/lib/survey/types";
 
 type DashboardTab = "beliefs" | "values";
@@ -345,7 +345,7 @@ export function ValuesBeliefsDashboardShell({
   );
   const pendingResultsKey = getPendingResultsKey(survey.type);
   const storedAnswersKey = getStoredAnswersKey(survey.type);
-  const surveyApiBasePath = getSurveyApiBasePath(survey.type);
+  const surveyApiBasePath = apiRoutes.surveyBase(survey.type);
   const hasSyncedLatestResults = useRef(false);
 
   useEffect(() => {
