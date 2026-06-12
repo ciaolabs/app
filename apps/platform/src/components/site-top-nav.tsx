@@ -7,9 +7,13 @@ import { createPortal } from "react-dom";
 import { UserMenu } from "@/components/auth/user-menu";
 import { SiteBreadcrumb } from "@/components/ui/site-breadcrumb";
 import { SURVEYS_ROUTE } from "@/lib/survey/routes";
-import { applyResolvedTheme } from "@/lib/theme";
-
-type ThemeMode = "light" | "dark";
+import {
+  THEME_STORAGE_KEY,
+  type ThemeMode,
+  applyResolvedTheme,
+  readStoredThemeMode,
+  resolveTheme,
+} from "@/lib/theme";
 
 type SiteTopNavProps = {
   breadcrumbTitle?: string;
@@ -132,22 +136,23 @@ function getSaveStatusIndicatorColor(saveStatus: string, isError: boolean): stri
   return "bg-(--ink-soft)";
 }
 
-function readTheme(): ThemeMode {
-  if (typeof document !== "undefined") {
-    const theme = document.documentElement.dataset.theme;
-    if (theme === "dark" || theme === "light") {
-      return theme;
-    }
+// Older builds persisted the resolved theme here; the layout boot script reads
+// only THEME_STORAGE_KEY, so migrate the value forward or it is lost on reload.
+const LEGACY_THEME_STORAGE_KEY = "ambi-theme";
+
+function readInitialThemeMode(): ThemeMode {
+  const storedMode = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (storedMode === "light" || storedMode === "dark" || storedMode === "system") {
+    return storedMode;
   }
 
-  if (typeof window !== "undefined") {
-    const storedTheme = window.localStorage.getItem("ambi-theme");
-    if (storedTheme === "dark" || storedTheme === "light") {
-      return storedTheme;
-    }
+  const legacyTheme = window.localStorage.getItem(LEGACY_THEME_STORAGE_KEY);
+  if (legacyTheme === "light" || legacyTheme === "dark") {
+    window.localStorage.setItem(THEME_STORAGE_KEY, legacyTheme);
+    return legacyTheme;
   }
 
-  return "light";
+  return readStoredThemeMode();
 }
 
 function actionButtonClassName() {
@@ -168,36 +173,31 @@ export function SiteTopNav({
   helpExpanded,
   action,
 }: SiteTopNavProps) {
-  const [theme, setTheme] = useState<ThemeMode>("light");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [hasHydrated, setHasHydrated] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
   const mobileMenuPanelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const nextTheme = readTheme();
-    setTheme(nextTheme);
+    const mode = readInitialThemeMode();
+    const resolved = resolveTheme(mode);
+    setTheme(resolved);
+    applyResolvedTheme(resolved, mode);
     setHasHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!hasHydrated) {
-      return;
-    }
-
-    applyResolvedTheme(theme, theme);
-    window.localStorage.setItem("ambi-theme", theme);
-  }, [hasHydrated, theme]);
-
-  useEffect(() => {
     function handleStorage(event: StorageEvent) {
-      if (event.key !== "ambi-theme") {
+      if (event.key !== THEME_STORAGE_KEY) {
         return;
       }
 
-      const nextTheme = event.newValue;
-      if (nextTheme === "dark" || nextTheme === "light") {
-        setTheme(nextTheme);
+      const nextMode = event.newValue;
+      if (nextMode === "light" || nextMode === "dark" || nextMode === "system") {
+        const resolved = resolveTheme(nextMode);
+        setTheme(resolved);
+        applyResolvedTheme(resolved, nextMode);
       }
     }
 
@@ -235,8 +235,13 @@ export function SiteTopNav({
   }, [isMobileMenuOpen]);
 
   const toggleTheme = useCallback(() => {
-    setTheme((currentTheme) => (currentTheme === "light" ? "dark" : "light"));
-  }, []);
+    // Persist only on explicit toggles: a stored "system" mode must survive
+    // page visits, and toggling pins it to an explicit light/dark choice.
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    applyResolvedTheme(nextTheme, nextTheme);
+    window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  }, [theme]);
 
   const themeLabel = hasHydrated ? (theme === "light" ? "Dark mode" : "Light mode") : "Theme";
   const themeAriaLabel = hasHydrated
