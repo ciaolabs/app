@@ -272,6 +272,24 @@ html:not(.dark) [data-section="docs"] .interactive-dot-background__grain {
   color: rgba(255, 255, 255, 1);
 }
 
+/* Nav logo swap — same .dark signal as the AI pill sparkles, since the
+   Tailwind dark: variant keys off html[data-theme="dark"] and can lag. */
+.ciao-nav-sparkle-dark {
+  display: none;
+}
+
+.dark [data-section="docs"] .ciao-nav-sparkle-light {
+  display: none;
+}
+
+.dark [data-section="docs"] .ciao-nav-sparkle-dark {
+  display: block;
+}
+
+.dark [data-section="docs"] .ciao-nav-text {
+  filter: invert(1);
+}
+
 .dark [data-section="docs"] .ai-pill-sparkle-dark {
   display: block;
 }

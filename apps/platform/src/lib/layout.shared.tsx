@@ -10,7 +10,7 @@ export function baseOptions(): BaseLayoutProps {
             src="/ciao-sparkle.svg"
             alt=""
             aria-hidden="true"
-            className="ciao-wave dark:hidden"
+            className="ciao-wave ciao-nav-sparkle-light"
             style={{ height: 28, width: 28, objectFit: "contain" }}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -18,7 +18,7 @@ export function baseOptions(): BaseLayoutProps {
             src="/ciao-sparkle-dark.svg"
             alt=""
             aria-hidden="true"
-            className="ciao-wave hidden dark:block"
+            className="ciao-wave ciao-nav-sparkle-dark"
             style={{ height: 28, width: 28, objectFit: "contain" }}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -26,7 +26,7 @@ export function baseOptions(): BaseLayoutProps {
             src="/ciao-text.png"
             alt="Ciao!"
             style={{ height: 22, width: "auto" }}
-            className="dark:[filter:invert(1)]"
+            className="ciao-nav-text"
           />
           <span className="font-semibold leading-none">Docs</span>
         </span>
