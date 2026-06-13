@@ -1,0 +1,299 @@
+/*
+ * Docs section styles — ported from apps/docs/src/app/globals.css.
+ *
+ * The fumadocs imports (fumadocs-ui/css/neutral.css + preset.css) and the
+ * black/white --color-fd-* token overrides live in ../globals.css instead of
+ * here: preset.css relies on Tailwind v4 at-rules (@plugin, @utility, @apply,
+ * @variant dark, @source inline) that only work in the compilation unit that
+ * contains `@import "tailwindcss"`. Importing them here standalone would not
+ * generate the fumadocs utility classes.
+ *
+ * Everything in this file is plain CSS scoped to [data-section="docs"]. The
+ * docs layout renders <div data-section="docs"> and mirrors the attribute
+ * onto <body> (BodySection), so fumadocs portals (e.g. the search dialog)
+ * are covered too.
+ *
+ * Dark mode here keys off `.dark` rather than html[data-theme="dark"]:
+ * fumadocs/next-themes toggles the .dark class live (storageKey
+ * "ambi-theme-mode"), while html[data-theme] is only written by the root
+ * layout's boot script at page load. Inside the docs section, .dark is the
+ * signal that fumadocs' own internals follow, so keying off it keeps these
+ * rules in lockstep with the fumadocs UI.
+ */
+
+/* The old docs css keyed typography off --font-sans; the platform root
+   layout provides --font-body. */
+[data-section="docs"] {
+  --font-sans: var(--font-body);
+}
+
+body[data-section="docs"] {
+  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  font-feature-settings: "ss03", "ss10", "ss11", "ss12";
+  background: transparent;
+  color: var(--color-fd-foreground);
+}
+
+/* Selection: light matches the base ::selection; the dark flip must follow
+   .dark (the base keys it off html[data-theme="dark"], which can lag after
+   an in-docs theme toggle). The :not(.dark) guard wins over the base dark
+   rule when the docs toggle has switched back to light. */
+html:not(.dark) [data-section="docs"] ::selection {
+  background: #000000;
+  color: #ffffff;
+}
+
+.dark [data-section="docs"] ::selection {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Interactive dot background — docs variant: full-bleed sheet behind the
+   fumadocs layout instead of the survey base's inset rounded card. */
+[data-section="docs"] .interactive-dot-background {
+  inset: 0;
+  z-index: -1;
+  border-radius: 0;
+  background-color: var(--color-fd-background);
+}
+
+/* Hot-dot vars: set on the section element so they follow .dark instead of
+   the (potentially stale) html[data-theme="dark"] values inherited from the
+   base. Light values match the base :root. */
+[data-section="docs"] {
+  --dot-hot-coral: rgba(0, 0, 0, 0.96);
+  --dot-hot-blue: rgba(0, 0, 0, 0.98);
+  --dot-hot-mint: rgba(0, 0, 0, 0.96);
+  --dot-hot-lilac: rgba(0, 0, 0, 0.96);
+  --dot-hot-opacity: 1;
+  --dot-hot-size: 1.85px;
+  --dot-hot-edge: 2.05px;
+}
+
+.dark [data-section="docs"] {
+  --dot-hot-coral: rgba(255, 255, 255, 0.96);
+  --dot-hot-blue: rgba(255, 255, 255, 0.96);
+  --dot-hot-mint: rgba(255, 255, 255, 0.96);
+  --dot-hot-lilac: rgba(255, 255, 255, 0.96);
+  --dot-hot-opacity: 1;
+  --dot-hot-size: 1.65px;
+  --dot-hot-edge: 1.92px;
+}
+
+/* Dot grid + grain: .dark-keyed variants (with :not(.dark) light guards so
+   the base html[data-theme="dark"] rules cannot leak a stale theme in). */
+html:not(.dark) [data-section="docs"] .interactive-dot-background::before {
+  background-image: radial-gradient(circle, rgba(38, 38, 36, 0.22) 1.2px, transparent 1.4px);
+}
+
+.dark [data-section="docs"] .interactive-dot-background::before {
+  background-image: radial-gradient(circle, rgba(250, 249, 245, 0.22) 1.2px, transparent 1.4px);
+}
+
+html:not(.dark) [data-section="docs"] .interactive-dot-background__grain {
+  mix-blend-mode: multiply;
+  opacity: 0.04;
+}
+
+.dark [data-section="docs"] .interactive-dot-background__grain {
+  mix-blend-mode: screen;
+  opacity: 0.1;
+}
+
+/* Translucent panels for readability over the animated background.
+   Light: soft white wash + blur. Dark: dim wash + blur. */
+[data-section="docs"] article {
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border-radius: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.82);
+  padding: 1.5rem 1.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dark [data-section="docs"] article {
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  background-color: rgba(0, 0, 0, 0.78);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+[data-section="docs"] #nd-toc {
+  background-color: transparent;
+}
+
+.dark [data-section="docs"] #nd-toc {
+  background-color: transparent;
+}
+
+/* Left sidebar: solid background, no translucency. */
+[data-section="docs"] #nd-sidebar {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+}
+
+.dark [data-section="docs"] #nd-sidebar {
+  background-color: #000000;
+  --color-fd-muted: #1f1f1e;
+  --color-fd-secondary: #2c2c2b;
+}
+
+/* TOC + sidebar text: full-contrast black/white instead of muted */
+[data-section="docs"] #nd-toc,
+[data-section="docs"] #nd-toc a,
+[data-section="docs"] #nd-toc button,
+[data-section="docs"] #nd-sidebar,
+[data-section="docs"] #nd-sidebar a,
+[data-section="docs"] #nd-sidebar button {
+  color: #000000;
+}
+
+.dark [data-section="docs"] #nd-toc,
+.dark [data-section="docs"] #nd-toc a,
+.dark [data-section="docs"] #nd-toc button,
+.dark [data-section="docs"] #nd-sidebar,
+.dark [data-section="docs"] #nd-sidebar a,
+.dark [data-section="docs"] #nd-sidebar button {
+  color: #ffffff;
+}
+
+/* Collapsed-sidebar floating pill (sidebar toggle + search icons) */
+[data-section="docs"] [data-sidebar-panel] {
+  flex-direction: column;
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+.dark [data-section="docs"] [data-sidebar-panel] {
+  background-color: #000000 !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+/* Top nav glass effect */
+[data-section="docs"] #nd-nav {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+.dark [data-section="docs"] #nd-nav {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Sidebar active — cream primary invisible on cream bg, use dark tint */
+[data-section="docs"] #nd-sidebar [data-active=true] {
+  background-color: rgba(26, 26, 24, 0.08) !important;
+  color: #1a1a18;
+}
+
+[data-section="docs"] #nd-sidebar [data-active=true]::before {
+  background-color: #1a1a18 !important;
+}
+
+/* TOC active — text-only emphasis, no background */
+[data-section="docs"] #nd-toc [data-active=true] {
+  background-color: transparent !important;
+  color: #1a1a18 !important;
+}
+
+/* Dark mode — restore visible active states */
+.dark [data-section="docs"] #nd-sidebar [data-active=true] {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f9f8f6;
+}
+
+.dark [data-section="docs"] #nd-sidebar [data-active=true]::before {
+  background-color: #f9f8f6 !important;
+}
+
+.dark [data-section="docs"] #nd-toc [data-active=true] {
+  color: #fdfbf0 !important;
+}
+
+/* AI chat pill — the base file styles the light state and keys dark off
+   [data-theme="dark"]; inside docs the live dark signal is .dark, so the
+   dark variants are re-issued here. */
+.dark [data-section="docs"] .ai-pill {
+  background: #0c0c0c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+.dark [data-section="docs"] .ai-pill.ai-pill--expanded {
+  background: #0c0c0c;
+}
+
+.dark [data-section="docs"] .ai-pill-input {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dark [data-section="docs"] .ai-pill-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.dark [data-section="docs"] .ai-pill-kbd {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.dark [data-section="docs"] .ai-pill-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dark [data-section="docs"] .ai-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.dark [data-section="docs"] .ai-pill [class*="text-white"] {
+  color: unset !important;
+}
+
+.dark [data-section="docs"] .ai-pill [class*="bg-white"],
+.dark [data-section="docs"] .ai-pill [class*="bg-white"]:hover {
+  background-color: unset !important;
+}
+
+.dark [data-section="docs"] .ai-divider-b {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark [data-section="docs"] .ai-divider-t {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark [data-section="docs"] .ai-user-bubble {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 1);
+}
+
+.dark [data-section="docs"] .ai-pill-sparkle-dark {
+  display: block;
+}
+
+.dark [data-section="docs"] .ai-pill-sparkle-light {
+  display: none;
+}
+
+.dark [data-section="docs"] .ai-pill-logo {
+  filter: invert(1);
+}
+
+.dark [data-section="docs"] .ai-pill-textarea {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dark [data-section="docs"] .ai-pill-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.dark [data-section="docs"] .ai-pill-textarea:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+}

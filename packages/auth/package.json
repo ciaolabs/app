@@ -6,13 +6,13 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./middleware": "./src/middleware.ts"
+    "./proxy": "./src/proxy.ts"
   },
   "dependencies": {
     "@workos-inc/authkit-nextjs": "^4.0.1"
   },
   "peerDependencies": {
-    "next": "15.5.14"
+    "next": "^16.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -105,13 +105,25 @@ export async function getCurrentUserId({
   return null;
 }
 
-export async function requireCurrentUserId() {
+type RequireCurrentUserIdOptions = {
+  /** Path to come back to after sign-in. Must be an absolute path within the app. */
+  returnPathname?: string;
+};
+
+function signInPath({ returnPathname }: RequireCurrentUserIdOptions) {
+  if (returnPathname && returnPathname.startsWith("/") && !returnPathname.startsWith("//")) {
+    return `/sign-in?next=${encodeURIComponent(returnPathname)}`;
+  }
+  return "/sign-in";
+}
+
+export async function requireCurrentUserId(options: RequireCurrentUserIdOptions = {}) {
   if (isLocalDevAuthBypass()) {
     return LOCAL_DEV_USER_ID;
   }
 
   if (!isWorkOSConfigured()) {
-    redirect("/sign-in");
+    redirect(signInPath(options));
   }
 
   let user: Awaited<ReturnType<typeof withAuth>>["user"];
@@ -119,11 +131,11 @@ export async function requireCurrentUserId() {
   try {
     ({ user } = await withAuth());
   } catch {
-    redirect("/sign-in");
+    redirect(signInPath(options));
   }
 
   if (!user?.id) {
-    redirect("/sign-in");
+    redirect(signInPath(options));
   }
 
   return user.id;

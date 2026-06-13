@@ -1,0 +1,1562 @@
+@import "tailwindcss";
+/* Fumadocs CSS must live in this file (the Tailwind compilation unit):
+   preset.css relies on Tailwind v4 at-rules (@plugin, @utility, @apply,
+   @variant dark, @source inline) that only work alongside the
+   `@import "tailwindcss"` above. Importing it from docs.css standalone would
+   fail to generate the fumadocs utilities. The fd-* tokens are harmless
+   app-wide; the B/W overrides for them live at the end of this file. */
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+:root {
+  --clay-black: #000000;
+  --clay-white: #ffffff;
+  --clay-cream: #faf9f7;
+  --clay-oat: #dad4c8;
+  --clay-oat-light: #eee9df;
+  --clay-warm-silver: #9f9b93;
+  --clay-warm-charcoal: #55534e;
+  --clay-matcha-300: #84e7a5;
+  --clay-matcha-600: #078a52;
+  --clay-matcha-800: #02492a;
+  --clay-slushie-500: #3bd3fd;
+  --clay-slushie-800: #0089ad;
+  --clay-lemon-400: #f8cc65;
+  --clay-lemon-500: #fbbd41;
+  --clay-lemon-700: #d08a11;
+  --clay-ube-300: #c1b0ff;
+  --clay-ube-800: #43089f;
+  --clay-pomegranate-400: #fc7981;
+  --clay-blueberry-800: #01418d;
+  --clay-focus: #146ef5;
+  --clay-radius-card: 1.5rem;
+  --clay-radius-section: 2.5rem;
+  --clay-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset, 0 -0.5px 1px rgba(0, 0, 0, 0.05);
+  --clay-hard-shadow: -7px 7px 0 #000000;
+  --background: #faf9f7;
+  --foreground: #000000;
+  --ink: #000000;
+  --ink-soft: #55534e;
+  --muted: #9f9b93;
+  --surface: #faf9f7;
+  --surface-secondary: #eee9df;
+  --surface-panel: rgba(255, 255, 255, 0.92);
+  --surface-panel-strong: #ffffff;
+  --surface-inset: rgba(238, 233, 223, 0.86);
+  --line: rgba(218, 212, 200, 0.9);
+  --line-strong: #dad4c8;
+  --accent: var(--clay-pomegranate-400);
+  --accent-soft: rgba(59, 211, 210, 0.14);
+  --accent-mint: #84e7a5;
+  --accent-lilac: #c1b0ff;
+  --accent-rose: #fc7981;
+  --accent-blue: #081F22;
+  --accent-coral: #081F22;
+  --accent-lime: #f8cc65;
+  --accent-sand: #eee9df;
+  --selected-contrast: #ffffff;
+  --keycap-bg: rgba(255, 255, 255, 0.98);
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
+  --home-crumb-button-bg: #ffffff;
+  --shadow-soft: var(--clay-shadow);
+  --shadow-strong: var(--clay-shadow), -7px 7px 0 rgba(0, 0, 0, 0.12);
+  --plot-fill-start: rgba(252, 121, 129, 0.42);
+  --plot-fill-end: rgba(59, 211, 253, 0.72);
+  --plot-grid: rgba(38, 38, 36, 0.1);
+  --plot-label: rgba(38, 38, 36, 0.58);
+  --plot-stroke: rgba(38, 38, 36, 0.22);
+  --hero-gradient:
+    linear-gradient(135deg, rgba(251, 189, 65, 0.72), rgba(132, 231, 165, 0.48) 48%, rgba(255, 255, 255, 0.78));
+  --hero-spotlight: radial-gradient(circle at center, rgba(59, 211, 253, 0.28), transparent 62%);
+  --app-background:
+    linear-gradient(180deg, #faf9f7, #faf9f7);
+  --glow-left: rgba(132, 231, 165, 0.18);
+  --glow-right: rgba(193, 176, 255, 0.16);
+  --skeleton-base: rgba(218, 212, 200, 0.62);
+  --skeleton-highlight: rgba(255, 255, 255, 0.92);
+  --dot-color: rgba(38, 38, 36, 0.14);
+  --dot-hot-coral: rgba(0, 0, 0, 0.96);
+  --dot-hot-blue: rgba(0, 0, 0, 0.98);
+  --dot-hot-mint: rgba(0, 0, 0, 0.96);
+  --dot-hot-lilac: rgba(0, 0, 0, 0.96);
+  --dot-hot-opacity: 1;
+  --dot-hot-size: 1.85px;
+  --dot-hot-edge: 2.05px;
+  --nav-glass-bg: rgba(255, 255, 255, 0.08);
+  --nav-glass-border: rgba(218, 212, 200, 0.22);
+}
+
+html[data-theme="dark"] {
+  --background: #26231f;
+  --foreground: #faf9f5;
+  --ink: #faf9f5;
+  --ink-soft: rgba(250, 249, 245, 0.78);
+  --muted: rgba(250, 249, 245, 0.58);
+  --surface: #26231f;
+  --surface-secondary: #342f28;
+  --surface-panel: #1a1a1a;
+  --surface-panel-strong: #202322;
+  --surface-inset: rgba(227, 218, 204, 0.12);
+  --line: rgba(218, 212, 200, 0.22);
+  --line-strong: rgba(238, 233, 223, 0.34);
+  --selected-contrast: #262624;
+  --keycap-bg: rgba(52, 47, 40, 0.72);
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.34), 0 -1px 1px rgba(255, 255, 255, 0.08) inset;
+  --home-crumb-button-bg: #2a251f;
+  --shadow-soft: 0 1px 1px rgba(0, 0, 0, 0.4), 0 -1px 1px rgba(255, 255, 255, 0.06) inset, 0 -0.5px 1px rgba(255, 255, 255, 0.04);
+  --shadow-strong: var(--shadow-soft), -7px 7px 0 rgba(0, 0, 0, 0.48);
+  --plot-fill-start: rgba(252, 121, 129, 0.5);
+  --plot-fill-end: rgba(59, 211, 253, 0.78);
+  --plot-grid: rgba(250, 249, 245, 0.12);
+  --plot-label: rgba(250, 249, 245, 0.56);
+  --plot-stroke: rgba(250, 249, 245, 0.22);
+  --hero-gradient:
+    linear-gradient(135deg, rgba(67, 8, 159, 0.82), rgba(2, 73, 42, 0.74) 58%, rgba(52, 47, 40, 0.94));
+  --hero-spotlight: radial-gradient(circle at center, rgba(230, 121, 109, 0.12), transparent 62%);
+  --app-background:
+    linear-gradient(180deg, #26231f, #26231f);
+  --glow-left: rgba(190, 229, 216, 0.14);
+  --glow-right: rgba(184, 197, 255, 0.12);
+  --skeleton-base: rgba(250, 249, 245, 0.08);
+  --skeleton-highlight: rgba(250, 249, 245, 0.18);
+  --selected-contrast-strong: #faf9f5;
+  --dot-color: rgba(250, 249, 245, 0.18);
+  --dot-hot-coral: rgba(255, 255, 255, 0.96);
+  --dot-hot-blue: rgba(255, 255, 255, 0.96);
+  --dot-hot-mint: rgba(255, 255, 255, 0.96);
+  --dot-hot-lilac: rgba(255, 255, 255, 0.96);
+  --dot-hot-opacity: 1;
+  --dot-hot-size: 1.65px;
+  --dot-hot-edge: 1.92px;
+  --accent-blue: #ffffff;
+  --accent-coral: #ffffff;
+  --nav-glass-bg: rgba(30, 27, 23, 0.10);
+  --nav-glass-border: rgba(238, 233, 223, 0.08);
+}
+
+:root {
+  --selected-contrast-strong: #000000;
+}
+
+/* Force light-theme token values on any subtree — used by the landing preview */
+[data-theme="light"] {
+  --background: #faf9f7;
+  --foreground: #000000;
+  --ink: #000000;
+  --ink-soft: #55534e;
+  --muted: #9f9b93;
+  --surface: #faf9f7;
+  --surface-secondary: #eee9df;
+  --surface-panel: rgba(255, 255, 255, 0.92);
+  --surface-panel-strong: #ffffff;
+  --surface-inset: rgba(238, 233, 223, 0.86);
+  --line: rgba(218, 212, 200, 0.9);
+  --line-strong: #dad4c8;
+  --accent: var(--clay-pomegranate-400);
+  --accent-soft: rgba(59, 211, 210, 0.14);
+  --accent-mint: #84e7a5;
+  --accent-lilac: #c1b0ff;
+  --accent-rose: #fc7981;
+  --accent-blue: #081F22;
+  --accent-coral: #081F22;
+  --accent-lime: #f8cc65;
+  --accent-sand: #eee9df;
+  --selected-contrast: #ffffff;
+  --selected-contrast-strong: #ffffff;
+  --keycap-bg: rgba(255, 255, 255, 0.98);
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
+  --shadow-soft: var(--clay-shadow);
+  --shadow-strong: var(--clay-shadow), -7px 7px 0 rgba(0, 0, 0, 0.12);
+  --nav-glass-bg: rgba(255, 255, 255, 0.08);
+  --nav-glass-border: rgba(218, 212, 200, 0.22);
+  --plot-fill-start: rgba(252, 121, 129, 0.42);
+  --plot-fill-end: rgba(59, 211, 253, 0.72);
+  --plot-grid: rgba(38, 38, 36, 0.1);
+  --plot-label: rgba(38, 38, 36, 0.58);
+  --plot-stroke: rgba(38, 38, 36, 0.22);
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --frame-color: #ffffff;
+  --content-bg: #fdfbf0;
+}
+
+html[data-theme="dark"] {
+  --frame-color: #000000;
+  --content-bg: #1a1a1a;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--frame-color);
+  overflow-x: clip;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  background: var(--frame-color);
+  overflow-x: clip;
+  color: var(--foreground);
+  font-family: var(--font-body), sans-serif;
+  font-feature-settings: "ss03", "ss10", "ss11", "ss12";
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+::selection {
+  background: #000000;
+  color: #ffffff;
+}
+
+html[data-theme="dark"] ::selection {
+  background: #ffffff;
+  color: #000000;
+}
+
+[data-theme="light"] ::selection {
+  background: #000000;
+  color: #ffffff;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--clay-focus);
+  outline-offset: 3px;
+}
+
+input.ai-chat-input:focus-visible,
+textarea.ai-chat-input:focus-visible {
+  outline: none;
+  outline-offset: 0;
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  background: var(--content-bg);
+  margin: 1rem 1rem 1rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.app-shell::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--frame-color);
+}
+
+.app-shell::before {
+  content: none;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+.nav-glass {
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+}
+
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .nav-glass {
+    background-color: var(--surface-panel) !important;
+  }
+}
+
+/* Hero floating blob animations */
+@keyframes hero-blob-1 {
+  0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+  25%      { transform: translate(35%, -15%) scale(1.15) rotate(10deg); }
+  50%      { transform: translate(55%, 12%) scale(1.25) rotate(-12deg); }
+  75%      { transform: translate(25%, -8%) scale(1.12) rotate(8deg); }
+}
+
+@keyframes hero-blob-2 {
+  0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+  25%      { transform: translate(-30%, 15%) scale(1.18) rotate(-10deg); }
+  50%      { transform: translate(-55%, -10%) scale(1.28) rotate(14deg); }
+  75%      { transform: translate(-25%, 12%) scale(1.14) rotate(-8deg); }
+}
+
+@keyframes hero-blob-3 {
+  0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+  25%      { transform: translate(40%, -12%) scale(1.16) rotate(8deg); }
+  50%      { transform: translate(30%, 10%) scale(1.22) rotate(-10deg); }
+  75%      { transform: translate(20%, -6%) scale(1.1) rotate(6deg); }
+}
+
+@keyframes hero-blob-4 {
+  0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+  25%      { transform: translate(-25%, -12%) scale(1.14) rotate(-8deg); }
+  50%      { transform: translate(-45%, 15%) scale(1.26) rotate(12deg); }
+  75%      { transform: translate(-20%, -6%) scale(1.1) rotate(-6deg); }
+}
+
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+  pointer-events: none;
+}
+
+.hero-blob-1 {
+  width: 160%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: radial-gradient(circle, rgba(251, 189, 65, 0.85) 0%, rgba(251, 189, 65, 0.35) 35%, transparent 65%);
+  animation: hero-blob-1 15s ease-in-out infinite;
+}
+
+.hero-blob-2 {
+  width: 150%;
+  height: 190%;
+  top: -45%;
+  right: -50%;
+  background: radial-gradient(circle, rgba(132, 231, 165, 0.8) 0%, rgba(132, 231, 165, 0.35) 35%, transparent 65%);
+  animation: hero-blob-2 18s ease-in-out infinite;
+}
+
+.hero-blob-3 {
+  width: 140%;
+  height: 180%;
+  bottom: -40%;
+  left: -30%;
+  background: radial-gradient(circle, rgba(251, 189, 65, 0.5) 0%, rgba(251, 189, 65, 0.18) 35%, transparent 65%);
+  animation: hero-blob-3 16s ease-in-out infinite;
+}
+
+.hero-blob-4 {
+  width: 130%;
+  height: 170%;
+  top: -30%;
+  left: 20%;
+  background: radial-gradient(circle, rgba(132, 231, 165, 0.7) 0%, rgba(100, 200, 130, 0.25) 35%, transparent 65%);
+  animation: hero-blob-4 20s ease-in-out infinite;
+}
+
+html[data-theme="dark"] .hero-blob-1 {
+  background: radial-gradient(circle, rgba(245, 141, 215, 0.85) 0%, rgba(200, 80, 180, 0.45) 35%, transparent 65%);
+}
+
+html[data-theme="dark"] .hero-blob-2 {
+  background: radial-gradient(circle, rgba(66, 158, 214, 0.88) 0%, rgba(30, 100, 180, 0.4) 35%, transparent 65%);
+}
+
+html[data-theme="dark"] .hero-blob-3 {
+  background: radial-gradient(circle, rgba(66, 158, 214, 0.6) 0%, rgba(30, 100, 180, 0.2) 35%, transparent 65%);
+}
+
+html[data-theme="dark"] .hero-blob-4 {
+  background: radial-gradient(circle, rgba(245, 141, 215, 0.75) 0%, rgba(200, 80, 180, 0.35) 35%, transparent 65%);
+}
+
+/* static sun background: pre-rendered glow + central disc image */
+.hero-sun {
+  position: relative;
+  isolation: isolate;
+  background-color: #fbfcfa;
+}
+
+.hero-sun::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  aspect-ratio: 1684 / 896;
+  background-image: url("/hero-sun-light.jpg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-sun::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background-image: url("/hero-sun-bottom.jpg");
+  background-size: 100% auto;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(to top, black 30%, transparent 100%);
+  mask-image: linear-gradient(to top, black 30%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-sun > * {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-theme="dark"] .hero-sun {
+  background-color: #181613;
+}
+
+html[data-theme="dark"] .hero-sun::before {
+  background-image: url("/hero-sun-dark.jpg");
+}
+
+.connector-blob {
+  background-image: url("/connector-blob.png");
+  background-size: 100% auto;
+  background-position: center;
+  background-repeat: no-repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .connector-blob {
+    animation: none;
+  }
+}
+
+html[data-theme="dark"] .connector-blob {
+  mix-blend-mode: screen;
+  filter: invert(1) hue-rotate(180deg);
+  opacity: 0.75;
+}
+
+.interactive-dot-background {
+  --dot-pointer-x: -20rem;
+  --dot-pointer-y: -20rem;
+  pointer-events: none;
+  position: fixed;
+  inset: 1rem;
+  z-index: 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  opacity: 1;
+  isolation: isolate;
+  background-color: var(--content-bg);
+  transition: opacity 180ms ease;
+}
+
+.interactive-dot-background__gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 1;
+}
+
+.interactive-dot-background__gradient canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.interactive-dot-background__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+  background-image: url("/noise.png");
+  background-size: 120px 120px;
+  background-repeat: repeat;
+}
+
+html[data-theme="dark"] .interactive-dot-background__grain {
+  mix-blend-mode: screen;
+  opacity: 0.1;
+}
+
+.interactive-dot-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(38, 38, 36, 0.22) 1.2px, transparent 1.4px);
+  background-position: 0 0;
+  background-size: 12px 12px;
+}
+
+html[data-theme="dark"] .interactive-dot-background::before {
+  background-image: radial-gradient(circle, rgba(250, 249, 245, 0.22) 1.2px, transparent 1.4px);
+}
+
+@property --dot-spin-angle {
+  syntax: "<angle>";
+  initial-value: 20deg;
+  inherits: false;
+}
+
+.interactive-dot-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 0;
+  background: conic-gradient(
+    from var(--dot-spin-angle, 20deg) at var(--dot-pointer-x) var(--dot-pointer-y),
+    var(--dot-hot-coral),
+    var(--dot-hot-blue),
+    var(--dot-hot-mint),
+    var(--dot-hot-lilac),
+    var(--dot-hot-coral)
+  );
+  animation: dot-spin 16s linear infinite;
+  filter: saturate(1.45) contrast(1.12);
+  clip-path: var(--dot-clip-shape, circle(1.5rem at var(--dot-pointer-x) var(--dot-pointer-y)));
+  mask-image: radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
+  mask-position: 0 0;
+  mask-size: 12px 12px;
+  mask-repeat: repeat;
+  -webkit-clip-path: var(--dot-clip-shape, circle(1.5rem at var(--dot-pointer-x) var(--dot-pointer-y)));
+  -webkit-mask-image: radial-gradient(circle, black var(--dot-hot-size), transparent var(--dot-hot-edge));
+  -webkit-mask-position: 0 0;
+  -webkit-mask-size: 12px 12px;
+  -webkit-mask-repeat: repeat;
+  transition: opacity 160ms ease;
+}
+
+.interactive-dot-background[data-pointer="active"]::after {
+  opacity: var(--dot-hot-opacity);
+}
+
+.app-glow {
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+  height: 28rem;
+  width: 28rem;
+  border-radius: 9999px;
+  filter: blur(56px);
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-blob {
+    animation: none;
+  }
+}
+
+/* surveys-page sun: image-based sphere background */
+.hero-sun-surveys {
+  position: relative;
+  isolation: isolate;
+  background-color: #c9d4e8 !important;
+  background-image: none !important;
+}
+
+.hero-sun-surveys::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("/surveys-sun-blue.webp?v=2") !important;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-sun-surveys::after {
+  content: none;
+}
+
+.hero-sun-surveys > * {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-theme="dark"] .hero-sun-surveys {
+  background-color: #4a5575;
+}
+
+html[data-theme="dark"] .hero-sun-surveys::before {
+  filter: brightness(0.7) saturate(0.85);
+}
+
+.app-glow-left {
+  left: -10rem;
+  top: -6rem;
+  background: var(--glow-left);
+}
+
+.app-glow-right {
+  bottom: -8rem;
+  right: -8rem;
+  background: var(--glow-right);
+}
+
+main,
+section,
+aside,
+header,
+footer {
+  position: relative;
+  z-index: 1;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-feature-settings: "ss01", "ss03", "ss10", "ss11", "ss12";
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.font-mono {
+  font-family: var(--font-mono), "Space Mono", monospace;
+}
+
+.clay-label {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.clay-card {
+  border: 1px solid var(--line);
+  border-radius: var(--clay-radius-card);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.clay-section {
+  border: 1px solid var(--line);
+  border-radius: var(--clay-radius-section);
+  box-shadow: var(--shadow-strong);
+}
+
+.clay-button-hover {
+  transform-origin: center;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.clay-button-hover:hover:not(:disabled) {
+  background: #2CA0AB !important;
+  border-color: var(--clay-black) !important;
+  color: #ffffff !important;
+  box-shadow: var(--clay-hard-shadow);
+  transform: translateY(-0.18rem) rotateZ(-3deg);
+}
+
+.clay-button-hover[data-clay-hover="dark"]:hover:not(:disabled) {
+  background: #434346;
+  color: #ffffff;
+}
+
+.clay-button-hover[data-clay-hover="blue"]:hover:not(:disabled) {
+  background: var(--clay-slushie-500);
+  color: var(--clay-black);
+}
+
+.clay-button-hover[data-clay-hover="lemon"]:hover:not(:disabled) {
+  background: var(--clay-lemon-500);
+  color: var(--clay-black);
+}
+
+.clay-swatch-section {
+  background: var(--clay-matcha-800);
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
+  box-shadow: -7px 7px 0 rgba(0, 0, 0, 0.9);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ciao-wave {
+  animation: ciao-wave-animation 1.5s infinite !important;
+  transform-origin: 70% 70% !important;
+  display: inline-block;
+  will-change: transform;
+}
+
+@keyframes ciao-wave-animation {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(14deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
+  60% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes ciao-wave-dot {
+  0%, 60%, 100% { opacity: 0.2; }
+  30% { opacity: 1; }
+}
+
+.ciao-wave-dot {
+  animation: ciao-wave-dot 1.4s ease-in-out infinite;
+}
+
+@keyframes dot-spin {
+  from { --dot-spin-angle: 20deg; }
+  to { --dot-spin-angle: 380deg; }
+}
+
+@keyframes openingDot {
+  0%, 80%, 100% {
+    opacity: 0.32;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-0.12rem);
+  }
+}
+
+@keyframes mobileNavBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mobileNavSheetIn {
+  0% {
+    opacity: 0;
+    transform: translateX(1.1rem);
+  }
+  62% {
+    opacity: 1;
+    transform: translateX(-0.35rem);
+  }
+  82% {
+    transform: translateX(0.12rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.mobile-nav-backdrop {
+  animation: mobileNavBackdropIn 180ms ease-out both;
+}
+
+.mobile-nav-sheet {
+  transform-origin: right center;
+  animation: mobileNavSheetIn 240ms cubic-bezier(0.22, 0.88, 0.3, 1.08) both;
+}
+
+.opening-dots {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1em;
+  margin-left: 0.08em;
+}
+
+.opening-dots span {
+  animation: openingDot 900ms ease-in-out infinite;
+  line-height: 1;
+}
+
+.opening-dots span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.opening-dots span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.loading-skeleton {
+  background:
+    linear-gradient(
+      90deg,
+      var(--skeleton-base) 0%,
+      var(--skeleton-base) 30%,
+      var(--skeleton-highlight) 50%,
+      var(--skeleton-base) 70%,
+      var(--skeleton-base) 100%
+    );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-nav-backdrop,
+  .mobile-nav-sheet,
+  .opening-dots span,
+  .loading-skeleton {
+    animation: none;
+  }
+
+  .opening-dots span {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+[data-print-only] {
+  display: none !important;
+}
+
+.dashboard-print-header {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 0 18px;
+  margin: 0 0 18px;
+  border-bottom: 1px solid #d8d3c9;
+}
+
+.dashboard-print-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.dashboard-print-header__logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.dashboard-print-header__brand-mark {
+  font-family: var(--font-display, "Cabinet Grotesk", "Geist", system-ui, sans-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1;
+}
+
+.dashboard-print-header__brand-tag {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #6e6a62;
+  margin: 4px 0 0;
+}
+
+.dashboard-print-header__meta {
+  text-align: right;
+  max-width: 60%;
+}
+
+.dashboard-print-header__eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #6e6a62;
+  margin: 0;
+}
+
+.dashboard-print-header__title {
+  font-family: var(--font-display, "Cabinet Grotesk", "Geist", system-ui, sans-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 6px 0 0;
+  line-height: 1.15;
+}
+
+.dashboard-print-header__sub {
+  font-size: 11px;
+  color: #6e6a62;
+  margin: 6px 0 0;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 10mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html[data-theme="dark"] {
+    color-scheme: light;
+  }
+
+  [data-print-only] {
+    display: flex !important;
+  }
+
+  [data-print-hide],
+  header.nav-glass,
+  nav[aria-label="Breadcrumb"],
+  footer,
+  .mobile-nav-backdrop,
+  .mobile-nav-sheet,
+  .interactive-dot-background,
+  .hero-blob,
+  [aria-hidden="true"][class*="hero-blob"],
+  [role="menuitem"] {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  section,
+  article {
+    box-shadow: none !important;
+    border-color: #e3ddd1 !important;
+    background: #ffffff !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .clay-section,
+  [style*="hero-gradient"],
+  [style*="var(--hero-gradient)"] {
+    background: #ffffff !important;
+  }
+
+  a {
+    color: #1a1a1a !important;
+    text-decoration: none !important;
+  }
+}
+
+@keyframes ciao-wave {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  10%, 30% { transform: rotate(18deg); }
+  20%, 40% { transform: rotate(-12deg); }
+  50% { transform: rotate(10deg); }
+}
+
+.ciao-wave {
+  transform-origin: 70% 80%;
+  animation: ciao-wave 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ciao-wave {
+    animation: none;
+  }
+}
+
+.incognito-maze {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.incognito-bg {
+  background-color: #080d24;
+  --dot-color: rgba(255, 255, 255, 0.22);
+  --dot-hot-coral: rgba(255, 255, 255, 0.96);
+  --dot-hot-blue: rgba(255, 255, 255, 0.96);
+  --dot-hot-mint: rgba(255, 255, 255, 0.96);
+  --dot-hot-lilac: rgba(255, 255, 255, 0.96);
+  --dot-hot-opacity: 1;
+  --dot-hot-size: 1.65px;
+  --dot-hot-edge: 1.92px;
+}
+
+.maze-ghost {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.maze-ghost-1 { color: #ff4d6d; animation-name: maze-path-1; animation-duration: 54s; }
+.maze-ghost-2 { color: #00d4ff; animation-name: maze-path-2; animation-duration: 37s; }
+.maze-ghost-3 { color: #ff8ad6; animation-name: maze-path-3; animation-duration: 39s; }
+.maze-ghost-4 { color: #ffb24c; animation-name: maze-path-4; animation-duration: 37s; }
+
+@keyframes maze-path-1 {
+  0%,  100% { left: 4%;  top: 8%;  }
+  19%       { left: 45%; top: 8%;  }
+  27%       { left: 45%; top: 25%; }
+  41%       { left: 15%; top: 25%; }
+  48%       { left: 15%; top: 40%; }
+  62%       { left: 45%; top: 40%; }
+  64%       { left: 45%; top: 45%; }
+  83%       { left: 4%;  top: 45%; }
+}
+
+@keyframes maze-path-2 {
+  0%,  100% { left: 55%; top: 8%;  }
+  25%       { left: 92%; top: 8%;  }
+  50%       { left: 92%; top: 45%; }
+  65%       { left: 70%; top: 45%; }
+  78%       { left: 70%; top: 25%; }
+  89%       { left: 55%; top: 25%; }
+}
+
+@keyframes maze-path-3 {
+  0%,  100% { left: 4%;  top: 92%; }
+  26%       { left: 45%; top: 92%; }
+  40%       { left: 45%; top: 70%; }
+  56%       { left: 20%; top: 70%; }
+  66%       { left: 20%; top: 55%; }
+  76%       { left: 4%;  top: 55%; }
+}
+
+@keyframes maze-path-4 {
+  0%,  100% { left: 55%; top: 92%; }
+  25%       { left: 92%; top: 92%; }
+  50%       { left: 92%; top: 55%; }
+  65%       { left: 70%; top: 55%; }
+  78%       { left: 70%; top: 75%; }
+  89%       { left: 55%; top: 75%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .maze-ghost {
+    animation: none;
+  }
+}
+
+/* AI chat pill theming — light cream pill in light mode, near-black in dark mode */
+.ai-pill {
+  background: rgba(250, 250, 250, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(60px) saturate(2.2);
+  -webkit-backdrop-filter: blur(60px) saturate(2.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+.ai-pill.ai-pill--expanded {
+  background: rgba(252, 252, 252, 0.95);
+}
+[data-theme="dark"] .ai-pill {
+  background: #0c0c0c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+[data-theme="dark"] .ai-pill.ai-pill--expanded {
+  background: #0c0c0c;
+}
+
+.ai-pill-input {
+  color: rgba(0, 0, 0, 0.8);
+}
+.ai-pill-input::placeholder {
+  color: rgba(0, 0, 0, 0.45);
+}
+[data-theme="dark"] .ai-pill-input {
+  color: rgba(255, 255, 255, 0.85);
+}
+[data-theme="dark"] .ai-pill-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.ai-pill-kbd {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.45);
+}
+[data-theme="dark"] .ai-pill-kbd {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.ai-pill-btn {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.65);
+}
+.ai-pill-btn:hover {
+  background: rgba(0, 0, 0, 0.14);
+}
+[data-theme="dark"] .ai-pill-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+}
+[data-theme="dark"] .ai-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* JSX uses text-white/* on icons and labels; flip those to dark in light mode */
+.ai-pill [class*="text-white"] {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+[data-theme="dark"] .ai-pill [class*="text-white"] {
+  color: unset !important;
+}
+
+/* JSX uses bg-white/* on subtle backgrounds (model badge, send button); flip those too */
+.ai-pill [class*="bg-white"] {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+.ai-pill [class*="bg-white"]:hover {
+  background-color: rgba(0, 0, 0, 0.14) !important;
+}
+[data-theme="dark"] .ai-pill [class*="bg-white"],
+[data-theme="dark"] .ai-pill [class*="bg-white"]:hover {
+  background-color: unset !important;
+}
+
+/* Divider lines */
+.ai-divider-b { border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+.ai-divider-t { border-top: 1px solid rgba(0, 0, 0, 0.08); }
+[data-theme="dark"] .ai-divider-b { border-bottom-color: rgba(255, 255, 255, 0.1); }
+[data-theme="dark"] .ai-divider-t { border-top-color: rgba(255, 255, 255, 0.1); }
+
+/* User message bubble */
+.ai-user-bubble {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.85);
+}
+[data-theme="dark"] .ai-user-bubble {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 1);
+}
+
+/* Sparkle/logo: light variant in light mode, dark in dark */
+.ai-pill-sparkle-dark { display: none; }
+.ai-pill-sparkle-light { display: block; }
+.ai-pill-logo { filter: none; }
+[data-theme="dark"] .ai-pill-sparkle-dark { display: block; }
+[data-theme="dark"] .ai-pill-sparkle-light { display: none; }
+[data-theme="dark"] .ai-pill-logo { filter: invert(1); }
+
+/* Expanded textarea inside ai-pill */
+.ai-pill-textarea {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.8);
+}
+.ai-pill-textarea::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+.ai-pill-textarea:focus {
+  border-color: rgba(0, 0, 0, 0.25);
+}
+[data-theme="dark"] .ai-pill-textarea {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+}
+[data-theme="dark"] .ai-pill-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+[data-theme="dark"] .ai-pill-textarea:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ===========================================================================
+   === Chat section (ported from apps/app) ===
+   ---------------------------------------------------------------------------
+   The chat layout renders <div data-section="chat" class="app-shell"> and a
+   client component mirrors the attribute onto <body> after hydration
+   (BodySection), so portal UI (Radix dialogs/tooltips, sonner toasts)
+   inherits these tokens too.
+
+   Token overrides are set on the section element itself, so they shadow both
+   the :root values and the html[data-theme="dark"] values via inheritance
+   proximity. The dark block targets the same element with one extra attribute
+   selector, so it outranks the light block by specificity.
+   ======================================================================== */
+
+[data-section="chat"] {
+  --clay-cream: #ffffff;
+  --clay-oat: rgba(0, 0, 0, 0.12);
+  --clay-oat-light: rgba(0, 0, 0, 0.04);
+  --clay-warm-silver: rgba(0, 0, 0, 0.5);
+  --clay-warm-charcoal: rgba(0, 0, 0, 0.75);
+  --clay-matcha-300: #000000;
+  --clay-matcha-600: #000000;
+  --clay-matcha-800: #000000;
+  --clay-slushie-500: #000000;
+  --clay-slushie-800: #000000;
+  --clay-lemon-400: #000000;
+  --clay-lemon-500: #000000;
+  --clay-lemon-700: #000000;
+  --clay-ube-300: #000000;
+  --clay-ube-800: #000000;
+  --clay-pomegranate-400: #000000;
+  --clay-blueberry-800: #000000;
+  --clay-focus: rgba(0, 0, 0, 0.4);
+  --clay-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --clay-hard-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --background: #ffffff;
+  --ink-soft: rgba(0, 0, 0, 0.78);
+  --muted: rgba(0, 0, 0, 0.6);
+  --surface: #ffffff;
+  --surface-secondary: rgba(0, 0, 0, 0.04);
+  --surface-panel: rgba(255, 255, 255, 0.6);
+  --surface-inset: rgba(0, 0, 0, 0.04);
+  --line: rgba(0, 0, 0, 0.08);
+  --line-strong: rgba(0, 0, 0, 0.1);
+  --accent: #000000;
+  --accent-soft: rgba(0, 0, 0, 0.06);
+  --accent-mint: #000000;
+  --accent-lilac: #000000;
+  --accent-rose: #000000;
+  --accent-blue: #000000;
+  --accent-coral: #000000;
+  --accent-lime: #000000;
+  --accent-sand: rgba(0, 0, 0, 0.04);
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.08), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
+  --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  /* Fumadocs-compatible aliases (the old chat app mirrored the docs palette) */
+  --color-fd-background: var(--background);
+  --color-fd-foreground: var(--foreground);
+  --color-fd-muted: var(--surface-secondary);
+  --color-fd-muted-foreground: var(--muted);
+  --color-fd-popover: var(--surface-panel-strong);
+  --color-fd-popover-foreground: var(--ink);
+  --color-fd-card: var(--surface-panel-strong);
+  --color-fd-card-foreground: var(--ink);
+  --color-fd-border: var(--line-strong);
+  --color-fd-primary: var(--ink);
+  --color-fd-primary-foreground: var(--selected-contrast);
+  --color-fd-secondary: var(--surface-inset);
+  --color-fd-secondary-foreground: var(--ink);
+  --color-fd-accent: var(--surface-inset);
+  --color-fd-accent-foreground: var(--ink);
+  --color-fd-ring: rgba(0, 0, 0, 0.4);
+  --color-fd-overlay: rgba(0, 0, 0, 0.15);
+  --plot-fill-start: rgba(0, 0, 0, 0.42);
+  --plot-fill-end: rgba(0, 0, 0, 0.72);
+  --plot-grid: rgba(0, 0, 0, 0.1);
+  --plot-label: rgba(0, 0, 0, 0.58);
+  --plot-stroke: rgba(0, 0, 0, 0.22);
+  --hero-gradient: linear-gradient(135deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.02));
+  --hero-spotlight: radial-gradient(circle at center, rgba(0, 0, 0, 0.04), transparent 62%);
+  --app-background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.94));
+  --glow-left: rgba(0, 0, 0, 0.04);
+  --glow-right: rgba(0, 0, 0, 0.04);
+  --skeleton-base: rgba(0, 0, 0, 0.04);
+  --dot-color: rgba(0, 0, 0, 0.14);
+  --frame-color: rgba(0, 0, 0, 0.06);
+  --content-bg: var(--background);
+}
+
+html[data-theme="dark"] [data-section="chat"] {
+  --background: #000000;
+  --frame-color: rgba(255, 255, 255, 0.06);
+  --content-bg: var(--background);
+  --foreground: #ffffff;
+  --ink: #ffffff;
+  --ink-soft: rgba(255, 255, 255, 0.78);
+  --muted: rgba(255, 255, 255, 0.6);
+  --surface: #000000;
+  --surface-secondary: rgba(255, 255, 255, 0.06);
+  --surface-panel: rgba(0, 0, 0, 0.6);
+  --surface-panel-strong: #0a0a0a;
+  --surface-inset: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.1);
+  --accent: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.1);
+  --accent-blue: #ffffff;
+  --selected-contrast: #000000;
+  --keycap-bg: rgba(18, 18, 18, 0.78);
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.4), 0 -1px 1px rgba(255, 255, 255, 0.06) inset;
+  --home-crumb-button-bg: #0a0a0a;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  --color-fd-ring: rgba(255, 255, 255, 0.4);
+  --color-fd-overlay: rgba(0, 0, 0, 0.5);
+  --plot-fill-start: rgba(255, 255, 255, 0.5);
+  --plot-fill-end: rgba(255, 255, 255, 0.78);
+  --plot-grid: rgba(255, 255, 255, 0.12);
+  --plot-label: rgba(255, 255, 255, 0.56);
+  --plot-stroke: rgba(255, 255, 255, 0.22);
+  --hero-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  --hero-spotlight: radial-gradient(circle at center, rgba(255, 255, 255, 0.04), transparent 62%);
+  --app-background: linear-gradient(180deg, rgba(0, 0, 0, 0.98), rgba(0, 0, 0, 0.94));
+  --glow-left: rgba(255, 255, 255, 0.04);
+  --glow-right: rgba(255, 255, 255, 0.04);
+  --skeleton-base: rgba(255, 255, 255, 0.06);
+  --skeleton-highlight: rgba(255, 255, 255, 0.12);
+  --selected-contrast-strong: #ffffff;
+  --dot-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Forced light-theme subtree inside chat (mirrors the base [data-theme="light"]
+   block; the extra section attribute outranks it). */
+[data-section="chat"] [data-theme="light"] {
+  --background: #ffffff;
+  --ink-soft: rgba(0, 0, 0, 0.78);
+  --muted: rgba(0, 0, 0, 0.6);
+  --surface: #ffffff;
+  --surface-secondary: rgba(0, 0, 0, 0.04);
+  --surface-panel: rgba(255, 255, 255, 0.6);
+  --surface-inset: rgba(0, 0, 0, 0.04);
+  --line: rgba(0, 0, 0, 0.08);
+  --line-strong: rgba(0, 0, 0, 0.1);
+  --accent: #000000;
+  --accent-soft: rgba(0, 0, 0, 0.06);
+  --accent-mint: #000000;
+  --accent-lilac: #000000;
+  --accent-rose: #000000;
+  --accent-blue: #000000;
+  --accent-coral: #000000;
+  --accent-lime: #000000;
+  --accent-sand: rgba(0, 0, 0, 0.04);
+  --keycap-shadow: 0 1px 1px rgba(0, 0, 0, 0.08), 0 -1px 1px rgba(0, 0, 0, 0.04) inset;
+  --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  --nav-glass-bg: rgba(255, 255, 255, 0.6);
+  --nav-glass-border: rgba(0, 0, 0, 0.08);
+}
+
+/* The old chat app layered the translucent frame tint over the opaque theme
+   background on <html>/<body>. <html> is outside the section scope, but the
+   body carries data-section, covers the viewport, and paints over it. */
+body[data-section="chat"] {
+  min-height: 100vh;
+  background: linear-gradient(var(--frame-color), var(--frame-color)), var(--background);
+  overflow-x: hidden;
+}
+
+/* Chat shell: fixed full-viewport panel clipped to a rounded inset card,
+   instead of the survey base's in-flow shell with margins. */
+.app-shell[data-section="chat"] {
+  position: fixed;
+  inset: 0;
+  min-height: 0;
+  margin: 0;
+  border-radius: 0;
+  clip-path: inset(1rem round 1.5rem);
+}
+
+.app-shell[data-section="chat"]::after {
+  content: none;
+}
+
+/* The chat app disables focus outlines on all text inputs (the base only
+   exempts .ai-chat-input). */
+[data-section="chat"] input:focus-visible,
+[data-section="chat"] textarea:focus-visible {
+  outline: none;
+  outline-offset: 0;
+}
+
+/* Dot background: full-bleed, token-driven dot grid (the base uses an inset
+   rounded card with hardcoded dot colors). */
+[data-section="chat"] .interactive-dot-background {
+  inset: 0;
+  border-radius: 0;
+  background-color: var(--background);
+}
+
+[data-section="chat"] .interactive-dot-background::before {
+  background-image: radial-gradient(circle, var(--dot-color) 1.15px, transparent 1.35px);
+  opacity: 0.82;
+}
+
+/* Needed because the base dark rule (html[data-theme="dark"] .interactive-
+   dot-background::before) outranks the chat light rule above. */
+html[data-theme="dark"] [data-section="chat"] .interactive-dot-background::before {
+  background-image: radial-gradient(circle, var(--dot-color) 1.15px, transparent 1.35px);
+}
+
+[data-section="chat"] .interactive-dot-background::after {
+  clip-path: var(--dot-clip-shape, circle(2.2rem at var(--dot-pointer-x) var(--dot-pointer-y)));
+  -webkit-clip-path: var(--dot-clip-shape, circle(2.2rem at var(--dot-pointer-x) var(--dot-pointer-y)));
+}
+
+/* The base resolves box-shadow through --clay-hard-shadow, which is a soft
+   blur in the chat palette; the chat app keeps the literal hard offset. */
+[data-section="chat"] .clay-button-hover:hover:not(:disabled) {
+  box-shadow: -7px 7px 0 #000000;
+}
+
+/* The chat app marks the variant colors !important so they beat the base
+   hover rule's !important background. */
+[data-section="chat"] .clay-button-hover[data-clay-hover="dark"]:hover:not(:disabled) {
+  background: #434346 !important;
+  color: #ffffff !important;
+}
+
+[data-section="chat"] .clay-button-hover[data-clay-hover="blue"]:hover:not(:disabled) {
+  background: var(--clay-slushie-500) !important;
+  color: var(--clay-black) !important;
+}
+
+[data-section="chat"] .clay-button-hover[data-clay-hover="lemon"]:hover:not(:disabled) {
+  background: var(--clay-lemon-500) !important;
+  color: var(--clay-black) !important;
+}
+
+[data-section="chat"] .clay-swatch-section {
+  background: var(--ink);
+  color: var(--selected-contrast);
+}
+
+[data-section="chat"] .incognito-bg {
+  background-color: #0e2cb0;
+}
+
+[data-section="chat"] .maze-ghost {
+  width: 36px;
+  height: 36px;
+}
+
+/* Ghost eye animation (chat app only; referenced via Tailwind's
+   animate-[look-around_...] arbitrary value in incognito-ghost-icon). */
+@keyframes look-around {
+  0%, 16.6%, 100% { transform: translateX(-1.5px) translateY(0); }
+  25%, 41.6%      { transform: translateX(1.5px) translateY(0); }
+  50%, 66.6%      { transform: translateX(0) translateY(-1.5px); }
+  75%, 91.6%      { transform: translateX(0) translateY(0); }
+}
+
+/* maze-path-2/3 exist in the base with different waypoints; keyframes are
+   global, so the chat variants are renamed and swapped in via animation-name. */
+@keyframes maze-path-2-chat {
+  0%,  100% { left: 55%; top: 18%; }
+  25%       { left: 92%; top: 18%; }
+  50%       { left: 92%; top: 48%; }
+  65%       { left: 70%; top: 48%; }
+  78%       { left: 70%; top: 30%; }
+  89%       { left: 55%; top: 30%; }
+}
+
+@keyframes maze-path-3-chat {
+  0%,  100% { left: 4%;  top: 85%; }
+  26%       { left: 45%; top: 85%; }
+  40%       { left: 45%; top: 65%; }
+  56%       { left: 20%; top: 65%; }
+  66%       { left: 20%; top: 55%; }
+  76%       { left: 4%;  top: 55%; }
+}
+
+[data-section="chat"] .maze-ghost-2 {
+  animation-name: maze-path-2-chat;
+}
+
+[data-section="chat"] .maze-ghost-3 {
+  animation-name: maze-path-3-chat;
+}
+
+/* ===========================================================================
+   === Docs section: fumadocs token overrides (ported from apps/docs) ===
+   ---------------------------------------------------------------------------
+   These accompany the fumadocs-ui imports at the top of this file. They are
+   global but harmless outside docs: the tokens are fd-prefixed, and `.dark`
+   is only set on <html> by the docs section's next-themes provider.
+   A later @theme block wins over the defaults from fumadocs neutral.css.
+   ======================================================================== */
+
+@theme {
+  /* Light mode — pure black & white to match survey/app */
+  --color-fd-background: #ffffff;
+  --color-fd-foreground: #000000;
+  --color-fd-muted: rgba(0, 0, 0, 0.04);
+  --color-fd-muted-foreground: rgba(0, 0, 0, 0.6);
+  --color-fd-popover: #ffffff;
+  --color-fd-popover-foreground: #000000;
+  --color-fd-card: #ffffff;
+  --color-fd-card-foreground: #000000;
+  --color-fd-border: rgba(0, 0, 0, 0.1);
+  --color-fd-primary: #000000;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: rgba(0, 0, 0, 0.06);
+  --color-fd-secondary-foreground: #000000;
+  --color-fd-accent: rgba(0, 0, 0, 0.06);
+  --color-fd-accent-foreground: #000000;
+  --color-fd-ring: rgba(0, 0, 0, 0.4);
+  --color-fd-overlay: rgba(0, 0, 0, 0.15);
+}
+
+/* Dark mode — pure black & white to match survey/app */
+.dark {
+  --color-fd-background: #000000;
+  --color-fd-foreground: #ffffff;
+  --color-fd-muted: rgba(255, 255, 255, 0.06);
+  --color-fd-muted-foreground: rgba(255, 255, 255, 0.6);
+  --color-fd-popover: #0a0a0a;
+  --color-fd-popover-foreground: #ffffff;
+  --color-fd-card: #0a0a0a;
+  --color-fd-card-foreground: #ffffff;
+  --color-fd-border: rgba(255, 255, 255, 0.1);
+  --color-fd-primary: #ffffff;
+  --color-fd-primary-foreground: #000000;
+  --color-fd-secondary: rgba(255, 255, 255, 0.08);
+  --color-fd-secondary-foreground: #ffffff;
+  --color-fd-accent: rgba(255, 255, 255, 0.08);
+  --color-fd-accent-foreground: #ffffff;
+  --color-fd-ring: rgba(255, 255, 255, 0.4);
+  --color-fd-overlay: rgba(0, 0, 0, 0.5);
+}
