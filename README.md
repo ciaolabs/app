@@ -10,7 +10,8 @@ A single Next.js application (`apps/platform`, served at `platform.ciaobang.com`
 - scored dashboards at `/surveys/personality/dashboard` and `/surveys/values-beliefs/dashboard`, with legacy dashboard redirects preserved
 - AI chat (threads, RAG over the docs) at `/chat`, account settings at `/chat/account`
 - documentation (Fumadocs) at `/docs`
-- legacy hosts `survey.`/`app.`/`docs.ciaobang.com` redirect into the platform host (see `apps/platform/next.config.ts`)
+
+The legacy hosts (`survey.`/`app.`/`docs.ciaobang.com`) have been retired — `platform.ciaobang.com` is the only host.
 
 ## Stack
 
