@@ -27,6 +27,24 @@
   --font-sans: var(--font-body);
 }
 
+/* The global stylesheet stacks page chrome above the dot background with an
+   unlayered `main, section, aside, header, footer { position: relative;
+   z-index: 1 }`. Because it is unlayered it outranks fumadocs' Tailwind
+   `.fixed`/`.sticky` utilities (which live in the utilities cascade layer),
+   so the mobile sidebar drawer (<aside id="nd-sidebar-mobile">) and the
+   sticky subnav (<header>) get forced to `position: relative` inside docs.
+   The drawer then sits in flow, its tall page-tree inflates the docs grid's
+   first row, and its min-content width grabs the left gutter column — which
+   is what pushed the article down and to the right on mobile.
+
+   Revert just these elements to their cascade-layer value so fumadocs' own
+   positioning wins again. Inside docs the dot background is a z-index:-1
+   full-bleed sheet, so the z-index:1 stacking isn't needed here either. */
+[data-section="docs"] :is(main, section, aside, header, footer) {
+  position: revert-layer;
+  z-index: revert-layer;
+}
+
 body[data-section="docs"] {
   font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
   font-feature-settings: "ss03", "ss10", "ss11", "ss12";

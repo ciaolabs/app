@@ -75,13 +75,16 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
     <footer className="mt-6">
       {/* Landscape container with the tulip image */}
       <div
-        className="relative h-[60rem] w-full overflow-hidden rounded-t-3xl border border-(--line) shadow-(--shadow-soft)"
+        className="relative min-h-[60rem] w-full overflow-hidden rounded-t-3xl border border-(--line) shadow-(--shadow-soft)"
         style={{
           background: `var(--surface-panel) url('${footerImage}') no-repeat center bottom / cover`,
         }}
       >
-        {/* White card pinned to the upper (white-sky) zone of the image */}
-        <div className="absolute inset-x-10 top-10 max-h-100 overflow-hidden rounded-2xl border border-(--line) bg-[#f5f3ef] px-6 py-6 [html[data-theme='dark']_&]:bg-[#202322] sm:inset-x-12 sm:top-12 sm:px-7 sm:py-7">
+        {/* White card pinned to the upper (white-sky) zone of the image. On
+            mobile it flows in-place and grows to fit all content; on large
+            screens it pins to the top corner and the compact horizontal
+            layout keeps it short. */}
+        <div className="relative mx-10 mt-10 rounded-2xl border border-(--line) bg-[#f5f3ef] px-6 py-6 [html[data-theme='dark']_&]:bg-[#202322] sm:mx-12 sm:mt-12 sm:px-7 sm:py-7">
 
           {/* Top row: tagline + CTAs | logo */}
           <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:justify-between">
@@ -136,7 +139,7 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
                 display: inline-block;
               }
             ` }} />
-            <div className="flex shrink-0 flex-col items-end justify-between">
+            <div className="flex shrink-0 flex-col items-start justify-start lg:items-end lg:justify-between">
               <div className="flex items-center gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
