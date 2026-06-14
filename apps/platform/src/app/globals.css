@@ -278,8 +278,19 @@ textarea.ai-chat-input:focus-visible {
   background: var(--frame-color);
 }
 
-.app-shell::before {
-  content: none;
+/* Frame overlay: a fixed 1rem border drawn on top of everything so the top and
+   bottom (and side) borders stay solid --frame-color while scrolling and the
+   sticky nav / page content can never bleed over the frame. The 1.5rem outer
+   radius minus the 1rem border width yields the 0.5rem inner radius that
+   matches .app-shell, so the framed content keeps its rounded corners. */
+.app-shell:not([data-section="chat"])::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  border: 1rem solid var(--frame-color);
+  border-radius: 1.5rem;
 }
 
 html,
