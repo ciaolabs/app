@@ -10,8 +10,8 @@ describe("routes", () => {
   });
 
   it("appends the account anchor only when given", () => {
-    expect(routes.account()).toBe("/chat/account");
-    expect(routes.account("models")).toBe("/chat/account#models");
+    expect(routes.account()).toBe("/app/account");
+    expect(routes.account("models")).toBe("/app/account#models");
   });
 
   it("appends the docs slug only when given", () => {

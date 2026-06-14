@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeftIcon,
   ArrowUpIcon,
   CheckIcon,
   ChevronsUpDownIcon,
@@ -9,7 +10,6 @@ import {
   HistoryIcon,
   Loader2Icon,
   LogOutIcon,
-  MenuIcon,
   MonitorIcon,
   MoreHorizontalIcon,
   MoonIcon,
@@ -40,7 +40,6 @@ import { MarkdownRenderer } from "@/components/chat/markdown-renderer";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -415,17 +414,40 @@ function SettingsMenu({
       {open ? (
         <div
           role="menu"
-          className="absolute left-12 bottom-0 z-30 w-72 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-4 shadow-(--shadow-strong)"
+          className="absolute bottom-full left-0 z-40 mb-2 w-72 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-3 shadow-(--shadow-strong)"
         >
-          <p className="clay-label">Appearance</p>
-          <div className="mt-3">
+          <p className="clay-label px-1">Appearance</p>
+          <div className="mt-3 px-1">
             <ThemeModeRow mode={mode} hasHydrated={hasHydrated} onSelect={setMode} />
           </div>
 
-          <Separator className="my-4 bg-(--line)" />
+          <Separator className="my-3 bg-(--line)" />
 
-          <p className="clay-label">Survey context</p>
-          <p className="mt-2 text-sm text-(--ink-soft)">{getContextLabel(surveyContext)}</p>
+          <a
+            href={routes.docs()}
+            target="_blank"
+            rel="noreferrer"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-(--ink) hover:bg-(--surface-inset)"
+          >
+            <DocsIcon className="size-4" />
+            <span>Documentation</span>
+          </a>
+          <Link
+            href={routes.home}
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-(--ink) hover:bg-(--surface-inset)"
+          >
+            <ArrowLeftIcon className="size-4" />
+            <span>Go back to surveys</span>
+          </Link>
+
+          <Separator className="my-3 bg-(--line)" />
+
+          <p className="clay-label px-1">Survey context</p>
+          <p className="mt-2 px-1 text-sm text-(--ink-soft)">{getContextLabel(surveyContext)}</p>
         </div>
       ) : null}
     </div>
@@ -481,7 +503,7 @@ function CollapsedSidebarToolbar({
 }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <div className="absolute top-7 left-7 z-30 flex flex-col items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur">
+    <div className="absolute top-7 left-7 z-30 hidden flex-col items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur lg:flex">
       <Tooltip>
         <TooltipTrigger asChild>
           <button
@@ -1074,6 +1096,7 @@ function ThreadSidebar({
   onRenameThread,
   onPinThread,
   pinnedThreadIds,
+  surveyContext,
   onCollapse,
   onOpenSearch,
 }: {
@@ -1088,6 +1111,7 @@ function ThreadSidebar({
   onRenameThread: (threadId: string, title: string) => void;
   onPinThread: (threadId: string) => void;
   pinnedThreadIds: string[];
+  surveyContext: SurveyChatContext;
   onCollapse?: () => void;
   onOpenSearch?: () => void;
 }) {
@@ -1205,7 +1229,12 @@ function ThreadSidebar({
       </ScrollArea>
 
       <div className="shrink-0 border-t border-(--line) p-3">
-        <AccountMenu />
+        <div className="flex items-center gap-1">
+          <div className="min-w-0 flex-1">
+            <AccountMenu />
+          </div>
+          <SettingsMenu surveyContext={surveyContext} />
+        </div>
       </div>
     </aside>
   );
@@ -1257,7 +1286,7 @@ function AccountMenu() {
         <div
           role="menu"
           aria-label="Account menu"
-          className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-2 shadow-(--shadow-strong)"
+          className="absolute bottom-full left-0 right-0 z-50 mb-2 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-2 shadow-(--shadow-strong)"
         >
           <Link
             href={routes.account()}
@@ -1887,6 +1916,7 @@ export function ChatShell({
                 onRenameThread={handleRenameThread}
                 onPinThread={handlePinThread}
                 pinnedThreadIds={pinnedThreadIds}
+                surveyContext={surveyContext}
                 onCollapse={() => {
                   window.clearTimeout(peekTimerRef.current);
                   setSidebarPeeked(false);
@@ -1898,7 +1928,7 @@ export function ChatShell({
           </>
         ) : (
           <div
-            className="relative hidden shrink-0 border-r border-(--line-strong) lg:block"
+            className="relative z-40 hidden shrink-0 border-r border-(--line-strong) lg:block"
             style={{ width: "280px" }}
           >
             <ThreadSidebar
@@ -1913,6 +1943,7 @@ export function ChatShell({
               onRenameThread={handleRenameThread}
               onPinThread={handlePinThread}
               pinnedThreadIds={pinnedThreadIds}
+              surveyContext={surveyContext}
               onCollapse={() => sidebarLayout.setCollapsed(true)}
               onOpenSearch={() => setIsPaletteOpen(true)}
             />
@@ -1921,15 +1952,13 @@ export function ChatShell({
 
         <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
           <SheetTrigger asChild>
-            <Button
+            <button
               type="button"
-              size="icon"
-              variant="ghost"
-              className="absolute top-7 left-7 z-30 text-(--ink) hover:bg-(--surface-inset) lg:hidden"
-              aria-label="Open chat history"
+              className="absolute top-7 left-7 z-30 inline-flex size-11 items-center justify-center rounded-2xl border border-(--line-strong) bg-(--surface-panel) shadow-(--shadow-soft) backdrop-blur transition hover:bg-(--surface-inset) lg:hidden"
+              aria-label="Open chat menu"
             >
-              <MenuIcon className="size-5" />
-            </Button>
+              <CiaoSparkleImg size={28} />
+            </button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[340px] border-(--line) bg-(--surface-panel) p-0">
             <SheetHeader className="sr-only">
@@ -1948,6 +1977,7 @@ export function ChatShell({
               onRenameThread={handleRenameThread}
               onPinThread={handlePinThread}
               pinnedThreadIds={pinnedThreadIds}
+              surveyContext={surveyContext}
             />
           </SheetContent>
         </Sheet>
@@ -1983,24 +2013,6 @@ export function ChatShell({
             </div>
           </header>
 
-          <div className="absolute bottom-4 left-4 z-30 flex flex-col items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <a
-                  href={routes.docs()}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Open Ciao Docs"
-                  className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
-                >
-                  <DocsIcon className="size-5" />
-                </a>
-              </TooltipTrigger>
-              <TooltipContent side="right">Open Ciao Docs</TooltipContent>
-            </Tooltip>
-            <SettingsMenu surveyContext={surveyContext} />
-          </div>
-
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-6 sm:px-8">
             {messages.length === 0 ? (
               <EmptyChat
@@ -2025,7 +2037,19 @@ export function ChatShell({
             )}
           </div>
 
-          <div className="z-20 shrink-0 px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-8">
+          <div className="relative z-20 shrink-0 px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-8">
+            {/* Settings (appearance, docs, back to surveys). On mobile it sits above
+                the composer; on desktop it floats at the section's bottom-left, and
+                only when the sidebar is collapsed (the expanded sidebar footer has it). */}
+            <div
+              className={cn(
+                "absolute bottom-full left-4 z-30 mb-2 flex flex-col items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur sm:left-8",
+                "lg:bottom-4 lg:left-4 lg:mb-0",
+                !sidebarLayout.collapsed && "lg:hidden",
+              )}
+            >
+              <SettingsMenu surveyContext={surveyContext} />
+            </div>
             <div className="mx-auto w-full max-w-4xl">
               <form
                 onSubmit={(event) => {

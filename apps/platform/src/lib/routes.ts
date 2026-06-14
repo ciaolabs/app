@@ -21,8 +21,8 @@ export const routes = {
   survey: (surveyType: SurveyType) => `/surveys/${surveyType}`,
   surveyDashboard: (surveyType: SurveyType) => `/surveys/${surveyType}/dashboard`,
   dashboard: "/dashboard",
-  chat: "/chat",
-  account: (anchor?: "models") => (anchor ? `/chat/account#${anchor}` : "/chat/account"),
+  chat: "/app",
+  account: (anchor?: "models") => (anchor ? `/app/account#${anchor}` : "/app/account"),
   docs: (slug?: string) => (slug ? `/docs/${slug}` : "/docs"),
 } as const;
 

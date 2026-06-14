@@ -75,8 +75,19 @@ function createActiveSurveyDefinition(config: {
     return currentSections;
   }, []);
 
+  // Surface the project documentation alongside the academic source references
+  // so every active survey's help dialog links back to the docs.
+  const helpContent: SurveyHelpContent = {
+    ...config.helpContent,
+    references: [
+      { label: "View documentation", href: routes.docs() },
+      ...config.helpContent.references,
+    ],
+  };
+
   return {
     ...config,
+    helpContent,
     availability: "active",
     resultsEnabled: true,
     route: routes.survey(config.type),

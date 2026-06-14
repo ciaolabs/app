@@ -299,7 +299,7 @@ export function SurveyChatPreview() {
         </div>
 
         <div className="flex flex-1 items-center justify-center rounded-full bg-(--surface-inset) px-4 py-1.5 text-xs text-(--ink-soft)">
-          <span className="truncate">platform.ciaobang.com/chat</span>
+          <span className="truncate">platform.ciaobang.com/app</span>
         </div>
 
         <div className="hidden items-center gap-1 sm:flex">
