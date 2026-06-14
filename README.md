@@ -1,68 +1,99 @@
 # Ciao! Platform
 
-A single Next.js application (`apps/platform`, served at `platform.ciaobang.com`) that consolidates the former survey, chat, and docs apps:
+Ciao is a single web app at **platform.ciaobang.com** that helps you understand
+yourself through psychology research. It brings together three things you can do,
+each one feeding the next:
 
-- intro page at `/`
-- survey chooser at `/surveys`, with the AMBI personality survey at `/surveys/personality`
-- legacy `/personalitysurvey` and `/survey` paths preserved as compatibility redirects
-- per-question violin plot revealed after every answer
-- account-based autosaved drafts plus final submission
-- scored dashboards at `/surveys/personality/dashboard` and `/surveys/values-beliefs/dashboard`, with legacy dashboard redirects preserved
-- AI chat (threads, RAG over the docs) at `/chat`, account settings at `/chat/account`
-- documentation (Fumadocs) at `/docs`
+## What you can do
 
-The legacy hosts (`survey.`/`app.`/`docs.ciaobang.com`) have been retired — `platform.ciaobang.com` is the only host.
+### 1. Take a survey
 
-## Stack
+Answer research-grade questionnaires and get a scored profile back.
 
-- Next.js 16 App Router
-- TypeScript
-- Tailwind CSS v4
-- Supabase Postgres via `DATABASE_URL`
-- Vitest + Testing Library
-- Playwright
+- **Personality** — stable patterns in how you think, feel, and behave, measured
+  with the AMBI battery (a blend of eight established personality inventories).
+- **Values & beliefs** — what motivates your decisions (Portrait Values
+  Questionnaire) and the deep assumptions you hold about what the world is like
+  (Primals Inventory).
 
-## Local setup
+After every answer a small violin plot shows where your response falls against
+others. Your progress autosaves to your account, and once you submit you get a
+**dashboard**: ranked scales on a 0–50 scale, percentile bands against a
+reference group, and plain-language read-outs. No score is "good" or "bad" —
+each profile has its own strengths depending on context.
 
-1. Copy `apps/platform/.env.example` to `apps/platform/.env.local`.
-2. Keep `SURVEY_STORAGE=memory` for local contributor work without a database, or set `DATABASE_URL` to your Supabase Postgres connection string and use `SURVEY_STORAGE=postgres`.
-3. Add your WorkOS AuthKit keys (`WORKOS_API_KEY`, `WORKOS_CLIENT_ID`) when you need to test authenticated survey flows. Generate `WORKOS_COOKIE_PASSWORD` via `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`.
-4. In the WorkOS dashboard, add `http://localhost:3000/callback` as an allowed redirect URI and enable the social providers (GitHub, Google, LinkedIn) plus email/password under AuthKit.
-5. Run `pnpm install`.
-6. Start the app with `pnpm dev`.
+### 2. Chat about your results
 
-Do not commit `.env.local` or any other file containing real credentials. The committed `apps/platform/.env.example` file is intentionally limited to empty placeholders.
+A built-in AI assistant that already knows your survey profile and can pull from
+the reference docs to answer questions like *"what does a high score here mean
+for how I work with others?"* Conversations are saved as threads so you can pick
+them back up. A lightweight assist widget is also available right on the survey
+and docs pages for quick questions.
 
-If `DATABASE_URL` is omitted, the app automatically falls back to in-memory storage. That mode is useful for local UI work and automated tests, but it is not durable and should not be used for real survey data.
+### 3. Read the docs
 
-If the WorkOS keys are missing, the public home page still loads, but protected survey routes will redirect to the home page until auth is configured.
+Reference material explaining each assessment — what it measures, where it comes
+from, and how to read your scores. The same content powers the chat assistant's
+answers, so what you read and what the assistant tells you stay in sync.
 
-## Database
+---
 
-The canonical schema lives in [apps/platform/db/schema.sql](./apps/platform/db/schema.sql) and is applied by `@ciaobang/db`. It is organized into two Postgres schemas:
+## For developers
 
-- `app_private` — account and chat state: `user_accounts`, `chat_threads`, `chat_messages`
-- `research` — survey data: `participants`, `surveys`/`survey_versions`, `submissions`, `answers`, `score_results`, `consent_events`
+One Next.js app (`apps/platform`) serves all three surfaces: surveys at the root
+(`/`, `/surveys/*`), the chat at `/app`, and the docs at `/docs`.
 
-The Postgres client bootstraps these on first use, so a Supabase Postgres database can be used without a separate migration step.
+### Stack
 
-## Scripts
+Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Supabase Postgres ·
+WorkOS AuthKit · Vitest + Playwright.
+
+### Local setup
+
+1. `pnpm install`
+2. Copy `apps/platform/.env.example` to `apps/platform/.env.local`.
+3. Run `pnpm dev` and open the app.
+
+By default the app runs with `SURVEY_STORAGE=memory` — no database required, good
+for UI work and tests, but not durable. For real data, set `DATABASE_URL` to your
+Supabase Postgres connection string and `SURVEY_STORAGE=postgres`.
+
+To test signed-in survey flows, add your WorkOS AuthKit keys (`WORKOS_API_KEY`,
+`WORKOS_CLIENT_ID`, and a `WORKOS_COOKIE_PASSWORD` from
+`node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`),
+register `http://localhost:3000/callback` as a redirect URI in the WorkOS
+dashboard, and enable the providers you want. Without these keys the public pages
+still load; protected routes redirect home.
+
+Never commit `.env.local` or any real credentials.
+
+### Scripts
 
 Run from the repo root:
 
-- `pnpm dev` starts the Next.js dev server
-- `pnpm build` builds the platform app
-- `pnpm lint` runs ESLint
-- `pnpm test` runs unit tests with coverage
+- `pnpm dev` — start the dev server
+- `pnpm build` — build the app
+- `pnpm lint` — run ESLint
+- `pnpm test` — run unit tests
 
-Run from `apps/platform` (or via `pnpm --filter platform <script>`):
+From `apps/platform` (or `pnpm --filter platform <script>`):
 
-- `pnpm test:e2e` runs the Playwright flow against an in-memory local server
-- `pnpm index` (re)indexes the docs content into DocChunks for RAG
+- `pnpm test:e2e` — Playwright flow against an in-memory local server
+- `pnpm index` — (re)index the docs into DocChunks for chat retrieval (RAG)
 
-## Notes
+### Database
 
-- Response plots are seeded demo distributions in this MVP, not real respondent microdata.
-- The item order and AMBI question IDs are aligned to Appendix A of Yarkoni (2010).
-- Appendix-backed AMBI audit details and summary-level exceptions are documented in [docs/ambi-paper-audit.md](./docs/ambi-paper-audit.md).
-- Survey item, audit, and scoring data committed to this repository are limited to public/licensable source material intended for contributor visibility.
+The schema lives in [apps/platform/db/schema.sql](./apps/platform/db/schema.sql)
+and is applied automatically on first use, so a fresh Supabase Postgres database
+works without a separate migration step. It splits into two schemas:
+
+- `app_private` — account and chat state (`user_accounts`, `chat_threads`, `chat_messages`)
+- `research` — survey data (`participants`, `surveys`, `submissions`, `answers`, `score_results`, `consent_events`)
+
+### Notes
+
+- Response plots are seeded demo distributions in this MVP, not real respondent data.
+- AMBI item order and question IDs follow Appendix A of Yarkoni (2010); audit
+  details are in [docs/ambi-paper-audit.md](./docs/ambi-paper-audit.md).
+- Survey, audit, and scoring data committed here are limited to
+  public/licensable source material.

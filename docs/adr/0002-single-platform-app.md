@@ -3,6 +3,11 @@
 **Status**: Accepted
 **Date**: 2026-06-12
 
+> **Amendment (2026-06-13)**: the chat surface was subsequently moved from
+> `/chat` to `/app` (account at `/app/account`); the legacy host redirects were
+> retired so `platform.ciaobang.com` is now the only host. The decision below is
+> kept as originally recorded.
+
 ## Decision
 
 The three apps (`apps/survey` on survey.ciaobang.com, `apps/app` on app.ciaobang.com, `apps/docs` on docs.ciaobang.com) are merged into a single Next.js 16 app, `apps/platform`, served at platform.ciaobang.com:
