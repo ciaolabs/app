@@ -49,7 +49,7 @@ export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHe
   }, []);
 
   const ctaClassName =
-    "clay-button-hover inline-flex h-11 items-center justify-center rounded-full border border-black bg-(--accent-blue) px-5 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)";
+    "clay-button-hover inline-flex h-10 items-center justify-center rounded-full border border-black bg-(--accent-blue) px-4 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft) sm:h-11 sm:px-5";
 
   const navLinks: { href: string; label: string; color: string; external?: boolean }[] = [
     { href: "#surveys", label: "Surveys", color: "#f97316" },
@@ -58,7 +58,7 @@ export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHe
   ];
 
   return (
-    <header className="relative flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <header className="relative flex w-full items-center justify-between gap-2 px-4 py-4 sm:gap-4 sm:px-6 lg:px-8">
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes ciaoHandWaveHeader {
           0%   { transform: rotate(0deg); }
@@ -83,16 +83,14 @@ export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHe
           src={theme === "dark" ? "/ciao-sparkle-dark.svg" : "/ciao-sparkle.svg"}
           alt=""
           aria-hidden="true"
-          className="ciao-header-wave"
-          style={{ height: 44, width: 44, objectFit: "contain" }}
+          className="ciao-header-wave h-9 w-9 object-contain sm:h-11 sm:w-11"
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/ciao-text.png"
           alt="Ciao!"
+          className="h-7 w-auto sm:h-9"
           style={{
-            height: 36,
-            width: "auto",
             filter: theme === "dark" ? "invert(1)" : "none",
           }}
         />
@@ -119,30 +117,32 @@ export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHe
         ))}
       </nav>
 
-      <nav className="flex items-center gap-3">
+      <nav className="flex items-center gap-2 sm:gap-3">
         <a
           href={routes.docs()}
           target="_blank"
           rel="noreferrer"
-          className="clay-button-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-[var(--ink)] shadow-[var(--shadow-soft)]"
+          className="clay-button-hover flex h-10 w-10 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) text-(--ink) shadow-(--shadow-soft) sm:h-11 sm:w-11"
           aria-label="Documentation"
         >
           <BookIcon />
         </a>
         <Link
           href={routes.chat}
-          className="clay-button-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-[var(--ink)] shadow-[var(--shadow-soft)]"
+          className="clay-button-hover flex h-10 w-10 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) text-(--ink) shadow-(--shadow-soft) sm:h-11 sm:w-11"
           aria-label="Open the Ciao app"
         >
           <CiaoIcon />
         </Link>
         {isSignedIn ? (
           <StartSurveyButton className={ctaClassName}>
-            Start a survey →
+            <span className="sm:hidden">Start →</span>
+            <span className="hidden sm:inline">Start a survey →</span>
           </StartSurveyButton>
         ) : (
           <a href={signInHref} className={ctaClassName}>
-            Sign in to start →
+            <span className="sm:hidden">Sign in →</span>
+            <span className="hidden sm:inline">Sign in to start →</span>
           </a>
         )}
       </nav>

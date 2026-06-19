@@ -25,6 +25,14 @@ export function InteractiveDotBackground() {
       return;
     }
 
+    // On touch / coarse-pointer devices there is no real cursor to follow, so
+    // the hover-and-click dot reveal makes no sense — and pointermove /
+    // pointerdown would fire on every tap. Skip the whole interactive layer
+    // there and leave the static dot background as-is.
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      return;
+    }
+
     const backgroundElement = backgroundRef.current;
     const rootFontSize = parseFloat(
       window.getComputedStyle(document.documentElement).fontSize,

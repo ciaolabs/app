@@ -453,9 +453,9 @@ export function SurveyResultsPreview() {
 
         {/* Ranking list */}
         <section className="mt-4 rounded-3xl border border-(--line) bg-(--surface-panel-strong) px-5 py-5 shadow-(--shadow-soft) sm:px-6">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto_5rem] items-center gap-4 border-b border-(--line) pb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-(--muted)">
-            <p>{rankingMode === "highest" ? "Top traits" : "Lowest traits"}</p>
-            <div className="inline-flex rounded-full border border-(--line) bg-(--surface-panel) p-0.5 shadow-(--shadow-soft)">
+          <div className="grid grid-cols-[minmax(0,1fr)_5rem] items-center gap-x-4 gap-y-3 border-b border-(--line) pb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-(--muted) sm:grid-cols-[minmax(0,1fr)_auto_5rem] sm:gap-4">
+            <p className="col-start-1 row-start-1">{rankingMode === "highest" ? "Top traits" : "Lowest traits"}</p>
+            <div className="col-span-2 row-start-2 inline-flex justify-self-center rounded-full border border-(--line) bg-(--surface-panel) p-0.5 shadow-(--shadow-soft) sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-stretch">
               {FRAMEWORK_IDS.map((id) => (
                 <button
                   key={id}
@@ -476,7 +476,7 @@ export function SurveyResultsPreview() {
                 </button>
               ))}
             </div>
-            <p className="text-right">Score</p>
+            <p className="col-start-2 row-start-1 text-right sm:col-start-3">Score</p>
           </div>
 
           <div className="mt-3 space-y-2">

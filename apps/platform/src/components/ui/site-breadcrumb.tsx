@@ -56,8 +56,17 @@ export function SiteBreadcrumb({ title, items }: SiteBreadcrumbProps) {
       >
         <HomeIcon />
       </Link>
-      {breadcrumbItems.map((item, index) => (
-        <span key={`${item.label}-${index}`} className="inline-flex min-w-0 flex-shrink items-center gap-2 overflow-hidden">
+      {breadcrumbItems.map((item, index) => {
+        // The last crumb (current page) is the only one allowed to shrink and
+        // truncate; intermediate crumbs stay at their natural width so short
+        // labels like "Surveys" never collapse to "S…" on narrow screens.
+        const isLast = index === breadcrumbItems.length - 1;
+
+        return (
+        <span
+          key={`${item.label}-${index}`}
+          className={`inline-flex items-center gap-2 overflow-hidden ${isLast ? "min-w-0 flex-1" : "shrink-0"}`}
+        >
           <span className="shrink-0 text-[var(--muted)]">
             <ChevronRightIcon />
           </span>
@@ -81,7 +90,8 @@ export function SiteBreadcrumb({ title, items }: SiteBreadcrumbProps) {
             </span>
           </span>
         </span>
-      ))}
+        );
+      })}
     </nav>
   );
 }

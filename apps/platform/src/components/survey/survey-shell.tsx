@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 
 import { SiteTopNav } from "@/components/site-top-nav";
 import { LikertScale } from "@/components/survey/likert-scale";
@@ -87,6 +88,36 @@ function UpArrowIcon() {
   );
 }
 
+function ListIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
+      <path
+        d="M7 5.5h8.5M7 10h8.5M7 14.5h8.5M3.4 5.5h.01M3.4 10h.01M3.4 14.5h.01"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.7"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
+      <path
+        d="m5.5 5.5 9 9M14.5 5.5l-9 9"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.7"
+      />
+    </svg>
+  );
+}
+
 export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProps) {
   const router = useRouter();
   const [answers, setAnswers] = useState<SurveyAnswers>(initialDraft.answers);
@@ -98,6 +129,9 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   const [pendingSaveCount, setPendingSaveCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isLogOpen, setIsLogOpen] = useState(false);
+  const logTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const logCloseRef = useRef<HTMLButtonElement | null>(null);
   const pendingSaveIds = useRef(new Set<string>());
   const pendingTimers = useRef<Map<string, number>>(new Map());
   const pendingControllers = useRef<Map<string, AbortController>>(new Map());
@@ -331,10 +365,15 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (isHelpOpen) {
+      if (isHelpOpen || isLogOpen) {
         if (event.key === "Escape") {
           event.preventDefault();
-          setIsHelpOpen(false);
+          if (isLogOpen) {
+            setIsLogOpen(false);
+            logTriggerRef.current?.focus();
+          } else {
+            setIsHelpOpen(false);
+          }
         }
 
         return;
@@ -385,7 +424,31 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [isHelpOpen, isSubmitting]);
+  }, [isHelpOpen, isLogOpen, isSubmitting]);
+
+  // On mobile each question is a focused screen; re-anchor to the top of the
+  // survey when the active prompt changes so the new question header is in view
+  // after tapping Previous/Next (which live at the bottom of the card). On
+  // desktop the layout is a fixed-height grid with no document scroll, so this
+  // is a no-op there.
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const isMobileViewport = window.matchMedia?.("(max-width: 1023px)")?.matches;
+    if (isMobileViewport) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [activeIndex]);
+
+  // Move focus into the mobile question-list dialog when it opens; focus is
+  // restored to the trigger on close (see closeLog and the Escape handler).
+  useEffect(() => {
+    if (isLogOpen) {
+      logCloseRef.current?.focus();
+    }
+  }, [isLogOpen]);
 
   async function handleSubmit() {
     if (answeredCount < minAnswersRequired || isSubmitting) {
@@ -439,10 +502,22 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
   );
 
   const openHelp = useCallback(() => setIsHelpOpen(true), []);
+  const openLog = useCallback(() => setIsLogOpen(true), []);
+  const closeLog = useCallback(() => {
+    setIsLogOpen(false);
+    logTriggerRef.current?.focus();
+  }, []);
+  const handleLogSelect = useCallback(
+    (index: number) => {
+      goToIndex(index);
+      setIsLogOpen(false);
+    },
+    [goToIndex],
+  );
 
   return (
     <>
-      <div className="grid gap-6 lg:h-[calc(100svh-3rem)] lg:grid-rows-[auto_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 min-w-0 gap-4 pb-28 sm:gap-6 lg:h-[calc(100svh-3rem)] lg:grid-rows-[auto_minmax(0,1fr)] lg:pb-0">
         <SiteTopNav
           breadcrumbTitle={survey.title}
           breadcrumbItems={breadcrumbItems}
@@ -462,8 +537,45 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
           }
         />
 
-        <div className="grid min-h-0 gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
-          <aside className="min-h-0 lg:h-full">
+        {/* Mobile-only progress summary + trigger for the question-list drawer.
+            The full rail lives in <aside> below, which on mobile becomes that
+            drawer; this keeps progress visible without showing all 150 prompts. */}
+        <div className="lg:hidden">
+          <div className="flex items-center gap-3 rounded-[1.25rem] border border-[var(--line)] bg-[var(--surface-panel)] px-4 py-3 shadow-[var(--shadow-soft)] backdrop-blur">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="clay-label">Progress</p>
+                <p className="text-xs font-semibold text-[var(--ink-soft)]">
+                  {answeredCount} / {questions.length}
+                </p>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--surface-inset)]">
+                <div
+                  className="h-full rounded-full bg-[var(--accent-mint)] transition-all duration-300"
+                  style={{ width: `${completion}%` }}
+                />
+              </div>
+            </div>
+            <button
+              ref={logTriggerRef}
+              type="button"
+              onClick={openLog}
+              aria-haspopup="dialog"
+              aria-controls="survey-question-rail"
+              aria-expanded={isLogOpen}
+              className="clay-button-hover inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] px-4 text-xs font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)]"
+            >
+              <ListIcon />
+              All questions
+            </button>
+          </div>
+        </div>
+
+        <div className="grid min-h-0 min-w-0 gap-4 sm:gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
+          {/* Desktop-only progress rail. On mobile this content is presented as
+              a bottom-sheet dialog rendered through a portal (see below), so the
+              rail itself is display:none and occupies no layout space. */}
+          <aside className="hidden min-h-0 lg:block lg:h-full">
             <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] p-5 shadow-[var(--shadow-soft)] backdrop-blur">
               <div className="shrink-0 space-y-3">
                 <div className="flex items-start justify-between gap-3">
@@ -510,11 +622,11 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
             </div>
           </aside>
 
-          <main className="min-h-0">
-            <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] shadow-[var(--shadow-strong)] backdrop-blur">
-              <div className="border-b border-[var(--line)] px-6 py-4 sm:px-7">
-                <div className="hidden flex-wrap items-center justify-between gap-3 sm:flex">
-                  <div className="flex flex-wrap items-center gap-3">
+          <main className="min-h-0 min-w-0">
+            <section className="flex flex-col overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface-panel)] shadow-[var(--shadow-strong)] backdrop-blur lg:h-full lg:min-h-0">
+              <div className="border-b border-[var(--line)] px-5 py-4 sm:px-7">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     <p className="clay-label">
                       Question {currentQuestion.order} of {questions.length}
                     </p>
@@ -524,7 +636,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                       </span>
                     ) : null}
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                  <div className="hidden flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)] sm:flex">
                     <span>Keys</span>
                     <ShortcutKey wide>1-6</ShortcutKey>
                     <span>Answer</span>
@@ -566,7 +678,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                     </div>
                   </div>
                 ) : null}
-                <h1 className="mt-2 font-display text-[2rem] leading-tight text-[var(--ink)] sm:text-[2.4rem]">
+                <h1 className="mt-2 font-display text-[1.7rem] leading-tight text-[var(--ink)] break-words sm:text-[2.4rem]">
                   {currentQuestion.prompt}
                 </h1>
                 {isSectionStart && currentSection?.description ? (
@@ -576,7 +688,7 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                 ) : null}
               </div>
 
-              <div className="min-h-0 flex-1 px-6 py-5 sm:px-7">
+              <div className="min-h-0 flex-1 px-5 py-5 sm:px-7">
                 {currentAnswer ? (
                   <div className="flex h-full min-h-0 flex-col gap-4">
                     <LikertScale
@@ -617,10 +729,115 @@ export function SurveyShell({ survey, questions, initialDraft }: SurveyShellProp
                   </div>
                 )}
               </div>
+
+              {/* Mobile-only prompt navigation. On desktop the arrow keys and the
+                  header keycaps handle this; here it gives a thumb-reachable
+                  Previous/Next that sits clear of the floating chat bar. */}
+              <div className="flex items-center justify-between gap-3 border-t border-[var(--line)] px-5 py-3.5 lg:hidden">
+                <button
+                  type="button"
+                  onClick={goToPreviousQuestion}
+                  disabled={activeIndex === 0}
+                  className="clay-button-hover inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ArrowLeftIcon />
+                  Previous
+                </button>
+                <span className="shrink-0 text-xs font-semibold text-[var(--muted)]">
+                  {activeIndex + 1}/{questions.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={goToNextQuestion}
+                  disabled={activeIndex === questions.length - 1}
+                  className="clay-button-hover inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] text-sm font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                  <ArrowRightIcon />
+                </button>
+              </div>
             </section>
           </main>
         </div>
       </div>
+
+      {isLogOpen && typeof document !== "undefined"
+        ? createPortal(
+            <>
+              <button
+                type="button"
+                aria-label="Close question list overlay"
+                onClick={closeLog}
+                className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-[2px] lg:hidden"
+              />
+              <div
+                id="survey-question-rail"
+                role="dialog"
+                aria-modal="true"
+                aria-label="All survey questions"
+                className="fixed inset-x-0 bottom-0 z-[80] h-[85svh] motion-safe:animate-[fadeIn_220ms_ease-out] lg:hidden"
+              >
+                <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-t-[1.5rem] border border-[var(--line-strong)] bg-[var(--surface-panel-strong)] p-5 shadow-[var(--shadow-strong)]">
+                  <div className="shrink-0 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="clay-label">Survey progress</p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            goToFirstUnansweredQuestion();
+                            setIsLogOpen(false);
+                          }}
+                          disabled={!hasUnansweredQuestions || isSubmitting}
+                          className="clay-button-hover inline-flex items-center gap-1.5 rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel)] px-3 py-1.5 text-[10px] font-semibold text-[var(--ink)] shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <UpArrowIcon />
+                          Find first unanswered
+                        </button>
+                        <button
+                          ref={logCloseRef}
+                          type="button"
+                          onClick={closeLog}
+                          aria-label="Close question list"
+                          className="clay-button-hover inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--line-strong)] bg-[var(--surface-panel)] text-[var(--ink)] shadow-[var(--shadow-soft)]"
+                        >
+                          <CloseIcon />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-end justify-between gap-4">
+                      <div>
+                        <p className="font-display text-5xl text-[var(--ink)]">{answeredCount}</p>
+                        <p className="text-sm text-[var(--ink-soft)]">
+                          of {questions.length} prompts answered
+                        </p>
+                      </div>
+                      <p className="rounded-full border border-black bg-[var(--accent-blue)] px-4 py-2 text-sm font-semibold text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
+                        {completion}%
+                      </p>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-inset)]">
+                      <div
+                        className="h-full rounded-full bg-[var(--accent-mint)] transition-all duration-300"
+                        style={{ width: `${completion}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-5 min-h-0 flex-1 overflow-hidden">
+                    <QuestionLog
+                      questions={questions}
+                      answers={deferredAnswers}
+                      activeIndex={activeIndex}
+                      onSelect={handleLogSelect}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>,
+            document.body,
+          )
+        : null}
 
       {isHelpOpen ? (
         <SurveyHelpDialog

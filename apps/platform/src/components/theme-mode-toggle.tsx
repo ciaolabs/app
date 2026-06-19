@@ -104,7 +104,7 @@ export function ThemeModeToggle() {
     <div
       role="radiogroup"
       aria-label="Theme mode"
-      className="inline-flex h-10 items-center gap-1 rounded-full border border-neutral-300 bg-white px-1 [html[data-theme='dark']_&]:border-neutral-600 [html[data-theme='dark']_&]:bg-neutral-800"
+      className="inline-flex h-9 items-center gap-0.5 rounded-full border border-neutral-300 bg-white px-1 [html[data-theme='dark']_&]:border-neutral-600 [html[data-theme='dark']_&]:bg-neutral-800 lg:h-10 lg:gap-1"
     >
       {OPTIONS.map((option) => {
         const isActive = hasHydrated && mode === option.mode;
@@ -118,7 +118,7 @@ export function ThemeModeToggle() {
             title={option.label}
             onClick={() => selectMode(option.mode)}
             className={[
-              "inline-flex h-8 w-8 items-center justify-center rounded-full transition",
+              "inline-flex h-7 w-7 items-center justify-center rounded-full transition lg:h-8 lg:w-8",
               isActive
                 ? "bg-black text-white [html[data-theme='dark']_&]:bg-white [html[data-theme='dark']_&]:text-black"
                 : "text-neutral-500 hover:text-neutral-900 [html[data-theme='dark']_&]:text-neutral-400 [html[data-theme='dark']_&]:hover:text-neutral-100",

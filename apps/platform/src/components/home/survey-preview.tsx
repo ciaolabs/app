@@ -258,10 +258,10 @@ export function SurveyPreview() {
             </div>
           </div>
 
-          <div className="mt-6 flex items-end justify-between gap-4">
+          <div className="mt-5 flex items-end justify-between gap-4">
             <div>
-              <p className="font-display text-6xl leading-none text-(--ink)">{answeredCount}</p>
-              <p className="mt-2 text-sm text-(--ink-soft)">
+              <p className="font-display text-5xl leading-none text-(--ink)">{answeredCount}</p>
+              <p className="mt-1.5 text-sm text-(--ink-soft)">
                 of {meta.total} prompts answered
               </p>
             </div>
@@ -270,19 +270,19 @@ export function SurveyPreview() {
             </p>
           </div>
 
-          <div className="mt-5 h-2 overflow-hidden rounded-full bg-(--surface-inset)">
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-(--surface-inset)">
             <div
               className="h-full rounded-full bg-(--accent-mint) transition-all duration-300"
               style={{ width: `${completion}%` }}
             />
           </div>
 
-          <div className="relative mt-6 min-h-0 flex-1 overflow-hidden">
+          <div className="relative mt-4 min-h-0 flex-1 overflow-hidden">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-[linear-gradient(0deg,var(--surface-panel-strong)_0%,rgba(255,255,255,0)_100%)] [html[data-theme='dark']_&]:bg-[linear-gradient(0deg,var(--surface-panel-strong)_0%,rgba(0,0,0,0)_100%)]"
+              className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-12 bg-[linear-gradient(0deg,var(--surface-panel-strong)_0%,rgba(255,255,255,0)_100%)] [html[data-theme='dark']_&]:bg-[linear-gradient(0deg,var(--surface-panel-strong)_0%,rgba(0,0,0,0)_100%)]"
             />
-            <ol className="flex max-h-72 flex-col gap-3 overflow-hidden pr-1 lg:max-h-104">
+            <ol className="flex max-h-72 flex-col gap-2 overflow-hidden pr-1 lg:max-h-[34rem]">
               {visibleProgressItems.map((question, index) => {
                 const answer = answers[survey][question.id];
                 const isActive = index === activeIndex;
@@ -294,7 +294,7 @@ export function SurveyPreview() {
                       onClick={() => index < questions.length && setActiveIndex(index)}
                       disabled={index >= questions.length}
                       className={[
-                        "w-full rounded-2xl border px-4 py-3 text-left shadow-(--shadow-soft) transition",
+                        "w-full rounded-2xl border px-4 py-2.5 text-left shadow-(--shadow-soft) transition",
                         isActive
                           ? "border-black bg-(--accent-soft)"
                           : "border-(--line) bg-(--surface-panel)",
@@ -317,7 +317,7 @@ export function SurveyPreview() {
                               {answer ? scale.options[answer - 1]?.label : "Not answered"}
                             </span>
                           </span>
-                          <span className="mt-2 line-clamp-2 block text-sm leading-6 text-(--ink)">
+                          <span className="mt-1 line-clamp-1 text-sm leading-5 text-(--ink)">
                             {question.prompt}
                           </span>
                         </span>
@@ -381,7 +381,7 @@ export function SurveyPreview() {
                     onClick={() => selectAnswer(option.value)}
                     aria-pressed={selected}
                     className={[
-                      "group flex min-h-38 flex-col items-center justify-center rounded-[1.25rem] border px-3 py-5 text-center transition duration-200 sm:min-h-44",
+                      "group flex items-center gap-3 rounded-[1.25rem] border px-4 py-3 text-left transition duration-200 sm:min-h-44 sm:flex-col sm:justify-center sm:gap-0 sm:px-3 sm:py-5 sm:text-center",
                       selected
                         ? "-rotate-2 border-black bg-[#2CA0AB] text-white shadow-(--clay-hard-shadow)"
                         : "border-(--line) bg-(--surface-panel) text-(--ink) shadow-(--shadow-soft) hover:-translate-y-1 hover:border-(--ink) hover:bg-(--accent-soft)",
@@ -389,7 +389,7 @@ export function SurveyPreview() {
                   >
                     <span
                       className={[
-                        "inline-flex h-12 min-w-[3.1rem] items-center justify-center rounded-xl border px-3 text-lg font-semibold shadow-(--keycap-shadow)",
+                        "inline-flex h-9 min-w-[2.6rem] shrink-0 items-center justify-center rounded-xl border px-2.5 text-base font-semibold shadow-(--keycap-shadow) sm:h-12 sm:min-w-[3.1rem] sm:px-3 sm:text-lg",
                         selected
                           ? "border-black/10 bg-white/60 text-(--selected-contrast)"
                           : "border-(--line-strong) bg-(--surface-panel-strong) text-(--ink)",
@@ -399,7 +399,7 @@ export function SurveyPreview() {
                     </span>
                     <span
                       className={[
-                        "mt-4 text-base font-semibold leading-6 sm:text-lg",
+                        "text-sm font-semibold leading-5 sm:mt-4 sm:text-lg sm:leading-6",
                         selected ? "text-(--selected-contrast)" : "text-(--ink-soft)",
                       ].join(" ")}
                     >

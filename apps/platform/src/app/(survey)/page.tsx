@@ -63,10 +63,10 @@ export default async function HomePage() {
             <SurveyPreview />
           </div>
 
-          <div className="relative h-20 sm:h-24">
+          <div className="relative h-40 sm:h-24">
             <div
               aria-hidden="true"
-              className="connector-blob pointer-events-none absolute left-0 right-0 top-1/2 h-[36rem] -translate-y-[85%] sm:h-[42rem]"
+              className="connector-blob pointer-events-none absolute -left-4 -right-4 top-1/2 h-[36rem] -translate-y-1/2 sm:left-0 sm:right-0 sm:h-[42rem] sm:-translate-y-[85%]"
             />
             <div
               aria-hidden="true"
@@ -132,13 +132,12 @@ export default async function HomePage() {
             <SurveyResultsPreview />
           </div>
 
-          <div className="relative h-20 sm:h-24">
+          <div className="relative h-40 sm:h-24">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -left-4 -right-4 top-1/2 h-[36rem] -translate-y-[15%] bg-center bg-no-repeat sm:-left-8 sm:-right-8 sm:h-[42rem] lg:-left-10 lg:-right-10"
+              className="pointer-events-none absolute -left-8 -right-8 top-1/2 h-[36rem] -translate-y-[15%] bg-center bg-no-repeat [background-size:180%_auto] sm:-left-8 sm:-right-8 sm:h-[42rem] sm:[background-size:100%_auto] lg:-left-10 lg:-right-10"
               style={{
                 backgroundImage: 'url("/surveys-sun.png")',
-                backgroundSize: "100% auto",
                 maskImage:
                   "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
                 WebkitMaskImage:

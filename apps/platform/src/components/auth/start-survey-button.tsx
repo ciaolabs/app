@@ -65,7 +65,7 @@ export function StartSurveyButton({
       aria-label={isNavigating ? `${pendingLabel}...` : undefined}
       className={className}
     >
-      <span className="inline-flex min-w-36 items-center justify-center">
+      <span className="inline-flex min-w-24 items-center justify-center sm:min-w-36">
         {isNavigating ? (
           <>
             <span>{pendingLabel}</span>

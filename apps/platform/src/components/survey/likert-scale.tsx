@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, type CSSProperties } from "react";
 
 import { LikertValue, QuestionResponseScale } from "@/lib/survey/types";
 
@@ -27,16 +27,19 @@ export const LikertScale = memo(function LikertScale({
       </div>
 
       <div
-        className={[
-          "gap-3",
-          isHero ? "grid h-full flex-1 grid-cols-3 grid-rows-2" : "grid",
-        ].join(" ")}
+        className={
+          isHero
+            ? // Mobile: one full-width row per option so labels never overflow.
+              // sm+: the original 3x2 hero grid.
+              "grid grid-cols-1 gap-2.5 sm:h-full sm:flex-1 sm:grid-cols-3 sm:grid-rows-2 sm:gap-3"
+            : // Mobile: 3 columns (2 rows) so a 6-point scale fits the viewport.
+              // sm+: one row with a column per option.
+              "grid grid-cols-3 gap-2 sm:gap-3 sm:grid-cols-[repeat(var(--likert-cols),minmax(0,1fr))]"
+        }
         style={
           isHero
             ? undefined
-            : {
-                gridTemplateColumns: `repeat(${responseScale.options.length}, minmax(0, 1fr))`,
-              }
+            : ({ "--likert-cols": responseScale.options.length } as CSSProperties)
         }
       >
         {responseScale.options.map((option) => {
@@ -49,8 +52,10 @@ export const LikertScale = memo(function LikertScale({
               type="button"
               onClick={() => onSelect(value)}
               className={[
-                "group clay-button-hover min-w-0 rounded-[1.25rem] border text-center duration-200",
-                isHero ? "flex h-full min-h-[10rem] flex-col items-center justify-center px-3 py-5" : "px-2 py-3",
+                "group clay-button-hover min-w-0 rounded-[1.25rem] border duration-200",
+                isHero
+                  ? "flex items-center gap-3 px-4 py-3.5 text-left sm:h-full sm:min-h-[10rem] sm:flex-col sm:justify-center sm:px-3 sm:py-5 sm:text-center"
+                  : "px-2 py-3 text-center",
                 selected
                   ? "border-[#238E98] bg-[#2CA0AB] text-white shadow-[var(--shadow-strong)]"
                   : "border-[var(--line)] bg-[var(--surface-panel-strong)] text-[var(--ink)] shadow-[var(--shadow-soft)]",
@@ -59,8 +64,10 @@ export const LikertScale = memo(function LikertScale({
             >
               <span
                 className={[
-                  "inline-flex items-center justify-center border font-semibold shadow-[var(--keycap-shadow)]",
-                  isHero ? "h-12 min-w-[3.2rem] rounded-[0.625rem] px-3 text-lg" : "h-9 min-w-[2.5rem] rounded-[0.75rem] px-2 text-sm",
+                  "inline-flex shrink-0 items-center justify-center border font-semibold shadow-[var(--keycap-shadow)]",
+                  isHero
+                    ? "h-10 min-w-[2.75rem] rounded-[0.7rem] px-2.5 text-base sm:h-12 sm:min-w-[3.2rem] sm:rounded-[0.625rem] sm:px-3 sm:text-lg"
+                    : "h-9 min-w-[2.5rem] rounded-[0.75rem] px-2 text-sm",
                   selected
                     ? "border-white/20 bg-white/25 text-white"
                     : "border-[var(--line)] bg-[var(--keycap-bg)] text-[var(--muted)]",
@@ -70,9 +77,10 @@ export const LikertScale = memo(function LikertScale({
               </span>
               <p
                 className={[
+                  "min-w-0 font-semibold",
                   isHero
-                    ? "mt-3 text-base font-semibold leading-6 sm:text-lg"
-                    : "mt-2 text-[11px] font-semibold leading-4 sm:text-xs",
+                    ? "text-base leading-6 sm:text-lg"
+                    : "mt-2 text-[11px] leading-4 sm:text-xs",
                   selected ? "text-white opacity-90" : "text-[var(--ink-soft)]",
                 ].join(" ")}
               >

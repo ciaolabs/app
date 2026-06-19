@@ -298,6 +298,23 @@ body {
   overflow-x: clip;
 }
 
+/* Mobile: gently scale the entire rem-based UI down so dense layouts (the
+   landing header, the chat app) fit narrow viewports without clipping. Because
+   the design is rem-based, padding, gaps, type and radii all shrink together —
+   including under [data-section="chat"]. Two steps keep the smallest phones
+   comfortable without making mid-size phones feel cramped. */
+@media (max-width: 640px) {
+  html {
+    font-size: 93.75%; /* 15px — mobile scale-down */
+  }
+}
+
+@media (max-width: 380px) {
+  html {
+    font-size: 90%; /* 14.4px */
+  }
+}
+
 .nav-glass {
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   backdrop-filter: blur(24px) saturate(180%);

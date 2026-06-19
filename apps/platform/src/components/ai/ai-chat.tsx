@@ -267,7 +267,7 @@ export function AiSearchBar() {
 
   return createPortal(
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-4 pt-2 transition-opacity duration-300"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-7 pt-2 transition-opacity duration-300"
       style={{
         opacity: nearBottom && !expanded ? 0 : 1,
       }}
