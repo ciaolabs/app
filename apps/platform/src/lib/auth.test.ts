@@ -1,28 +1,87 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+// @vitest-environment node
+// Auth helpers are server-side; the node environment also avoids the jose/jsdom
+// realm mismatch that breaks `Uint8Array instanceof` checks during signing.
+import { SignJWT, generateKeyPair, type KeyLike } from "jose";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { withAuthMock, getTokenClaimsMock, redirectMock } = vi.hoisted(() => ({
-  withAuthMock: vi.fn(),
-  getTokenClaimsMock: vi.fn(),
-  redirectMock: vi.fn(),
-}));
+const { withAuthMock, getWorkOSMock, createRemoteJWKSetMock, redirectMock } = vi.hoisted(
+  () => ({
+    withAuthMock: vi.fn(),
+    getWorkOSMock: vi.fn(),
+    createRemoteJWKSetMock: vi.fn(),
+    redirectMock: vi.fn(),
+  }),
+);
 
 vi.mock("@workos-inc/authkit-nextjs", () => ({
   withAuth: withAuthMock,
-  getTokenClaims: getTokenClaimsMock,
+  getWorkOS: getWorkOSMock,
 }));
 
 vi.mock("next/navigation", () => ({
   redirect: redirectMock,
 }));
 
+// Mock ONLY the JWKS source. `jwtVerify` stays real, so these tests exercise
+// genuine RS256 signature verification against a locally generated key pair.
+vi.mock("jose", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("jose")>();
+  return { ...actual, createRemoteJWKSet: createRemoteJWKSetMock };
+});
+
+type KeyPair = { publicKey: KeyLike; privateKey: KeyLike };
+
+// The key WorkOS "owns" (its JWKS resolves to this public key) and an attacker
+// key that WorkOS would never sign with.
+let workos: KeyPair;
+let attacker: KeyPair;
+
+function bearerRequest(token: string) {
+  return new Request("http://localhost/api/surveys/personality/answer", {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+async function signWith(
+  privateKey: KeyLike,
+  claims: Record<string, unknown>,
+  expSeconds = Math.floor(Date.now() / 1000) + 3600,
+) {
+  return new SignJWT(claims)
+    .setProtectedHeader({ alg: "RS256" })
+    .setIssuedAt()
+    .setExpirationTime(expSeconds)
+    .sign(privateKey);
+}
+
+const b64url = (value: unknown) =>
+  Buffer.from(JSON.stringify(value)).toString("base64url");
+
 describe("auth helpers", () => {
+  beforeAll(async () => {
+    workos = (await generateKeyPair("RS256")) as KeyPair;
+    attacker = (await generateKeyPair("RS256")) as KeyPair;
+  });
+
   beforeEach(() => {
     withAuthMock.mockReset();
-    getTokenClaimsMock.mockReset();
+    getWorkOSMock.mockReset();
+    createRemoteJWKSetMock.mockReset();
     redirectMock.mockReset();
+
     process.env.WORKOS_API_KEY = "sk_test_workos";
     process.env.WORKOS_CLIENT_ID = "client_test";
     process.env.WORKOS_COOKIE_PASSWORD = "test_cookie_password_32_characters";
+
+    // The SDK builds the JWKS URL from the client; we stub the resolver so it
+    // returns WorkOS's public key (real key resolution would hit the network).
+    getWorkOSMock.mockReturnValue({
+      userManagement: {
+        getJwksUrl: () => "https://api.workos.com/sso/jwks/client_test",
+      },
+    });
+    createRemoteJWKSetMock.mockReturnValue(async () => workos.publicKey);
   });
 
   it("returns the signed-in user id from the WorkOS session cookie", async () => {
@@ -32,7 +91,7 @@ describe("auth helpers", () => {
 
     await expect(getCurrentUserId({ acceptsSessionToken: true })).resolves.toBe("user_cookie");
     expect(withAuthMock).toHaveBeenCalledTimes(1);
-    expect(getTokenClaimsMock).not.toHaveBeenCalled();
+    expect(createRemoteJWKSetMock).not.toHaveBeenCalled();
   });
 
   it("returns null when no session cookie and no Bearer token are present", async () => {
@@ -41,7 +100,6 @@ describe("auth helpers", () => {
     const { getCurrentUserId } = await import("@/lib/auth");
 
     await expect(getCurrentUserId({ acceptsSessionToken: true })).resolves.toBeNull();
-    expect(getTokenClaimsMock).not.toHaveBeenCalled();
   });
 
   it("returns null when the WorkOS session cannot be read", async () => {
@@ -50,51 +108,76 @@ describe("auth helpers", () => {
     const { getCurrentUserId } = await import("@/lib/auth");
 
     await expect(getCurrentUserId({ acceptsSessionToken: true })).resolves.toBeNull();
-    expect(getTokenClaimsMock).not.toHaveBeenCalled();
   });
 
-  it("falls back to verifying a Bearer token when the session is missing", async () => {
+  it("accepts a Bearer token whose signature WorkOS produced", async () => {
     withAuthMock.mockResolvedValue({ user: null });
-    getTokenClaimsMock.mockResolvedValue({ sub: "user_verified" });
+    const token = await signWith(workos.privateKey, { sub: "user_verified" });
 
     const { getCurrentUserId } = await import("@/lib/auth");
-    const request = new Request("http://localhost/api/surveys/personality/answer", {
-      method: "PUT",
-      headers: { Authorization: "Bearer test_session_token" },
-    });
 
     await expect(
-      getCurrentUserId({ acceptsSessionToken: true, request }),
+      getCurrentUserId({ acceptsSessionToken: true, request: bearerRequest(token) }),
     ).resolves.toBe("user_verified");
-    expect(getTokenClaimsMock).toHaveBeenCalledWith("test_session_token");
+  });
+
+  it("rejects a forged Bearer token signed with a non-WorkOS key", async () => {
+    withAuthMock.mockResolvedValue({ user: null });
+    // Attacker forges a token for a victim, signed with their own key.
+    const forged = await signWith(attacker.privateKey, { sub: "user_victim" });
+
+    const { getCurrentUserId } = await import("@/lib/auth");
+
+    await expect(
+      getCurrentUserId({ acceptsSessionToken: true, request: bearerRequest(forged) }),
+    ).resolves.toBeNull();
+  });
+
+  it("rejects an unsigned (alg:none) Bearer token", async () => {
+    withAuthMock.mockResolvedValue({ user: null });
+    const algNone = `${b64url({ alg: "none", typ: "JWT" })}.${b64url({ sub: "user_victim" })}.`;
+
+    const { getCurrentUserId } = await import("@/lib/auth");
+
+    await expect(
+      getCurrentUserId({ acceptsSessionToken: true, request: bearerRequest(algNone) }),
+    ).resolves.toBeNull();
+  });
+
+  it("rejects an expired Bearer token even if correctly signed", async () => {
+    withAuthMock.mockResolvedValue({ user: null });
+    const expired = await signWith(
+      workos.privateKey,
+      { sub: "user_verified" },
+      Math.floor(Date.now() / 1000) - 3600,
+    );
+
+    const { getCurrentUserId } = await import("@/lib/auth");
+
+    await expect(
+      getCurrentUserId({ acceptsSessionToken: true, request: bearerRequest(expired) }),
+    ).resolves.toBeNull();
+  });
+
+  it("returns null when a verified token carries no sub claim", async () => {
+    withAuthMock.mockResolvedValue({ user: null });
+    const noSub = await signWith(workos.privateKey, { foo: "bar" });
+
+    const { getCurrentUserId } = await import("@/lib/auth");
+
+    await expect(
+      getCurrentUserId({ acceptsSessionToken: true, request: bearerRequest(noSub) }),
+    ).resolves.toBeNull();
   });
 
   it("ignores Bearer tokens when acceptsSessionToken is false", async () => {
     withAuthMock.mockResolvedValue({ user: null });
+    const token = await signWith(workos.privateKey, { sub: "user_verified" });
 
     const { getCurrentUserId } = await import("@/lib/auth");
-    const request = new Request("http://localhost/api/surveys/personality/answer", {
-      method: "PUT",
-      headers: { Authorization: "Bearer test_session_token" },
-    });
 
-    await expect(getCurrentUserId({ request })).resolves.toBeNull();
-    expect(getTokenClaimsMock).not.toHaveBeenCalled();
-  });
-
-  it("returns null when the Bearer token cannot be verified", async () => {
-    withAuthMock.mockResolvedValue({ user: null });
-    getTokenClaimsMock.mockRejectedValue(new Error("invalid token"));
-
-    const { getCurrentUserId } = await import("@/lib/auth");
-    const request = new Request("http://localhost/api/surveys/personality/answer", {
-      method: "PUT",
-      headers: { Authorization: "Bearer bad_token" },
-    });
-
-    await expect(
-      getCurrentUserId({ acceptsSessionToken: true, request }),
-    ).resolves.toBeNull();
+    await expect(getCurrentUserId({ request: bearerRequest(token) })).resolves.toBeNull();
+    expect(createRemoteJWKSetMock).not.toHaveBeenCalled();
   });
 
   it("returns null when WorkOS env vars are missing", async () => {

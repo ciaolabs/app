@@ -9,7 +9,8 @@
     "./proxy": "./src/proxy.ts"
   },
   "dependencies": {
-    "@workos-inc/authkit-nextjs": "^4.0.1"
+    "@workos-inc/authkit-nextjs": "^4.0.1",
+    "jose": "^5.10.0"
   },
   "peerDependencies": {
     "next": "^16.0.0"

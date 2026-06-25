@@ -33,6 +33,7 @@ vi.mock("@workos-inc/authkit-nextjs", () => ({
   getSignUpUrl: vi.fn(async () => "https://workos.example/sign-up"),
   signOut: vi.fn(),
   getTokenClaims: vi.fn(),
+  getWorkOS: vi.fn(),
   handleAuth: vi.fn(),
   authkitMiddleware: vi.fn(),
 }));
@@ -65,16 +66,6 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-Object.defineProperty(window, "scrollTo", {
-  value: () => undefined,
-  writable: true,
-});
-
-Object.defineProperty(window.HTMLElement.prototype, "scrollIntoView", {
-  value: () => undefined,
-  writable: true,
-});
-
 class MockIntersectionObserver {
   observe() {}
 
@@ -83,7 +74,21 @@ class MockIntersectionObserver {
   disconnect() {}
 }
 
-Object.defineProperty(window, "IntersectionObserver", {
-  value: MockIntersectionObserver,
-  writable: true,
-});
+// DOM shims only apply when a DOM is present (jsdom). Server-side test files
+// pinned to the node environment have no `window` and skip these.
+if (typeof window !== "undefined") {
+  Object.defineProperty(window, "scrollTo", {
+    value: () => undefined,
+    writable: true,
+  });
+
+  Object.defineProperty(window.HTMLElement.prototype, "scrollIntoView", {
+    value: () => undefined,
+    writable: true,
+  });
+
+  Object.defineProperty(window, "IntersectionObserver", {
+    value: MockIntersectionObserver,
+    writable: true,
+  });
+}

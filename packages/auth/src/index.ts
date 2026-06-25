@@ -1,9 +1,10 @@
 import {
-  getTokenClaims,
+  getWorkOS,
   withAuth,
   type NoUserInfo,
   type UserInfo,
 } from "@workos-inc/authkit-nextjs";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import { redirect } from "next/navigation";
 
 type GetCurrentUserIdOptions = {
@@ -61,10 +62,42 @@ function getBearerToken(request: Request) {
   return authorization.slice("Bearer ".length).trim() || null;
 }
 
+let cachedJwks: ReturnType<typeof createRemoteJWKSet> | undefined;
+
+/**
+ * Lazily build (and cache) the WorkOS JWKS used to verify access-token
+ * signatures. Mirrors the AuthKit SDK's own internal verification source
+ * (`createRemoteJWKSet(getWorkOS().userManagement.getJwksUrl(clientId))`).
+ */
+function getWorkOSJwks() {
+  if (!cachedJwks) {
+    const clientId = process.env.WORKOS_CLIENT_ID;
+    if (!clientId) {
+      throw new Error("WORKOS_CLIENT_ID is not configured");
+    }
+    const jwksUrl = getWorkOS().userManagement.getJwksUrl(clientId);
+    cachedJwks = createRemoteJWKSet(new URL(jwksUrl));
+  }
+  return cachedJwks;
+}
+
+/**
+ * Resolve the user id from a WorkOS access token supplied as a Bearer token.
+ *
+ * The token's RS256 signature is cryptographically verified against WorkOS's
+ * JWKS, the algorithm is pinned, and expiry is enforced by `jwtVerify`. A token
+ * that is unsigned, forged, expired, or signed by any key other than WorkOS's
+ * is rejected (returns `null`). Note: `getTokenClaims`/`decodeJwt` must never be
+ * used here — they only decode the payload and perform NO signature verification.
+ */
 async function verifyBearerToken(token: string) {
   try {
-    const claims = await getTokenClaims(token);
-    return typeof claims?.sub === "string" ? claims.sub : null;
+    const { payload } = await jwtVerify(token, getWorkOSJwks(), {
+      // WorkOS signs AuthKit access tokens with RS256; pinning the algorithm is
+      // defense-in-depth against algorithm-substitution attacks.
+      algorithms: ["RS256"],
+    });
+    return typeof payload.sub === "string" ? payload.sub : null;
   } catch {
     return null;
   }
