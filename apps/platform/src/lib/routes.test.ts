@@ -31,7 +31,6 @@ describe("apiRoutes", () => {
   it("composes parameterised endpoints", () => {
     expect(apiRoutes.surveyBase("personality")).toBe("/api/surveys/personality");
     expect(apiRoutes.chatThread("t_123")).toBe("/api/chat/threads/t_123");
-    expect(apiRoutes.accountApiKey("anthropic")).toBe("/api/account/api-keys/anthropic");
   });
 
   it("keeps static API endpoints unique", () => {

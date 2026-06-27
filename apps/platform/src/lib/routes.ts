@@ -37,5 +37,4 @@ export const apiRoutes = {
   account: "/api/account",
   accountProfile: "/api/account/profile",
   accountPreferences: "/api/account/preferences",
-  accountApiKey: (provider: string) => `/api/account/api-keys/${provider}`,
 } as const;

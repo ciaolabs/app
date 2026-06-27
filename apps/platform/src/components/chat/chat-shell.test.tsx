@@ -1,13 +1,19 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ChatShell } from "@/components/chat/chat-shell";
-
-const defaultProviders = { anthropic: true, google: true };
 
 describe("ChatShell", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response(null, { status: 401 })));
+    // Keys now live in the browser, not in props: seed localStorage so the shell
+    // treats the user as having usable API keys.
+    localStorage.setItem("ciao-ai-key-anthropic", "sk-test-anthropic");
+    localStorage.setItem("ciao-ai-key-google", "sk-test-google");
+  });
+
+  afterEach(() => {
+    localStorage.clear();
   });
 
   it("offers survey completion links alongside generic prompts when no survey context exists", () => {
@@ -15,7 +21,6 @@ describe("ChatShell", () => {
       <ChatShell
         initialThreads={[]}
         surveyContext={{ personality: null, valuesBeliefs: null }}
-        apiKeyProviders={defaultProviders}
         initialChatModel="gemini-flash-lite-latest"
       />,
     );
@@ -57,7 +62,6 @@ describe("ChatShell", () => {
       <ChatShell
         initialThreads={[]}
         surveyContext={{ personality: null, valuesBeliefs: null }}
-        apiKeyProviders={defaultProviders}
         initialChatModel="gemini-flash-lite-latest"
       />,
     );

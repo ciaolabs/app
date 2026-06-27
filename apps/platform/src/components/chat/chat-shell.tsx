@@ -67,6 +67,7 @@ import {
   resolveTheme,
 } from "@/lib/theme";
 import { MODEL_OPTIONS, resolveUsableModel, type ApiKeyProvider } from "@/lib/account/models";
+import { useAiSettings } from "@/lib/use-ai-settings";
 import { apiRoutes, routes } from "@/lib/routes";
 const InteractiveDotBackground = dynamic(
   () => import("@/components/interactive-dot-background").then((m) => ({ default: m.InteractiveDotBackground })),
@@ -87,7 +88,6 @@ import type { ChatMessage, ChatThreadSummary, ChatThreadWithMessages } from "@/l
 type ChatShellProps = {
   initialThreads: ChatThreadSummary[];
   surveyContext: SurveyChatContext;
-  apiKeyProviders: { anthropic: boolean; google: boolean };
   initialChatModel: string;
 };
 
@@ -1546,9 +1546,26 @@ function ChatMessageBubble({
 export function ChatShell({
   initialThreads,
   surveyContext: initialSurveyContext,
-  apiKeyProviders,
   initialChatModel,
 }: ChatShellProps) {
+  // Keys live only in the browser (localStorage), never in our DB. They are sent
+  // per turn via request headers and used transiently by /api/chat.
+  const settings = useAiSettings();
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  // localStorage is unreadable during SSR, so the first client render must match
+  // the server's "no keys" HTML; we flip to the real values after hydration. In
+  // development the chat turn is a mock that needs no key, so treat keys present.
+  const devBypass = process.env.NODE_ENV === "development";
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  const apiKeyProviders = useMemo(
+    () => ({
+      anthropic: devBypass || (hydrated && settings.hasApiKey("anthropic")),
+      google: devBypass || (hydrated && settings.hasApiKey("google")),
+    }),
+    [devBypass, hydrated, settings],
+  );
   const hasApiKeys = apiKeyProviders.anthropic || apiKeyProviders.google;
   const [chatModel, setChatModel] = useState(initialChatModel);
   // The model the server will actually run: if the saved model's provider has
@@ -1700,6 +1717,14 @@ export function ChatShell({
     () =>
       new DefaultChatTransport({
         api: apiRoutes.chat,
+        // Both keys ride along so an Anthropic-model turn can still use the
+        // Google key for RAG embeddings. The server uses them transiently and
+        // never stores them. Read from the ref so the freshest localStorage
+        // value is sent without rebuilding the transport.
+        headers: () => ({
+          "x-anthropic-key": settingsRef.current.getApiKey("anthropic") ?? "",
+          "x-google-key": settingsRef.current.getApiKey("google") ?? "",
+        }),
         body: () => ({
           threadId: isTemporaryRef.current ? null : activeThreadRef.current,
           temporary: isTemporaryRef.current,

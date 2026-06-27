@@ -11,10 +11,6 @@ const _schema = z
     // Optional
     WORKOS_COOKIE_DOMAIN: z.string().optional(),
     WORKOS_COOKIE_NAME: z.string().optional(),
-    API_KEY_ENCRYPTION_SECRET: z
-      .string()
-      .min(32, "API_KEY_ENCRYPTION_SECRET must be at least 32 characters when set")
-      .optional(),
     SURVEY_STORAGE: z.enum(["memory", "postgres"]).default("memory"),
     NODE_ENV: z
       .enum(["development", "test", "production"])

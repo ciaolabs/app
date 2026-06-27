@@ -4,7 +4,6 @@ import { getCurrentUserId, getInitialAuth } from "@ciaobang/auth";
 
 import {
   deleteAccount,
-  getApiKeyProviders,
   getOrCreateAccount,
   getPreferences,
 } from "@/lib/account/repository";
@@ -17,10 +16,9 @@ export async function GET(request: Request) {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const [auth, account, apiKeys, preferences] = await Promise.all([
+    const [auth, account, preferences] = await Promise.all([
       getInitialAuth(),
       getOrCreateAccount(userId),
-      getApiKeyProviders(userId),
       getPreferences(userId),
     ]);
 
@@ -28,7 +26,6 @@ export async function GET(request: Request) {
       email: auth.user?.email ?? "",
       displayName: account.display_name ?? "",
       organization: account.organization ?? "",
-      apiKeys,
       preferences,
     });
   } catch (error) {

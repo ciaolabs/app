@@ -15,7 +15,7 @@ import { loadSurveyChatContext } from "@/lib/chat-context-loader";
 import { runChatTurn, type RagSearchCapability } from "@/lib/chat/turn";
 import { runDevChatTurn } from "@/lib/chat/turn.dev-mock";
 import { MODEL_OPTIONS, resolveUsableModel } from "@/lib/account/models";
-import { getChatTurnCredentials } from "@/lib/account/repository";
+import { getPreferences } from "@/lib/account/repository";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -78,11 +78,17 @@ export async function POST(request: Request) {
     });
   }
 
-  // Survey context and the participant's credentials are independent DB reads,
-  // so resolve them together.
-  const [serverSurveyContext, credentials] = await Promise.all([
+  // BYOK: the provider keys never live in our DB. The browser holds them
+  // (localStorage) and sends them per turn over HTTPS; we use them transiently
+  // to instantiate the SDK and run RAG embeddings, and never persist them.
+  const anthropicKey = request.headers.get("x-anthropic-key")?.trim() || null;
+  const googleKey = request.headers.get("x-google-key")?.trim() || null;
+
+  // Only the model preference is read from the DB now (it is not sensitive);
+  // the per-turn model from the request body still takes precedence.
+  const [serverSurveyContext, preferences] = await Promise.all([
     loadSurveyChatContext(userId).catch(() => EMPTY_SURVEY_CHAT_CONTEXT),
-    getChatTurnCredentials(userId),
+    getPreferences(userId),
   ]);
 
   const surveyContext = surveyContextHasResults(serverSurveyContext)
@@ -93,10 +99,10 @@ export async function POST(request: Request) {
 
   // Prefer the per-turn model from the request body, falling back to the stored
   // preference. resolveUsableModel substitutes a provider the user has a key for,
-  // so we only 402 when no key is configured at all.
-  const modelValue = resolveUsableModel(body.model ?? credentials.chatModel, {
-    anthropic: !!credentials.anthropicKey,
-    google: !!credentials.googleKey,
+  // so we only 402 when no key is provided at all.
+  const modelValue = resolveUsableModel(body.model ?? preferences.chatModel, {
+    anthropic: !!anthropicKey,
+    google: !!googleKey,
   });
 
   if (!modelValue) {
@@ -113,11 +119,11 @@ export async function POST(request: Request) {
   const option = MODEL_OPTIONS.find((m) => m.value === modelValue)!;
   const model: LanguageModel =
     option.provider === "anthropic"
-      ? createAnthropic({ apiKey: credentials.anthropicKey! })(option.value)
-      : createGoogleGenerativeAI({ apiKey: credentials.googleKey! })(option.value);
+      ? createAnthropic({ apiKey: anthropicKey! })(option.value)
+      : createGoogleGenerativeAI({ apiKey: googleKey! })(option.value);
 
-  const ragSearch: RagSearchCapability | null = credentials.googleKey
-    ? { googleApiKey: credentials.googleKey, sql: await getReadyDb() }
+  const ragSearch: RagSearchCapability | null = googleKey
+    ? { googleApiKey: googleKey, sql: await getReadyDb() }
     : null;
 
   logger.info(

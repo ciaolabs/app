@@ -1,10 +1,8 @@
 import { AUTH_PROVIDER, getReadyDb, type Sql } from "@ciaobang/db";
 
-import { decryptApiKey, encryptApiKey } from "./crypto";
-import { normalizeModelId, type ApiKeyProvider } from "./models";
+import { normalizeModelId } from "./models";
 
 type AccountRow = { id: string; display_name: string | null; organization: string | null };
-type ApiKeyRow = { provider: ApiKeyProvider; encrypted_key: string };
 type PrefsRow = { chat_model: string };
 
 export async function getOrCreateAccount(userId: string, sql?: Sql): Promise<AccountRow> {
@@ -35,59 +33,6 @@ export async function updateProfile(
   `;
 }
 
-export async function setApiKey(userId: string, provider: ApiKeyProvider, key: string, sql?: Sql) {
-  const db = sql ?? (await getReadyDb());
-  const account = await getOrCreateAccount(userId, db);
-  const encrypted = encryptApiKey(key.trim());
-  await db`
-    insert into app_private.user_api_keys (user_account_id, provider, encrypted_key)
-    values (${account.id}, ${provider}, ${encrypted})
-    on conflict (user_account_id, provider)
-    do update set encrypted_key = excluded.encrypted_key, updated_at = now()
-  `;
-}
-
-export async function removeApiKey(userId: string, provider: ApiKeyProvider, sql?: Sql) {
-  const db = sql ?? (await getReadyDb());
-  const account = await getOrCreateAccount(userId, db);
-  await db`
-    delete from app_private.user_api_keys
-    where user_account_id = ${account.id} and provider = ${provider}
-  `;
-}
-
-export async function getApiKeyProviders(
-  userId: string,
-  sql?: Sql,
-): Promise<Record<ApiKeyProvider, boolean>> {
-  const db = sql ?? (await getReadyDb());
-  const account = await getOrCreateAccount(userId, db);
-  const rows = await db<{ provider: ApiKeyProvider }[]>`
-    select provider from app_private.user_api_keys where user_account_id = ${account.id}
-  `;
-  const set = new Set(rows.map((r) => r.provider));
-  return { anthropic: set.has("anthropic"), google: set.has("google") };
-}
-
-export async function getDecryptedApiKey(
-  userId: string,
-  provider: ApiKeyProvider,
-  sql?: Sql,
-): Promise<string | null> {
-  const db = sql ?? (await getReadyDb());
-  const account = await getOrCreateAccount(userId, db);
-  const [row] = await db<ApiKeyRow[]>`
-    select encrypted_key from app_private.user_api_keys
-    where user_account_id = ${account.id} and provider = ${provider}
-  `;
-  if (!row) return null;
-  try {
-    return decryptApiKey(row.encrypted_key);
-  } catch {
-    return null;
-  }
-}
-
 export async function getPreferences(userId: string, sql?: Sql): Promise<{ chatModel: string }> {
   const db = sql ?? (await getReadyDb());
   const account = await getOrCreateAccount(userId, db);
@@ -95,46 +40,6 @@ export async function getPreferences(userId: string, sql?: Sql): Promise<{ chatM
     select chat_model from app_private.user_preferences where user_account_id = ${account.id}
   `;
   return { chatModel: normalizeModelId(row?.chat_model) };
-}
-
-/**
- * Resolve everything a chat turn needs in a single account lookup: the model
- * preference plus both decrypted provider keys. Folds what used to be three
- * separate calls (getPreferences + getDecryptedApiKey twice) — each of which
- * re-ran the account upsert — into one upsert and two parallel reads.
- */
-export async function getChatTurnCredentials(
-  userId: string,
-  sql?: Sql,
-): Promise<{ chatModel: string; anthropicKey: string | null; googleKey: string | null }> {
-  const db = sql ?? (await getReadyDb());
-  const account = await getOrCreateAccount(userId, db);
-
-  const [prefRows, keyRows] = await Promise.all([
-    db<PrefsRow[]>`
-      select chat_model from app_private.user_preferences where user_account_id = ${account.id}
-    `,
-    db<ApiKeyRow[]>`
-      select provider, encrypted_key from app_private.user_api_keys
-      where user_account_id = ${account.id}
-    `,
-  ]);
-
-  const decrypt = (provider: ApiKeyProvider): string | null => {
-    const row = keyRows.find((r) => r.provider === provider);
-    if (!row) return null;
-    try {
-      return decryptApiKey(row.encrypted_key);
-    } catch {
-      return null;
-    }
-  };
-
-  return {
-    chatModel: normalizeModelId(prefRows[0]?.chat_model),
-    anthropicKey: decrypt("anthropic"),
-    googleKey: decrypt("google"),
-  };
 }
 
 export async function updatePreferences(userId: string, chatModel: string, sql?: Sql) {
@@ -154,9 +59,4 @@ export async function deleteAccount(userId: string, sql?: Sql) {
     delete from app_private.user_accounts
     where provider = ${AUTH_PROVIDER} and provider_user_id = ${userId}
   `;
-}
-
-export async function hasAnyApiKey(userId: string, sql?: Sql): Promise<boolean> {
-  const keys = await getApiKeyProviders(userId, sql);
-  return keys.anthropic || keys.google;
 }

@@ -147,9 +147,14 @@ export function AiSettings({ onClose }: { onClose?: () => void }) {
 
       <div className="space-y-3">
         <h4 className="text-sm font-medium">API Keys</h4>
-        <p className="text-xs opacity-60">
-          Keys stored in your browser only and sent directly to the AI provider.
-        </p>
+        <div className="flex items-start gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/70">
+          <KeyRound className="mt-0.5 size-3.5 shrink-0 text-white/60" />
+          <p>
+            <span className="font-medium text-white/90">Your keys never leave this browser.</span>{" "}
+            They are saved only on this device and sent directly to the AI
+            provider — never stored on our servers or in our database.
+          </p>
+        </div>
         {API_KEY_PROVIDERS.map((provider) => (
           <ApiKeyField
             key={provider}

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getCurrentUserId = vi.fn();
 const loadSurveyChatContext = vi.fn();
-const getChatTurnCredentials = vi.fn();
+const getPreferences = vi.fn();
 const createAnthropic = vi.fn();
 const runChatTurn = vi.fn();
 const runDevChatTurn = vi.fn();
@@ -12,7 +12,7 @@ const getChatRepository = vi.fn();
 vi.mock("@ciaobang/auth", () => ({ getCurrentUserId }));
 vi.mock("@/lib/chat/repository", () => ({ getChatRepository }));
 vi.mock("@/lib/chat-context-loader", () => ({ loadSurveyChatContext }));
-vi.mock("@/lib/account/repository", () => ({ getChatTurnCredentials }));
+vi.mock("@/lib/account/repository", () => ({ getPreferences }));
 vi.mock("@ai-sdk/anthropic", () => ({ createAnthropic }));
 vi.mock("@ai-sdk/google", () => ({ createGoogleGenerativeAI: vi.fn() }));
 vi.mock("@ciaobang/db", () => ({ getReadyDb }));
@@ -38,7 +38,7 @@ describe("POST /api/chat (HTTP shape)", () => {
     vi.resetModules();
     getCurrentUserId.mockReset();
     loadSurveyChatContext.mockReset();
-    getChatTurnCredentials.mockReset();
+    getPreferences.mockReset();
     createAnthropic.mockReset();
     runChatTurn.mockReset();
     runDevChatTurn.mockReset();
@@ -47,21 +47,30 @@ describe("POST /api/chat (HTTP shape)", () => {
 
     getChatRepository.mockReturnValue({});
     getReadyDb.mockResolvedValue({});
-    getChatTurnCredentials.mockResolvedValue({
-      chatModel: "claude-sonnet-4-6",
-      anthropicKey: "sk-test-key",
-      googleKey: "sk-test-key",
-    });
+    // Only the (non-sensitive) model preference comes from the DB now; the keys
+    // arrive per request via headers.
+    getPreferences.mockResolvedValue({ chatModel: "claude-sonnet-4-6" });
     createAnthropic.mockReturnValue(() => "mock-model");
     loadSurveyChatContext.mockResolvedValue(surveyContext);
     runChatTurn.mockResolvedValue(new Response("ok", { headers: { "x-chat-thread-id": "t1" } }));
     runDevChatTurn.mockResolvedValue(new Response("dev"));
   });
 
-  function buildRequest(body: unknown) {
+  // Keys are BYOK: the browser sends them per request via headers. Default both
+  // present; individual tests override to exercise the no-key / single-key paths.
+  function buildRequest(
+    body: unknown,
+    keys: { anthropic?: string | null; google?: string | null } = {
+      anthropic: "sk-test-key",
+      google: "sk-test-key",
+    },
+  ) {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (keys.anthropic) headers["x-anthropic-key"] = keys.anthropic;
+    if (keys.google) headers["x-google-key"] = keys.google;
     return new Request("http://localhost/api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(body),
     });
   }
@@ -119,19 +128,17 @@ describe("POST /api/chat (HTTP shape)", () => {
     );
   });
 
-  it("returns 402 when no API key is configured for the chosen provider", async () => {
+  it("returns 402 when no API key is provided for the chosen provider", async () => {
     getCurrentUserId.mockResolvedValue("user_1");
-    getChatTurnCredentials.mockResolvedValue({
-      chatModel: "claude-sonnet-4-6",
-      anthropicKey: null,
-      googleKey: null,
-    });
     const { POST } = await import("@/app/api/chat/route");
 
     const response = await POST(
-      buildRequest({
-        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
-      }),
+      buildRequest(
+        {
+          messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
+        },
+        { anthropic: null, google: null },
+      ),
     );
 
     expect(response.status).toBe(402);
@@ -181,19 +188,17 @@ describe("POST /api/chat (HTTP shape)", () => {
     expect(args.repository).toBeDefined();
   });
 
-  it("omits the RAG capability when no Google API key is configured", async () => {
+  it("omits the RAG capability when no Google API key is provided", async () => {
     getCurrentUserId.mockResolvedValue("user_1");
-    getChatTurnCredentials.mockResolvedValue({
-      chatModel: "claude-sonnet-4-6",
-      anthropicKey: "sk-anthropic",
-      googleKey: null,
-    });
     const { POST } = await import("@/app/api/chat/route");
 
     await POST(
-      buildRequest({
-        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
-      }),
+      buildRequest(
+        {
+          messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
+        },
+        { anthropic: "sk-anthropic", google: null },
+      ),
     );
 
     expect(runChatTurn).toHaveBeenCalledWith(expect.objectContaining({ ragSearch: null }));
@@ -219,19 +224,18 @@ describe("POST /api/chat (HTTP shape)", () => {
   it("falls back to a usable provider's model instead of 402 when the chosen provider has no key", async () => {
     getCurrentUserId.mockResolvedValue("user_1");
     // Anthropic-only user whose (stored) model is a Google one.
-    getChatTurnCredentials.mockResolvedValue({
-      chatModel: "gemini-flash-lite-latest",
-      anthropicKey: "sk-anthropic",
-      googleKey: null,
-    });
+    getPreferences.mockResolvedValue({ chatModel: "gemini-flash-lite-latest" });
     const inner = vi.fn(() => "mock-model");
     createAnthropic.mockReturnValue(inner);
     const { POST } = await import("@/app/api/chat/route");
 
     const response = await POST(
-      buildRequest({
-        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
-      }),
+      buildRequest(
+        {
+          messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
+        },
+        { anthropic: "sk-anthropic", google: null },
+      ),
     );
 
     expect(response.status).toBe(200);
@@ -244,17 +248,15 @@ describe("POST /api/chat (HTTP shape)", () => {
     process.env.RAG_GOOGLE_API_KEY = "server-google-key";
     process.env.GOOGLE_API_KEY = "server-google-key";
     getCurrentUserId.mockResolvedValue("user_1");
-    getChatTurnCredentials.mockResolvedValue({
-      chatModel: "claude-sonnet-4-6",
-      anthropicKey: "sk-anthropic",
-      googleKey: null,
-    });
     const { POST } = await import("@/app/api/chat/route");
 
     await POST(
-      buildRequest({
-        messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
-      }),
+      buildRequest(
+        {
+          messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Hi" }] }],
+        },
+        { anthropic: "sk-anthropic", google: null },
+      ),
     );
 
     expect(runChatTurn).toHaveBeenCalledWith(expect.objectContaining({ ragSearch: null }));

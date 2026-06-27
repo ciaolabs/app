@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDownIcon, EyeIcon, EyeOffIcon, HistoryIcon, LogOutIcon, PanelLeftCloseIcon, PanelLeftIcon, PlusIcon, SearchIcon, Trash2Icon, UserIcon } from "lucide-react";
+import { ChevronsUpDownIcon, EyeIcon, EyeOffIcon, HistoryIcon, LockIcon, LogOutIcon, PanelLeftCloseIcon, PanelLeftIcon, PlusIcon, SearchIcon, Trash2Icon, UserIcon } from "lucide-react";
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -22,6 +22,7 @@ import type { ChatThreadSummary } from "@/lib/chat/types";
 
 import { MODEL_OPTIONS } from "@/lib/account/models";
 import type { ApiKeyProvider } from "@/lib/account/models";
+import { useAiSettings } from "@/lib/use-ai-settings";
 import { apiRoutes, routes } from "@/lib/routes";
 
 type AccountShellProps = {
@@ -29,8 +30,6 @@ type AccountShellProps = {
   displayName: string;
   organization: string;
   chatModel: string;
-  hasAnthropicKey: boolean;
-  hasGoogleKey: boolean;
   dbError?: boolean;
   threads?: ChatThreadSummary[];
 };
@@ -113,59 +112,35 @@ function ApiKeyField({
   label,
   provider,
   hasKey,
-  disabled,
-  onSaved,
-  onRemoved,
+  onSave,
+  onRemove,
 }: {
   label: string;
   provider: ApiKeyProvider;
   hasKey: boolean;
-  disabled?: boolean;
-  onSaved: () => void;
-  onRemoved: () => void;
+  onSave: (key: string) => void;
+  onRemove: () => void;
 }) {
   const [editing, setEditing] = useState(!hasKey);
   const [value, setValue] = useState("");
   const [show, setShow] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [removing, setRemoving] = useState(false);
 
-  async function handleSave() {
-    if (!value.trim() || disabled) return;
-    setSaving(true);
-    try {
-      const res = await fetch(apiRoutes.accountApiKey(provider), {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: value }),
-      });
-      if (!res.ok) throw new Error(await getResponseErrorMessage(res, "Failed to save key"));
-      setValue("");
-      setEditing(false);
-      onSaved();
-      toast.success("API key saved");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save API key");
-    } finally {
-      setSaving(false);
-    }
+  // Keys are written straight to the browser (localStorage) — there is no
+  // network round-trip and nothing reaches our servers, so this is synchronous.
+  function handleSave() {
+    if (!value.trim()) return;
+    onSave(value.trim());
+    setValue("");
+    setEditing(false);
+    setShow(false);
+    toast.success("API key saved in this browser");
   }
 
-  async function handleRemove() {
-    if (disabled) return;
-    setRemoving(true);
-    try {
-      const res = await fetch(apiRoutes.accountApiKey(provider), { method: "DELETE" });
-      if (!res.ok) throw new Error(await getResponseErrorMessage(res, "Failed to remove key"));
-      setEditing(true);
-      setValue("");
-      onRemoved();
-      toast.success("API key removed");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to remove API key");
-    } finally {
-      setRemoving(false);
-    }
+  function handleRemove() {
+    onRemove();
+    setEditing(true);
+    setValue("");
+    toast.success("API key removed from this browser");
   }
 
   return (
@@ -179,7 +154,6 @@ function ApiKeyField({
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder={`Paste your ${label} here`}
-              disabled={disabled}
               className={cn(accountInputClass, "pr-10")}
             />
             <button
@@ -190,7 +164,7 @@ function ApiKeyField({
               {show ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
             </button>
           </div>
-          <SaveButton onClick={handleSave} loading={saving} disabled={disabled || !value.trim()} />
+          <SaveButton onClick={handleSave} loading={false} disabled={!value.trim()} />
           {hasKey && (
             <button
               type="button"
@@ -212,18 +186,16 @@ function ApiKeyField({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            disabled={disabled}
-            className={cn(claySecondaryButton, "h-11 px-4 disabled:opacity-50")}
+            className={cn(claySecondaryButton, "h-11 px-4")}
           >
             Update
           </button>
           <button
             type="button"
             onClick={handleRemove}
-            disabled={disabled || removing}
-            className={cn(clayDangerButton, "h-11 px-4 disabled:opacity-50")}
+            className={cn(clayDangerButton, "h-11 px-4")}
           >
-            {removing ? "Removing…" : "Remove"}
+            Remove
           </button>
         </div>
       )}
@@ -387,20 +359,22 @@ function GeneralSection({
 
 function ModelsSection({
   initialChatModel,
-  initialHasAnthropicKey,
-  initialHasGoogleKey,
   disabled,
 }: {
   initialChatModel: string;
-  initialHasAnthropicKey: boolean;
-  initialHasGoogleKey: boolean;
   disabled?: boolean;
 }) {
   const router = useRouter();
+  // Keys live only in this browser (localStorage). localStorage can't be read
+  // during SSR, so the first client render must match the server's "no keys"
+  // markup; we read the real presence after hydration.
+  const settings = useAiSettings();
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  const hasAnthropicKey = hydrated && settings.hasApiKey("anthropic");
+  const hasGoogleKey = hydrated && settings.hasApiKey("google");
   const [chatModel, setChatModel] = useState(initialChatModel);
   const [savingModel, setSavingModel] = useState(false);
-  const [hasAnthropicKey, setHasAnthropicKey] = useState(initialHasAnthropicKey);
-  const [hasGoogleKey, setHasGoogleKey] = useState(initialHasGoogleKey);
 
   async function saveModel() {
     if (disabled) return;
@@ -457,24 +431,33 @@ function ModelsSection({
       <section className="clay-card p-6">
         <h2 className="font-display text-2xl text-(--ink)">API Keys</h2>
         <p className="mt-1 text-sm text-(--muted)">
-          You must provide your own API keys. Keys are encrypted at rest and never shared.
+          You provide your own API keys to use the chat.
         </p>
+        <div className="mt-4 flex items-start gap-3 rounded-2xl border border-(--line-strong) bg-(--surface-inset) px-4 py-3 text-sm text-(--ink-soft) shadow-(--shadow-soft)">
+          <LockIcon className="mt-0.5 size-4 shrink-0 text-(--accent-blue)" />
+          <p>
+            <span className="font-semibold text-(--ink)">Your keys never leave this browser.</span>{" "}
+            They are saved only on this device and sent directly to the AI
+            provider on each request. We never store them on our servers or in our
+            database — only you hold them. Clearing your browser data removes them.
+          </p>
+        </div>
         <div className="mt-6 space-y-6">
           <ApiKeyField
+            key={`anthropic-${hasAnthropicKey}`}
             label="Anthropic (Claude) API Key"
             provider="anthropic"
             hasKey={hasAnthropicKey}
-            disabled={disabled}
-            onSaved={() => setHasAnthropicKey(true)}
-            onRemoved={() => setHasAnthropicKey(false)}
+            onSave={(key) => settings.setApiKey("anthropic", key)}
+            onRemove={() => settings.removeApiKey("anthropic")}
           />
           <ApiKeyField
+            key={`google-${hasGoogleKey}`}
             label="Google (Gemini) API Key"
             provider="google"
             hasKey={hasGoogleKey}
-            disabled={disabled}
-            onSaved={() => setHasGoogleKey(true)}
-            onRemoved={() => setHasGoogleKey(false)}
+            onSave={(key) => settings.setApiKey("google", key)}
+            onRemove={() => settings.removeApiKey("google")}
           />
         </div>
       </section>
@@ -689,8 +672,6 @@ export function AccountShell({
   displayName,
   organization,
   chatModel,
-  hasAnthropicKey,
-  hasGoogleKey,
   dbError,
   threads = [],
 }: AccountShellProps) {
@@ -837,12 +818,7 @@ export function AccountShell({
                   disabled={dbError}
                 />
               ) : (
-                <ModelsSection
-                  initialChatModel={chatModel}
-                  initialHasAnthropicKey={hasAnthropicKey}
-                  initialHasGoogleKey={hasGoogleKey}
-                  disabled={dbError}
-                />
+                <ModelsSection initialChatModel={chatModel} disabled={dbError} />
               )}
             </div>
           </div>
