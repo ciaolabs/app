@@ -1,6 +1,15 @@
 packages:
   - "apps/*"
   - "packages/*"
+# Force-resolve transitive dependencies flagged by Dependabot to their patched
+# versions. Dependabot security updates handle direct/most transitive bumps
+# automatically; these three are pinned by a narrower parent range and need an
+# explicit override. Remove an entry once the parent no longer pulls in the
+# vulnerable version.
+overrides:
+  "vite@<8.0.16": "8.0.16"
+  "postcss@<8.5.10": "8.5.15"
+  "esbuild@<0.28.1": "0.28.1"
 allowBuilds:
   core-js: true
   esbuild: true
