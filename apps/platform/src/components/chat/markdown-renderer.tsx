@@ -5,32 +5,76 @@ import remarkGfm from "remark-gfm";
 
 import { cn } from "@/lib/utils";
 
-export function MarkdownRenderer({ text }: { text: string }) {
+export function MarkdownRenderer({
+  text,
+  compact = false,
+}: {
+  text: string;
+  /**
+   * Tighter type scale + spacing for cramped surfaces (e.g. the Ask Ciao!
+   * pill). Element semantics and theming are identical to the default; only
+   * sizes shrink so the same Markdown reads well in a 13px container.
+   */
+  compact?: boolean;
+}) {
+  const lead = compact ? "leading-relaxed" : "leading-7";
   return (
-    <div className="markdown-body space-y-3">
+    <div className={cn("markdown-body", compact ? "space-y-2" : "space-y-3")}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          p: ({ children }) => <p className="leading-7">{children}</p>,
+          p: ({ children }) => <p className={lead}>{children}</p>,
           h1: ({ children }) => (
-            <h1 className="mt-2 text-2xl font-bold tracking-tight">{children}</h1>
+            <h1
+              className={cn(
+                "mt-2 font-bold tracking-tight",
+                compact ? "text-base" : "text-2xl",
+              )}
+            >
+              {children}
+            </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="mt-2 text-xl font-bold tracking-tight">{children}</h2>
+            <h2
+              className={cn(
+                "mt-2 font-bold tracking-tight",
+                compact ? "text-sm" : "text-xl",
+              )}
+            >
+              {children}
+            </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="mt-2 text-lg font-bold tracking-tight">{children}</h3>
+            <h3
+              className={cn(
+                "mt-2 font-bold tracking-tight",
+                compact ? "text-sm" : "text-lg",
+              )}
+            >
+              {children}
+            </h3>
           ),
           h4: ({ children }) => (
-            <h4 className="mt-2 text-base font-bold tracking-tight">{children}</h4>
+            <h4
+              className={cn(
+                "mt-2 font-bold tracking-tight",
+                compact ? "text-[13px]" : "text-base",
+              )}
+            >
+              {children}
+            </h4>
           ),
           ul: ({ children }) => (
-            <ul className="list-disc space-y-1 pl-6">{children}</ul>
+            <ul className={cn("list-disc space-y-1", compact ? "pl-5" : "pl-6")}>
+              {children}
+            </ul>
           ),
           ol: ({ children }) => (
-            <ol className="list-decimal space-y-1 pl-6">{children}</ol>
+            <ol className={cn("list-decimal space-y-1", compact ? "pl-5" : "pl-6")}>
+              {children}
+            </ol>
           ),
-          li: ({ children }) => <li className="leading-7">{children}</li>,
+          li: ({ children }) => <li className={lead}>{children}</li>,
           strong: ({ children }) => (
             <strong className="font-semibold text-(--ink)">{children}</strong>
           ),
