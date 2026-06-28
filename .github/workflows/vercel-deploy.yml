@@ -42,7 +42,10 @@ jobs:
           cache: pnpm
 
       - name: Install Vercel CLI
-        run: pnpm add -g vercel@latest
+        # Install via npm, not `pnpm add -g`: pnpm/action-setup does not run
+        # `pnpm setup`, so its global bin dir is absent from PATH. npm's global
+        # bin is on PATH via setup-node.
+        run: npm install --global vercel@latest
 
       - name: Resolve environment
         id: env
