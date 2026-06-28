@@ -436,10 +436,10 @@ function ModelsSection({
         <div className="mt-4 flex items-start gap-3 rounded-2xl border border-(--line-strong) bg-(--surface-inset) px-4 py-3 text-sm text-(--ink-soft) shadow-(--shadow-soft)">
           <LockIcon className="mt-0.5 size-4 shrink-0 text-(--accent-blue)" />
           <p>
-            <span className="font-semibold text-(--ink)">Your keys never leave this browser.</span>{" "}
-            They are saved only on this device and sent directly to the AI
+            <span className="font-semibold text-(--ink)">Your keys never leave your browser.</span>{" "}
+            They are saved only on your device and sent directly to the AI
             provider on each request. We never store them on our servers or in our
-            database — only you hold them. Clearing your browser data removes them.
+            database, only you hold them. Clearing your browser data removes them.
           </p>
         </div>
         <div className="mt-6 space-y-6">
