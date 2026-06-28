@@ -1420,11 +1420,42 @@ function EmptyChat({
   );
 }
 
+function ThinkingRow({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center gap-2 text-(--ink-soft)", className)}>
+      <ThinkingLottie className="size-5" />
+      <span className="text-sm">Thinking...</span>
+    </div>
+  );
+}
+
+// Shown between submitting a turn and the assistant message actually arriving
+// in the stream (the "submitted" window — seconds when RAG runs), so the user
+// gets immediate feedback instead of a message that seems to go nowhere.
+function PendingAssistantBubble() {
+  return (
+    <div className="flex w-full flex-col gap-1.5">
+      <div className="flex items-center gap-1.5 pl-1">
+        <CiaoIcon className="size-3.5 text-(--ink-soft)" />
+        <span className="text-[11px] font-medium text-(--ink-soft)">Ask Ciao!</span>
+      </div>
+      <div className="flex max-w-[min(760px,85%)] flex-col gap-1">
+        <div className="rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) px-5 py-4 text-base leading-7 text-(--ink) shadow-(--shadow-soft)">
+          <ThinkingRow />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ChatMessageBubble({
   message,
+  isActive = false,
   onEdit,
 }: {
   message: UIMessage;
+  /** True for the last message while the turn is still submitting/streaming. */
+  isActive?: boolean;
   onEdit?: (text: string) => void;
 }) {
   const isUser = message.role === "user";
@@ -1484,6 +1515,15 @@ function ChatMessageBubble({
   });
 
   const hasContent = renderedParts.some(Boolean);
+  const hasText = message.parts.some(
+    (part) => part.type === "text" && Boolean((part as { text?: string }).text),
+  );
+  // Keep the waving "Thinking…" indicator up the whole time the assistant is
+  // still working and hasn't written its answer yet — including the gap after a
+  // tool call (e.g. "Searching survey docs ✓") finishes but before text starts.
+  // It used to render only when the message had no parts at all, so a completed
+  // tool card made it vanish and the turn looked frozen.
+  const showThinking = isActive && !hasText;
 
   return (
     <div className="group flex w-full flex-col gap-1.5">
@@ -1493,14 +1533,8 @@ function ChatMessageBubble({
       </div>
       <div className="flex max-w-[min(760px,85%)] flex-col gap-1">
         <div className="rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) px-5 py-4 text-base leading-7 text-(--ink) shadow-(--shadow-soft)">
-          {hasContent ? (
-            renderedParts
-          ) : (
-            <div className="flex items-center gap-2 text-(--ink-soft)">
-              <ThinkingLottie className="size-5" />
-              <span className="text-sm">Thinking...</span>
-            </div>
-          )}
+          {hasContent ? renderedParts : null}
+          {showThinking ? <ThinkingRow className={cn(hasContent && "mt-3")} /> : null}
         </div>
         <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
           <button
@@ -2048,13 +2082,17 @@ export function ChatShell({
               />
             ) : (
               <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 py-4">
-                {messages.map((message) => (
+                {messages.map((message, index) => (
                   <ChatMessageBubble
                     key={message.id}
                     message={message}
+                    isActive={index === messages.length - 1 && isBusy}
                     onEdit={message.role === "user" ? handleEditMessage : undefined}
                   />
                 ))}
+                {isBusy && messages[messages.length - 1]?.role === "user" ? (
+                  <PendingAssistantBubble />
+                ) : null}
                 {loadingThreadId ? (
                   <p className="text-sm text-(--muted)">Loading thread...</p>
                 ) : null}
@@ -2076,43 +2114,52 @@ export function ChatShell({
               <SettingsMenu surveyContext={surveyContext} />
             </div>
             <div className="mx-auto w-full max-w-4xl">
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void submitPrompt(input);
-                }}
-                className={cn(
-                  "rounded-3xl border bg-(--surface-panel-strong) p-3 shadow-(--shadow-strong)",
-                  isTemporary
-                    ? "border-2 border-dashed border-[#3b4f8a]"
-                    : "border-(--line-strong)",
-                )}
-              >
-                <Textarea
-                  value={input}
-                  onChange={(event) => setInput(event.target.value)}
-                  placeholder="Type your message here..."
-                  disabled={!hasApiKeys || isBusy}
-                  className="max-h-44 min-h-20 border-0 bg-transparent px-2 py-2 text-base text-(--ink) placeholder:text-(--muted) focus-visible:border-0"
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" && !event.shiftKey) {
-                      event.preventDefault();
-                      void submitPrompt(input);
-                    }
+              {!hasApiKeys ? (
+                <div className="flex items-center justify-between gap-3 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) px-4 py-3 shadow-(--shadow-strong)">
+                  <p className="min-w-0 text-sm text-(--ink-soft)">
+                    Add an Anthropic or Google API key to start chatting.
+                  </p>
+                  <Link
+                    href={routes.account("models")}
+                    className={cn(clayPrimaryButton, "h-9 shrink-0")}
+                  >
+                    Add API key
+                  </Link>
+                </div>
+              ) : (
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void submitPrompt(input);
                   }}
-                />
-                <div className="flex items-center justify-between gap-3 pt-2">
-                  <div className="flex min-w-0 items-center gap-2 text-sm text-(--ink-soft)">
-                    <span className="truncate font-semibold">{getContextLabel(surveyContext)}</span>
-                    <Separator orientation="vertical" className="h-4 bg-(--line)" />
+                  className={cn(
+                    "flex items-center gap-2 rounded-2xl border bg-(--surface-panel-strong) py-1.5 pr-1.5 pl-3 shadow-(--shadow-strong)",
+                    isTemporary
+                      ? "border-2 border-dashed border-[#3b4f8a]"
+                      : "border-(--line-strong)",
+                  )}
+                >
+                  <Textarea
+                    value={input}
+                    onChange={(event) => setInput(event.target.value)}
+                    placeholder="Ask anything..."
+                    disabled={isBusy}
+                    rows={1}
+                    className="min-h-0 max-h-40 flex-1 border-0 bg-transparent px-1 py-1.5 text-base text-(--ink) placeholder:text-(--muted) focus-visible:border-0"
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        void submitPrompt(input);
+                      }
+                    }}
+                  />
+                  <div className="flex shrink-0 items-center gap-1.5">
                     <ModelPicker
                       value={effectiveModel}
                       onChange={(next) => void handleChatModelChange(next)}
                       providers={apiKeyProviders}
                       disabled={isBusy}
                     />
-                  </div>
-                  <div className="flex items-center gap-2">
                     {isBusy ? (
                       <button
                         type="button"
@@ -2125,15 +2172,15 @@ export function ChatShell({
                     ) : null}
                     <button
                       type="submit"
-                      disabled={!hasApiKeys || isBusy || !input.trim()}
+                      disabled={isBusy || !input.trim()}
                       className={clayIconButtonAccent}
                       aria-label="Send message"
                     >
                       <ArrowUpIcon className="size-5" />
                     </button>
                   </div>
-                </div>
-              </form>
+                </form>
+              )}
               {error ? (
                 <p className="mt-3 text-center text-sm text-(--accent-rose)">{error.message}</p>
               ) : null}
