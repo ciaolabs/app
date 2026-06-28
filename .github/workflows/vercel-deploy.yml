@@ -1,0 +1,90 @@
+name: Vercel deploy
+
+# Deploys the platform app to Vercel via the official CLI instead of Vercel's
+# Git integration. The Git integration refuses to deploy a private repo owned by
+# a GitHub org on the Hobby (free) plan; CLI/token deploys are not subject to
+# that limit, so the repo stays private + in the org + on the free plan.
+#
+# Secrets required (Settings > Secrets and variables > Actions):
+#   VERCEL_TOKEN       - a Vercel access token (you create this once)
+#   VERCEL_ORG_ID      - team_KOROMUmqriz18BjvRbDKGHj5  (set automatically)
+#   VERCEL_PROJECT_ID  - prj_wMqTjsd5Xd4hGlgRdtr7tqVuEMJj (set automatically)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: vercel-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    name: Build & deploy
+    runs-on: ubuntu-latest
+    # Skip on Dependabot PRs (they have no access to the VERCEL_TOKEN secret).
+    if: github.actor != 'dependabot[bot]'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          # pnpm@11 requires Node >=22.13 (see root package.json packageManager).
+          node-version: 22
+          cache: pnpm
+
+      - name: Install Vercel CLI
+        # Install via npm, not `pnpm add -g`: pnpm/action-setup does not run
+        # `pnpm setup`, so its global bin dir is absent from PATH. npm's global
+        # bin is on PATH via setup-node.
+        run: npm install --global vercel@latest
+
+      - name: Resolve environment
+        id: env
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "target=production" >> "$GITHUB_OUTPUT"
+            echo "prod_flag=--prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "target=preview" >> "$GITHUB_OUTPUT"
+            echo "prod_flag=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull Vercel project settings
+        run: vercel pull --yes --environment=${{ steps.env.outputs.target }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: vercel build ${{ steps.env.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy prebuilt output
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt ${{ steps.env.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed to $url"
+
+      - name: Comment preview URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.deploy.outputs.url }}';
+            const marker = '<!-- vercel-cli-preview -->';
+            const body = `${marker}\n▲ **Vercel preview** deployed: ${url}`;
+            const { data: comments } = await github.rest.issues.listComments({
+              ...context.repo, issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+            }
