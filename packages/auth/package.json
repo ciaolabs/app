@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@workos-inc/authkit-nextjs": "^4.1.4",
-    "jose": "^5.10.0"
+    "jose": "^6.2.3"
   },
   "peerDependencies": {
     "next": "^16.0.0"
