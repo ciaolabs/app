@@ -47,6 +47,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Auto-fix dispatch from pr-triage.sh carries a PR number — check that
+      # branch out so Claude works on (and pushes to) the failing PR.
+      - name: Check out target PR
+        if: github.event_name == 'repository_dispatch' && github.event.client_payload.pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr checkout ${{ github.event.client_payload.pr }}
+
       - uses: anthropics/claude-code-action@v1
         with:
           # Uses your Claude subscription (no extra API billing).
