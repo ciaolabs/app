@@ -1,0 +1,61 @@
+name: Supabase keep-alive
+
+# Free-tier Supabase projects auto-pause after 7 days with no activity, which
+# takes down login + surveys (the app's server components query Postgres on
+# every request). This workflow issues a daily authenticated request to the
+# "Ciao Survey Prod" REST API (ref rophwidmqewbijfgzwqx) so the project is
+# never idle long enough to be paused.
+#
+# NOTE: this is a free-tier workaround, not a hard guarantee. The only official
+# way to never auto-pause is upgrading the project to the Supabase Pro plan.
+#
+# Requires repo secret SUPABASE_KEEPALIVE_KEY (the project's anon/publishable
+# API key — public by design, but kept as a secret for hygiene).
+
+on:
+  schedule:
+    # Daily at 06:17 UTC. The pause window is 7 days, so a daily ping leaves a
+    # wide margin even if GitHub skips a scheduled run (it sometimes does under
+    # load). Odd minute to avoid the top-of-hour scheduler congestion.
+    - cron: "17 6 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase (GraphQL — exercises Postgres via pg_graphql)
+        env:
+          SUPABASE_URL: https://rophwidmqewbijfgzwqx.supabase.co
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEEPALIVE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_KEY:-}" ]; then
+            echo "::error::SUPABASE_KEEPALIVE_KEY secret is not set."
+            exit 1
+          fi
+          # POST to the GraphQL endpoint: this both passes the API gateway
+          # (an API request) AND runs a query through pg_graphql against
+          # Postgres (real DB activity) — either is enough to reset the
+          # free-tier inactivity timer; doing both is belt-and-suspenders.
+          code=$(curl -sS -o /dev/null -w '%{http_code}' \
+            --retry 3 --retry-delay 10 --max-time 30 \
+            -X POST \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"{ __typename }"}' \
+            "${SUPABASE_URL}/graphql/v1")
+          echo "GraphQL endpoint responded with HTTP ${code}"
+          # Expect 200. Anything else (incl. a paused project returning a
+          # gateway error) fails the run so GitHub emails an alert.
+          if [ "${code}" != "200" ]; then
+            echo "::error::Unexpected status ${code} — project may be paused or unreachable."
+            exit 1
+          fi
+          echo "Supabase project 'Ciao Survey Prod' is awake. ✅"
