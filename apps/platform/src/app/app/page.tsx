@@ -11,6 +11,14 @@ import { ChatShell } from "@/components/chat/chat-shell";
 import { ChatSkeleton } from "@/components/chat/chat-skeleton";
 import { logger } from "@/lib/logger";
 
+// /app is a per-user, auth-gated page. Without this it was emitting a
+// `cache-control: public` response for the unauthenticated shell that Vercel's
+// CDN cached and then served (the cache key does not vary on the session
+// cookie) to *authenticated* users too — who got the cached signed-out
+// skeleton instead of their chat, rendering as a blank page. force-dynamic
+// makes every request render fresh and non-cacheable (private, no-store).
+export const dynamic = "force-dynamic";
+
 // The chat shell must stay reachable even when the database is slow or briefly
 // unreachable. A plain `.catch()` only handles rejections, not a connection
 // that hangs (a paused/saturated pooler can stall indefinitely) — which leaves
