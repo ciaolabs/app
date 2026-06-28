@@ -45,6 +45,13 @@ export function getDb(): Sql {
       max: 1,
       prepare: false,
       ssl: "require",
+      // Fail fast instead of hanging the request when the database or the
+      // Supavisor pooler is unreachable (e.g. paused/saturated). Without a
+      // bound, a stalled connection leaves server renders (notably /app, which
+      // loads threads + preferences before rendering) pending until the
+      // platform kills the function — surfacing as a timeout / blank page.
+      connect_timeout: 10, // seconds
+      idle_timeout: 20, // seconds — release idle pooled connections
     });
   }
 

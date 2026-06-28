@@ -7,6 +7,7 @@ import { useChat } from "@ai-sdk/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useAiSettings } from "@/lib/use-ai-settings";
 import { apiRoutes, routes } from "@/lib/routes";
+import { MarkdownRenderer } from "@/components/chat/markdown-renderer";
 import { AiSettings } from "./ai-settings";
 import { useAssistPageContent } from "./assist-page-content";
 import { buildAssistBody } from "./assist-request";
@@ -118,7 +119,7 @@ function ChatMessages({
                 </span>
               </div>
               <div className="pl-0.5 text-[13px] leading-relaxed text-white/85">
-                <div className="whitespace-pre-wrap">{text}</div>
+                <MarkdownRenderer text={text} compact />
               </div>
             </div>
           );

@@ -1,13 +1,21 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import {
+  convertToModelMessages,
+  stepCountIs,
+  streamText,
+  type UIMessage,
+} from "ai";
+import {
+  EMPTY_SURVEY_CHAT_CONTEXT,
   formatSurveyChatContext,
   getSurveyContextAvailability,
   surveyContextHasResults,
+  type SurveyChatContext,
 } from "@ciaobang/chat-context";
 import { getCurrentUserId } from "@ciaobang/auth";
 import { getModelOption, MODEL_OPTIONS } from "@/lib/ai-models";
+import { makeSurveyContextTools } from "@/lib/chat/agent-tools";
 import { loadSurveyChatContext } from "@/lib/chat-context-loader";
 import { logger } from "@/lib/logger";
 
@@ -78,12 +86,14 @@ export async function POST(request: Request) {
   }
 
   // Personalisation is best-effort: anonymous visitors get the base prompt.
+  let surveyContext: SurveyChatContext = EMPTY_SURVEY_CHAT_CONTEXT;
   let surveyContextSection: string | null = null;
   try {
     const userId = await getCurrentUserId({ acceptsSessionToken: true, request });
     if (userId) {
       const ctx = await loadSurveyChatContext(userId);
       if (ctx && surveyContextHasResults(ctx)) {
+        surveyContext = ctx;
         surveyContextSection = `Data availability: ${getSurveyContextAvailability(ctx)}\n\n${formatSurveyChatContext(ctx)}`;
       }
     }
@@ -98,6 +108,14 @@ export async function POST(request: Request) {
     system: buildSystemPrompt(surveyContextSection, pageContent),
     messages: await convertToModelMessages(messages),
     temperature: 0.6,
+    // Same survey-context agentic tools as the full /api/chat route, so the
+    // pill can recall and compare the reader's saved results (the doc-RAG
+    // searchDocs tool stays out — it needs the BYOK Google embedding key the
+    // single-key assist route doesn't carry; see ADR-0001). Tools are wired in
+    // even for anonymous visitors (empty context → tools return nothing), which
+    // mirrors the full chat and keeps the two surfaces consistent.
+    tools: makeSurveyContextTools(surveyContext),
+    stopWhen: stepCountIs(6),
   });
 
   return result.toUIMessageStreamResponse({

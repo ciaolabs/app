@@ -9,6 +9,41 @@ import { getPreferences } from "@/lib/account/repository";
 import { DEFAULT_CHAT_MODEL } from "@/lib/account/models";
 import { ChatShell } from "@/components/chat/chat-shell";
 import { ChatSkeleton } from "@/components/chat/chat-skeleton";
+import { logger } from "@/lib/logger";
+
+// The chat shell must stay reachable even when the database is slow or briefly
+// unreachable. A plain `.catch()` only handles rejections, not a connection
+// that hangs (a paused/saturated pooler can stall indefinitely) — which leaves
+// this server render pending until the platform kills the request and the user
+// sees a timeout / blank /app page. We additionally bound each dependency load
+// so the shell always renders with usable defaults; the real threads and
+// preferences load on the next request once the database recovers.
+const DB_LOAD_TIMEOUT_MS = 8000;
+
+async function loadOrFallback<T>(
+  label: string,
+  load: () => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  // Attach the catch up front so a late rejection (after the timeout already
+  // won the race) can never become an unhandled rejection.
+  const guarded = load().catch((error) => {
+    logger.warn({ label, error }, "Chat dependency load failed; using fallback");
+    return fallback;
+  });
+  const timeout = new Promise<T>((resolve) => {
+    timer = setTimeout(() => {
+      logger.warn({ label }, "Chat dependency load timed out; using fallback");
+      resolve(fallback);
+    }, DB_LOAD_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([guarded, timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 async function ChatLoader() {
   const userId = await requireCurrentUserId({ returnPathname: routes.chat });
@@ -16,9 +51,11 @@ async function ChatLoader() {
   // per turn by the client. The server only needs the (non-sensitive) model
   // preference and the user's threads.
   const [threads, surveyContext, preferences] = await Promise.all([
-    getChatRepository().listThreads(userId).catch(() => []),
-    loadSurveyChatContext(userId).catch(() => EMPTY_SURVEY_CHAT_CONTEXT),
-    getPreferences(userId).catch(() => ({ chatModel: DEFAULT_CHAT_MODEL })),
+    loadOrFallback("threads", () => getChatRepository().listThreads(userId), []),
+    loadOrFallback("surveyContext", () => loadSurveyChatContext(userId), EMPTY_SURVEY_CHAT_CONTEXT),
+    loadOrFallback("preferences", () => getPreferences(userId), {
+      chatModel: DEFAULT_CHAT_MODEL,
+    }),
   ]);
 
   return (
