@@ -15,7 +15,7 @@
     "index": "tsx scripts/index-docs.ts"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.74",
+    "@ai-sdk/anthropic": "^4.0.1",
     "@ai-sdk/gateway": "^3.0.107",
     "@ai-sdk/google": "^3.0.67",
     "@ai-sdk/react": "^3.0.174",
