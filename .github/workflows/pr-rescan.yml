@@ -1,0 +1,48 @@
+name: PR rescan
+
+# Re-triages every open PR. This catches the cases a single PR's own CI run
+# can't see on its own:
+#   - after a merge, sibling PRs that now conflict on the lockfile get rebased
+#   - a PR that went green while nothing else was happening gets merged
+#   - a periodic safety net sweeps up anything that slipped through
+#
+# Triggers:
+#   - workflow_dispatch  : fired by pr-triage.sh right after each auto-merge
+#                          (a GITHUB_TOKEN push can't trigger the push event below,
+#                           but it can trigger workflow_dispatch)
+#   - push to main       : belt-and-braces for human/manual merges
+#   - schedule           : every 6h backstop
+#
+# All decisions live in .github/scripts/pr-triage.sh.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 */6 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pr-rescan
+  cancel-in-progress: false
+
+jobs:
+  rescan:
+    name: Re-triage all open PRs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Triage every open PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          for pr in $(gh pr list --repo "$GITHUB_REPOSITORY" --state open --json number -q '.[].number'); do
+            echo "::group::PR #$pr"
+            bash .github/scripts/pr-triage.sh "$pr" || echo "::warning::triage failed for #$pr"
+            echo "::endgroup::"
+          done

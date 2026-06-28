@@ -1,0 +1,70 @@
+name: CI
+
+# Build verification for every pull request, plus per-PR triage:
+#   - merge conflicts are rebased (Dependabot) or labelled (humans)
+#   - a failing Build dispatches Claude Code to fix it
+#   - a green, conflict-free PR by you or your bots is auto-merged
+# The actual decision logic lives in .github/scripts/pr-triage.sh so it can be
+# shared with the scheduled rescan (pr-rescan.yml).
+#
+# NOTE: the Build gate intentionally does NOT run `pnpm test`. The repo has
+# known pre-existing test failures unrelated to dependency bumps, so gating on
+# the build/typecheck keeps the gate meaningful. Add `pnpm -r test` here once
+# the suite is green.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# Dependabot PRs get a read-only token by default; declaring these scopes grants
+# the elevated permissions GitHub honours for Dependabot, which triage needs to
+# comment, label, merge, and dispatch the auto-fix workflow.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          # pnpm@11 (see root package.json packageManager) requires Node >=22.13;
+          # Node 20 makes pnpm crash on the node:sqlite builtin before install.
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Build all packages
+        run: pnpm -r build
+
+  triage:
+    name: Triage (merge / rebase / auto-fix)
+    needs: build
+    # Run even when the build fails (so we can dispatch the auto-fix), but never
+    # for PRs from forks — those can't use our token and aren't in the allowlist.
+    if: ${{ always() && github.event.pull_request.head.repo.fork == false }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # Always run the triage script from the default branch, never the PR's
+      # copy — a PR must not be able to alter the logic that decides to merge it,
+      # and existing PRs predating this script still need it to be present.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Triage this PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          KNOWN_BUILD_RESULT: ${{ needs.build.result }}
+        run: bash .github/scripts/pr-triage.sh "${{ github.event.pull_request.number }}"
