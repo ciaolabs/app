@@ -55,6 +55,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write # add-label (needs-rebase / ci-autofix-attempted) uses the issues API
     steps:
       # Always run the triage script from the default branch, never the PR's
       # copy — a PR must not be able to alter the logic that decides to merge it,
