@@ -1654,12 +1654,12 @@ export function ChatShell({
   const showSidebarPeek = useCallback(() => {
     window.clearTimeout(peekTimerRef.current);
     setSidebarPeeked(true);
-  }, []);
+  }, [setSidebarPeeked]);
 
   const hideSidebarPeek = useCallback((delay = 200) => {
     window.clearTimeout(peekTimerRef.current);
     peekTimerRef.current = window.setTimeout(() => setSidebarPeeked(false), delay);
-  }, []);
+  }, [setSidebarPeeked]);
 
   useEffect(() => {
     if (!sidebarLayout.collapsed) setSidebarPeeked(false);
@@ -1745,7 +1745,7 @@ export function ChatShell({
 
     const payload = (await response.json()) as { threads: ChatThreadSummary[] };
     setThreads(payload.threads);
-  }, []);
+  }, [setThreads]);
 
   const transport = useMemo(
     () =>
@@ -1875,7 +1875,7 @@ export function ChatShell({
         toast.error(sendError instanceof Error ? sendError.message : "Unable to send the message.");
       }
     },
-    [hasApiKeys, isBusy, sendMessage],
+    [hasApiKeys, isBusy, sendMessage, setInput],
   );
 
   const handleDeleteThread = useCallback(
@@ -1909,7 +1909,7 @@ export function ChatShell({
     } catch {
       toast.error("Unable to rename the chat.");
     }
-  }, []);
+  }, [setThreads]);
 
   const handlePinThread = useCallback((threadId: string) => {
     setPinnedThreadIds((prev) => {
@@ -1919,11 +1919,11 @@ export function ChatShell({
       } catch {}
       return next;
     });
-  }, []);
+  }, [setPinnedThreadIds]);
 
   const handleEditMessage = useCallback((text: string) => {
     setInput(text);
-  }, []);
+  }, [setInput]);
 
   return (
     <TooltipProvider>
