@@ -366,6 +366,11 @@ function ThemeModeRow({
   );
 }
 
+// w-72 (288px). Wider than the 280px sidebar, so the menu must be portaled to
+// the body — rendered as an `absolute` child it gets clipped by the peek
+// sidebar's `overflow-hidden` (it slides in on hover with rounded corners).
+const SETTINGS_MENU_WIDTH = 288;
+
 function SettingsMenu({
   surveyContext,
 }: {
@@ -373,13 +378,18 @@ function SettingsMenu({
 }) {
   const { mode, setMode, hasHydrated } = useThemeMode();
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [menuPos, setMenuPos] = useState<{ left: number; bottom: number } | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
     function handleClick(event: MouseEvent) {
-      if (!containerRef.current) return;
-      if (!containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        triggerRef.current && !triggerRef.current.contains(target) &&
+        menuRef.current && !menuRef.current.contains(target)
+      ) {
         setOpen(false);
       }
     }
@@ -394,15 +404,31 @@ function SettingsMenu({
     };
   }, [open]);
 
+  function openMenu() {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (rect) {
+      // Match the old `left-0` anchor (menu opens rightward from the button),
+      // clamped so it never runs off the viewport, and open upward by pinning
+      // the menu's bottom just above the trigger.
+      const left = Math.min(
+        Math.max(8, rect.left),
+        window.innerWidth - SETTINGS_MENU_WIDTH - 8,
+      );
+      setMenuPos({ left, bottom: window.innerHeight - rect.top + 8 });
+    }
+    setOpen(true);
+  }
+
   return (
-    <div ref={containerRef} className="relative">
+    <>
       <Tooltip>
         <TooltipTrigger asChild>
           <button
+            ref={triggerRef}
             type="button"
             aria-label="Settings"
             aria-expanded={open}
-            onClick={() => setOpen((value) => !value)}
+            onClick={() => (open ? setOpen(false) : openMenu())}
             className="inline-flex size-9 items-center justify-center rounded-xl text-(--ink) transition hover:bg-(--surface-inset)"
           >
             <Settings2Icon className="size-5" />
@@ -411,46 +437,51 @@ function SettingsMenu({
         <TooltipContent side="right">Settings</TooltipContent>
       </Tooltip>
 
-      {open ? (
-        <div
-          role="menu"
-          className="absolute bottom-full left-0 z-40 mb-2 w-72 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-3 shadow-(--shadow-strong)"
-        >
-          <p className="clay-label px-1">Appearance</p>
-          <div className="mt-3 px-1">
-            <ThemeModeRow mode={mode} hasHydrated={hasHydrated} onSelect={setMode} />
-          </div>
+      {open && menuPos && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              ref={menuRef}
+              role="menu"
+              style={{ position: "fixed", left: menuPos.left, bottom: menuPos.bottom }}
+              className="z-[9999] w-72 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-3 shadow-(--shadow-strong)"
+            >
+              <p className="clay-label px-1">Appearance</p>
+              <div className="mt-3 px-1">
+                <ThemeModeRow mode={mode} hasHydrated={hasHydrated} onSelect={setMode} />
+              </div>
 
-          <Separator className="my-3 bg-(--line)" />
+              <Separator className="my-3 bg-(--line)" />
 
-          <a
-            href={routes.docs()}
-            target="_blank"
-            rel="noreferrer"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-(--ink) hover:bg-(--surface-inset)"
-          >
-            <DocsIcon className="size-4" />
-            <span>Documentation</span>
-          </a>
-          <Link
-            href={routes.home}
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-(--ink) hover:bg-(--surface-inset)"
-          >
-            <ArrowLeftIcon className="size-4" />
-            <span>Go back to surveys</span>
-          </Link>
+              <a
+                href={routes.docs()}
+                target="_blank"
+                rel="noreferrer"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-(--ink) hover:bg-(--surface-inset)"
+              >
+                <DocsIcon className="size-4" />
+                <span>Documentation</span>
+              </a>
+              <Link
+                href={routes.home}
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-(--ink) hover:bg-(--surface-inset)"
+              >
+                <ArrowLeftIcon className="size-4" />
+                <span>Go back to surveys</span>
+              </Link>
 
-          <Separator className="my-3 bg-(--line)" />
+              <Separator className="my-3 bg-(--line)" />
 
-          <p className="clay-label px-1">Survey context</p>
-          <p className="mt-2 px-1 text-sm text-(--ink-soft)">{getContextLabel(surveyContext)}</p>
-        </div>
-      ) : null}
-    </div>
+              <p className="clay-label px-1">Survey context</p>
+              <p className="mt-2 px-1 text-sm text-(--ink-soft)">{getContextLabel(surveyContext)}</p>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
   );
 }
 
