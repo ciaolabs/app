@@ -38,13 +38,13 @@ export default function SurveyHelpDialog({ helpContent, onClose }: SurveyHelpDia
         <div className="mt-6 space-y-5 text-sm leading-7 text-[var(--ink-soft)]">
           <p>{helpContent?.body}</p>
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-[1.5rem] border border-black bg-[var(--accent-lilac)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
+            <div className="rounded-[1.5rem] border border-black bg-[var(--accent-blue)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
                 <ShortcutKey wide>1-6</ShortcutKey>
                 <span>Answer</span>
               </div>
             </div>
-            <div className="rounded-[1.5rem] border border-black bg-[var(--accent-mint)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
+            <div className="rounded-[1.5rem] border border-black bg-[var(--accent-blue)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
                 <ShortcutKey>
                   <ArrowLeftIcon />
@@ -52,7 +52,7 @@ export default function SurveyHelpDialog({ helpContent, onClose }: SurveyHelpDia
                 <span>Previous</span>
               </div>
             </div>
-            <div className="rounded-[1.5rem] border border-black bg-[var(--accent-lime)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
+            <div className="rounded-[1.5rem] border border-black bg-[var(--accent-blue)] p-4 text-[var(--selected-contrast)] shadow-[var(--shadow-soft)]">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
                 <ShortcutKey>
                   <ArrowRightIcon />

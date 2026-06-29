@@ -32,7 +32,15 @@ type SiteTopNavProps = {
 function HelpIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
-      <text x="12" y="18.2" textAnchor="middle" fontSize="20" fontWeight="800" fill="currentColor">?</text>
+      <path
+        d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+      <path d="M12 17.5h.01" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
     </svg>
   );
 }
