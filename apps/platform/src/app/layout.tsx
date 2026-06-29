@@ -11,7 +11,7 @@ import { getInitialAuth } from "@/lib/auth";
 import "./globals.css";
 
 const uncutSans = localFont({
-  src: "../fonts/UncutSans-Variable.ttf",
+  src: "../fonts/UncutSans-Variable.woff2",
   variable: "--font-body",
   display: "swap",
 });

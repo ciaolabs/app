@@ -69,7 +69,7 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
     return () => observer.disconnect();
   }, []);
 
-  const footerImage = theme === "dark" ? "/60615acd-ca89-4a73-8244-9a774ed80678.png" : "/footer-bg-light.webp";
+  const footerImage = theme === "dark" ? "/footer-bg-dark.webp" : "/footer-bg-light.webp";
 
   return (
     <footer className="mt-6">
