@@ -7,7 +7,8 @@ import {
   type SurveyDefinition,
 } from "@/lib/survey/definitions";
 import { getSurveyRepository } from "@/lib/survey/repository";
-import { buildSurveyResults } from "@/lib/survey/results/engine";
+import { buildSurveyResults, createReferenceDistributionSource } from "@/lib/survey/results/engine";
+import { loadInternalQuestionDistributionsSafe } from "@/lib/survey/results/reference-distributions";
 import {
   type ResultsPayloadBySurveyType,
 } from "@/lib/survey/results/types";
@@ -77,9 +78,10 @@ export async function getInitialDashboardPayload<Type extends SurveyType>(
 
   const userId = await requireCurrentUserId();
   const repository = getSurveyRepository();
-  const [submissions, latestSubmission] = await Promise.all([
+  const [submissions, latestSubmission, distributionSet] = await Promise.all([
     repository.listSubmissions(userId, definition.type),
     repository.getLatestSubmission(userId, definition.type),
+    loadInternalQuestionDistributionsSafe(definition.type),
   ]);
 
   if (!latestSubmission) {
@@ -91,7 +93,7 @@ export async function getInitialDashboardPayload<Type extends SurveyType>(
   }
 
   return {
-    results: buildSurveyResults(latestSubmission),
+    results: buildSurveyResults(latestSubmission, createReferenceDistributionSource(distributionSet)),
     submissions,
     selectedSubmissionId: latestSubmission.submissionId,
   } as ResultsPayloadBySurveyType[Type];

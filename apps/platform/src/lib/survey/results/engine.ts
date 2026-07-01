@@ -1,5 +1,6 @@
 import { surveyQuestions } from "@/lib/survey/questions";
 import { clamp, hashSeed, mulberry32 } from "@/lib/survey/results/math";
+import { type ReferenceDistributionSet } from "@/lib/survey/results/reference-distributions";
 import {
   percentileDetailsFor,
   scoreBandFor,
@@ -41,7 +42,20 @@ const QUESTION_BY_ORDER = new Map(surveyQuestions.map((question) => [question.or
 const scaleDistributionCache = new Map<string, ProbabilityDistribution>();
 const overviewSimulationCache = new Map<string, number[]>();
 
-function questionProbabilities(order: number, reverse = false) {
+/**
+ * A per-question probability provider. `SEEDED_SOURCE` reads the synthetic bins
+ * baked into the question definitions; {@link createReferenceDistributionSource}
+ * substitutes real-response bins (with a per-question fallback to seeded).
+ *
+ * `version` keys the memoisation caches so a monthly distribution refresh does
+ * not serve stale convolutions/simulations from a warm serverless instance.
+ */
+export type QuestionDistributionSource = {
+  version: string;
+  probabilitiesFor(order: number, reverse?: boolean): number[];
+};
+
+function seededProbabilities(order: number, reverse = false) {
   const question = QUESTION_BY_ORDER.get(order);
 
   if (!question) {
@@ -58,6 +72,44 @@ function questionProbabilities(order: number, reverse = false) {
   return reverse ? [...probabilities].reverse() : probabilities;
 }
 
+export const SEEDED_SOURCE: QuestionDistributionSource = {
+  version: "seeded",
+  probabilitiesFor: (order, reverse = false) => seededProbabilities(order, reverse),
+};
+
+/**
+ * Build a distribution source from stored real-response bins. Questions absent
+ * from the set (e.g. below the min-sample threshold) fall back to seeded bins.
+ */
+export function createReferenceDistributionSource(
+  set: ReferenceDistributionSet,
+): QuestionDistributionSource {
+  if (set.distributions.size === 0) {
+    return SEEDED_SOURCE;
+  }
+
+  return {
+    version: set.version,
+    probabilitiesFor(order, reverse = false) {
+      const question = QUESTION_BY_ORDER.get(order);
+      const counts = question ? set.distributions.get(question.id) : undefined;
+
+      if (!counts) {
+        return seededProbabilities(order, reverse);
+      }
+
+      const total = counts.reduce((sum, count) => sum + count, 0);
+
+      if (total <= 0) {
+        return seededProbabilities(order, reverse);
+      }
+
+      const probabilities = counts.map((count) => count / total);
+      return reverse ? [...probabilities].reverse() : probabilities;
+    },
+  };
+}
+
 function keyedAnswerSum(definition: ScaleDefinition, answers: SurveyAnswers) {
   return definition.keyedItems.reduce((sum, keyedItem) => {
     const rawValue = answers[QUESTION_BY_ORDER.get(keyedItem.order)?.id ?? ""];
@@ -72,8 +124,9 @@ function keyedAnswerSum(definition: ScaleDefinition, answers: SurveyAnswers) {
   }, 0);
 }
 
-function buildScaleDistribution(definition: ScaleDefinition) {
-  const cached = scaleDistributionCache.get(definition.code);
+function buildScaleDistribution(definition: ScaleDefinition, source: QuestionDistributionSource) {
+  const cacheKey = `${source.version}:${definition.code}`;
+  const cached = scaleDistributionCache.get(cacheKey);
 
   if (cached) {
     return cached;
@@ -82,7 +135,7 @@ function buildScaleDistribution(definition: ScaleDefinition) {
   let distribution = [1];
 
   for (const keyedItem of definition.keyedItems) {
-    const probabilities = questionProbabilities(keyedItem.order, keyedItem.reverse);
+    const probabilities = source.probabilitiesFor(keyedItem.order, keyedItem.reverse);
     const nextDistribution = Array.from(
       { length: distribution.length + probabilities.length },
       () => 0,
@@ -104,7 +157,7 @@ function buildScaleDistribution(definition: ScaleDefinition) {
     distribution = nextDistribution;
   }
 
-  scaleDistributionCache.set(definition.code, distribution);
+  scaleDistributionCache.set(cacheKey, distribution);
   return distribution;
 }
 
@@ -144,8 +197,11 @@ function calibratedOverviewScore(metric: OverviewMetricDefinition, childResults:
   return clamp(Math.round(mean + (metric.scoreOffset ?? 0)), 0, 50);
 }
 
-function buildOverviewSimulation(metric: OverviewMetricDefinition) {
-  const cacheKey = `${metric.id}:${metric.scaleNumbers.join(",")}:${metric.scoreOffset ?? 0}`;
+function buildOverviewSimulation(
+  metric: OverviewMetricDefinition,
+  source: QuestionDistributionSource,
+) {
+  const cacheKey = `${source.version}:${metric.id}:${metric.scaleNumbers.join(",")}:${metric.scoreOffset ?? 0}`;
   const cached = overviewSimulationCache.get(cacheKey);
 
   if (cached) {
@@ -181,7 +237,7 @@ function buildOverviewSimulation(metric: OverviewMetricDefinition) {
         continue;
       }
 
-      sampleAnswers[questionId] = sampleFromProbabilities(questionProbabilities(order), random) as 1;
+      sampleAnswers[questionId] = sampleFromProbabilities(source.probabilitiesFor(order), random) as 1;
     }
 
     const childScores = scaleDefinitions.map((definition) =>
@@ -235,10 +291,14 @@ function fallbackDescription(definition: ScaleDefinition) {
   return `AMBI estimate aligned to the ${definition.name} construct from the ${definition.inventoryLabel}.`;
 }
 
-function scoreScale(definition: ScaleDefinition, answers: SurveyAnswers): ScaleResult {
+function scoreScale(
+  definition: ScaleDefinition,
+  answers: SurveyAnswers,
+  source: QuestionDistributionSource,
+): ScaleResult {
   const keyedSum = keyedAnswerSum(definition, answers);
   const displayScore = displayScoreFromKeyedSum(keyedSum, definition.keyedItems.length);
-  const percentile = percentileFromDistribution(buildScaleDistribution(definition), keyedSum);
+  const percentile = percentileFromDistribution(buildScaleDistribution(definition, source), keyedSum);
   const percentileDetails = percentileDetailsFor(percentile, PERSONALITY_COMPARISON_NOUN);
   const override = scaleDisplayOverrides[definition.scaleNo];
 
@@ -269,13 +329,14 @@ function scoreScale(definition: ScaleDefinition, answers: SurveyAnswers): ScaleR
 function buildOverviewResults(
   definition: FrameworkDefinition,
   scaleResultsByNumber: Map<number, ScaleResult>,
+  source: QuestionDistributionSource,
 ): OverviewMetricResult[] {
   return definition.overview.map((metric) => {
     const childResults = metric.scaleNumbers
       .map((scaleNumber) => scaleResultsByNumber.get(scaleNumber))
       .filter((value): value is ScaleResult => Boolean(value));
     const score = calibratedOverviewScore(metric, childResults);
-    const simulations = buildOverviewSimulation(metric);
+    const simulations = buildOverviewSimulation(metric, source);
     const percentile = percentileFromSamples(simulations, score);
     const percentileDetails = percentileDetailsFor(percentile, PERSONALITY_COMPARISON_NOUN);
     const median = Math.round(quantileFromSortedSamples(simulations, 0.5));
@@ -335,7 +396,10 @@ function toRankedScaleResults(results: ScaleResult[], comparator: (left: ScaleRe
     }));
 }
 
-function buildFrameworkResults(scaleResultsByNumber: Map<number, ScaleResult>) {
+function buildFrameworkResults(
+  scaleResultsByNumber: Map<number, ScaleResult>,
+  source: QuestionDistributionSource,
+) {
   return inventoryOrder.map<FrameworkResult>((inventoryCode) => {
     const definition = frameworkDefinitions[inventoryCode];
 
@@ -347,14 +411,19 @@ function buildFrameworkResults(scaleResultsByNumber: Map<number, ScaleResult>) {
       intro: definition.intro,
       readMoreText: definition.readMoreText,
       layout: definition.layout,
-      overview: buildOverviewResults(definition, scaleResultsByNumber),
+      overview: buildOverviewResults(definition, scaleResultsByNumber, source),
       sections: buildFrameworkSections(definition, scaleResultsByNumber),
     };
   });
 }
 
-export function buildPersonalitySurveyResults(submission: SurveySubmission): SurveyResults {
-  const scaleResults = ambiScaleDefinitions.map((definition) => scoreScale(definition, submission.answers));
+export function buildPersonalitySurveyResults(
+  submission: SurveySubmission,
+  source: QuestionDistributionSource = SEEDED_SOURCE,
+): SurveyResults {
+  const scaleResults = ambiScaleDefinitions.map((definition) =>
+    scoreScale(definition, submission.answers, source),
+  );
   const scaleResultsByNumber = new Map(scaleResults.map((result) => [result.scaleNo, result]));
   const highestByScore = toRankedScaleResults(scaleResults, compareByScoreDesc);
   const lowestByScore = toRankedScaleResults(scaleResults, compareByScoreAsc);
@@ -372,7 +441,7 @@ export function buildPersonalitySurveyResults(submission: SurveySubmission): Sur
       updatedAt: submission.updatedAt,
     },
     answers: submission.answers,
-    frameworks: buildFrameworkResults(scaleResultsByNumber),
+    frameworks: buildFrameworkResults(scaleResultsByNumber, source),
     ranked: {
       highestByScore,
       lowestByScore,
@@ -392,15 +461,23 @@ export function buildPersonalitySurveyResults(submission: SurveySubmission): Sur
 
 export function buildSurveyResults(
   submission: SurveySubmission & { surveyType: "personality" },
+  source?: QuestionDistributionSource,
 ): SurveyResults;
 export function buildSurveyResults(
   submission: SurveySubmission & { surveyType: "values-beliefs" },
+  source?: QuestionDistributionSource,
 ): ValuesBeliefsResults;
-export function buildSurveyResults(submission: SurveySubmission): AnySurveyResults;
-export function buildSurveyResults(submission: SurveySubmission): AnySurveyResults {
+export function buildSurveyResults(
+  submission: SurveySubmission,
+  source?: QuestionDistributionSource,
+): AnySurveyResults;
+export function buildSurveyResults(
+  submission: SurveySubmission,
+  source: QuestionDistributionSource = SEEDED_SOURCE,
+): AnySurveyResults {
   if (submission.surveyType === "values-beliefs") {
     return buildValuesBeliefsResults(submission);
   }
 
-  return buildPersonalitySurveyResults(submission);
+  return buildPersonalitySurveyResults(submission, source);
 }

@@ -4,7 +4,8 @@ import { getCurrentUserId } from "@/lib/auth";
 import { toSurveyResultsDto } from "@/lib/survey/api-types";
 import { getActiveSurveyDefinition } from "@/lib/survey/definitions";
 import { getSurveyRepository } from "@/lib/survey/repository";
-import { buildSurveyResults } from "@/lib/survey/results/engine";
+import { buildSurveyResults, createReferenceDistributionSource } from "@/lib/survey/results/engine";
+import { loadInternalQuestionDistributionsSafe } from "@/lib/survey/results/reference-distributions";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,12 @@ export async function GET(request: Request, context: SurveyRouteContext) {
   const submissionPromise = requestedSubmissionId
     ? repository.getSubmissionById(userId, definition.type, requestedSubmissionId)
     : repository.getLatestSubmission(userId, definition.type);
-  const [submissions, submission] = await Promise.all([submissionsPromise, submissionPromise]);
+  const distributionPromise = loadInternalQuestionDistributionsSafe(definition.type);
+  const [submissions, submission, distributionSet] = await Promise.all([
+    submissionsPromise,
+    submissionPromise,
+    distributionPromise,
+  ]);
 
   if (!requestedSubmissionId && !submission && submissions.length === 0) {
     return NextResponse.json({ results: null, submissions, selectedSubmissionId: null });
@@ -57,7 +63,9 @@ export async function GET(request: Request, context: SurveyRouteContext) {
   }
 
   return NextResponse.json({
-    results: toSurveyResultsDto(buildSurveyResults(submission)),
+    results: toSurveyResultsDto(
+      buildSurveyResults(submission, createReferenceDistributionSource(distributionSet)),
+    ),
     submissions,
     selectedSubmissionId: submission.submissionId,
   });

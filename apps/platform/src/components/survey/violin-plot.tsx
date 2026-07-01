@@ -189,7 +189,7 @@ export const ViolinPlot = memo(function ViolinPlot({
           viewBox={`0 0 ${dims.width} ${dims.height}`}
           className={`h-full w-full ${dims.minHeightClass}`}
           role="img"
-          aria-label="Violin plot showing the seeded distribution of responses for this question"
+          aria-label="Violin plot showing the distribution of responses for this question"
         >
           <line
             x1={dims.left}
