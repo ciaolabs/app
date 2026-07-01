@@ -192,6 +192,24 @@ export const DROP_USER_API_KEYS_SQL = `
   drop table if exists app_private.user_api_keys;
 `;
 
+// Migration 0004: chats are stored anonymously. Threads are keyed by a
+// pseudonymous `subject_hash` (an HMAC of the auth user id computed with a
+// server secret) instead of a foreign key to the identifiable user account, so
+// a stored row cannot be tied back to a person's name/email/account without the
+// secret. `user_account_id` is made nullable for new anonymised rows; legacy
+// rows keep their old link but are no longer reachable via the app (queries
+// filter by subject_hash).
+export const CHAT_ANONYMIZE_SQL = `
+  alter table app_private.chat_threads
+    add column if not exists subject_hash text;
+
+  alter table app_private.chat_threads
+    alter column user_account_id drop not null;
+
+  create index if not exists app_private_chat_threads_subject_updated_idx
+    on app_private.chat_threads (subject_hash, updated_at desc);
+`;
+
 export const RAG_SCHEMA_SQL = `
   create extension if not exists vector;
 

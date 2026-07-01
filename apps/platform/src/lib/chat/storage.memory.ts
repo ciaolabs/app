@@ -1,3 +1,4 @@
+import { redactPii } from "@/lib/chat/anonymize";
 import type {
   ChatMessage,
   ChatRepository,
@@ -39,7 +40,7 @@ function createMessage(threadId: string, role: ChatRole, content: string): ChatM
     id: crypto.randomUUID(),
     threadId,
     role,
-    content,
+    content: redactPii(content),
     createdAt: new Date().toISOString(),
   };
 }
@@ -68,7 +69,7 @@ export function createMemoryChatRepository(): ChatRepository {
       const thread: ChatThreadSummary = {
         id: crypto.randomUUID(),
         userId,
-        title,
+        title: redactPii(title),
         createdAt: now,
         updatedAt: now,
       };
@@ -118,7 +119,7 @@ export function createMemoryChatRepository(): ChatRepository {
 
       const renamed = {
         ...thread,
-        title,
+        title: redactPii(title),
         updatedAt: new Date().toISOString(),
       };
 

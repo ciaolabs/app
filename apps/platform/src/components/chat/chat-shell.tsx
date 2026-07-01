@@ -1447,6 +1447,36 @@ function EmptyChat({
           ) : null}
         </>
       )}
+
+      {isTemporary ? null : (
+        <p className="mt-10 inline-flex max-w-md items-center gap-2 rounded-full border border-(--line) bg-(--surface-panel) px-4 py-2 text-xs leading-5 text-(--ink-soft) shadow-(--shadow-soft)">
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className="size-4 shrink-0 text-(--accent-mint)"
+          >
+            <path
+              d="M7 10V8a5 5 0 0 1 10 0v2"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <rect
+              x="4.5"
+              y="10"
+              width="15"
+              height="9.5"
+              rx="2"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
+          </svg>
+          Your chats are stored anonymously — never linked to your name or email, and
+          personal details are stripped automatically.
+        </p>
+      )}
     </div>
   );
 }
