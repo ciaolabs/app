@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 
 import { SurveyShell } from "@/components/survey/survey-shell";
 import { valuesBeliefsSurveyDefinition } from "@/lib/survey/definitions";

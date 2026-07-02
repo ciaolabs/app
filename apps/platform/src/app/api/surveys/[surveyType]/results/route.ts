@@ -7,7 +7,6 @@ import { getSurveyRepository } from "@/lib/survey/repository";
 import { buildSurveyResults, createReferenceDistributionSource } from "@/lib/survey/results/engine";
 import { loadInternalQuestionDistributionsSafe } from "@/lib/survey/results/reference-distributions";
 
-export const dynamic = "force-dynamic";
 
 type SurveyRouteContext = {
   params: Promise<{ surveyType: string }>;

@@ -18,7 +18,6 @@ import { MODEL_OPTIONS, resolveUsableModel } from "@/lib/account/models";
 import { getPreferences } from "@/lib/account/repository";
 import { logger } from "@/lib/logger";
 
-export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 type ChatRequestBody = {

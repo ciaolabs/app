@@ -4,7 +4,6 @@ import { getCurrentUserId } from "@ciaobang/auth";
 import { createThreadTitle } from "@/lib/chat/prompt";
 import { getChatRepository } from "@/lib/chat/repository";
 
-export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const userId = await getCurrentUserId({ acceptsSessionToken: true, request });
