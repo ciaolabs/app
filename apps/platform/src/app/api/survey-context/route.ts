@@ -4,7 +4,6 @@ import { getCurrentUserId } from "@ciaobang/auth";
 
 import { loadSurveyChatContext } from "@/lib/chat-context-loader";
 
-export const dynamic = "force-dynamic";
 
 export async function GET() {
   const userId = await getCurrentUserId();
