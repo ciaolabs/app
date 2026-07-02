@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUserId } from "@ciaobang/auth";
 import { getChatRepository } from "@/lib/chat/repository";
 
+export const dynamic = "force-dynamic";
 
 type ChatThreadRouteContext = {
   params: Promise<{ threadId: string }>;

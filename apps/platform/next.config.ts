@@ -3,11 +3,6 @@ import { createMDX } from "fumadocs-mdx/next";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@ciaobang/auth", "@ciaobang/db"],
-  // Partial prerendering: every page's static shell is prerendered and served
-  // from the CDN; dynamic holes (auth-gated, per-user content) stream from the
-  // function. Shells must never contain user data — user data belongs inside
-  // Suspense boundaries that read cookies/session.
-  cacheComponents: true,
   // Tree-shake big barrel-file packages so a single `import { Icon }` does not
   // pull the whole library into the client bundle. (Next ships lucide-react in
   // its default list; fumadocs is ours to add.)

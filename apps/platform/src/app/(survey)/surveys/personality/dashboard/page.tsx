@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { personalitySurveyDefinition } from "@/lib/survey/definitions";

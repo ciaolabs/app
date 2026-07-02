@@ -4,6 +4,7 @@ import { getCurrentUserId } from "@/lib/auth";
 import { getSurveyDefinition } from "@/lib/survey/definitions";
 import { getSurveyRepository } from "@/lib/survey/repository";
 
+export const dynamic = "force-dynamic";
 
 type SurveyRouteContext = {
   params: Promise<{ surveyType: string }>;

@@ -9,6 +9,7 @@ import {
 } from "@/lib/account/repository";
 import { accountStorageErrorResponse } from "./error-response";
 
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const userId = await getCurrentUserId({ request });
