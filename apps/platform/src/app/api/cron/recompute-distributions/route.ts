@@ -1,7 +1,11 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { logger } from "@/lib/logger";
-import { recomputeReferenceDistributions } from "@/lib/survey/results/reference-distributions";
+import {
+  REFERENCE_DISTRIBUTIONS_CACHE_TAG,
+  recomputeReferenceDistributions,
+} from "@/lib/survey/results/reference-distributions";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -27,6 +31,10 @@ async function handle(request: Request) {
 
   try {
     const summary = await recomputeReferenceDistributions();
+    // Drop the cached read-side copies so violin plots pick up the new bins
+    // immediately instead of after the daily revalidate window. ("max" is the
+    // Next 16 expiry profile: treat the tagged entries as fully expired.)
+    revalidateTag(REFERENCE_DISTRIBUTIONS_CACHE_TAG, "max");
     logger.info(summary, "Reference distributions recomputed");
     return NextResponse.json({ ok: true, ...summary });
   } catch (error) {

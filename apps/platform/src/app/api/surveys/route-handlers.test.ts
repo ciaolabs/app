@@ -18,6 +18,9 @@ vi.mock("@/lib/survey/repository", () => ({
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
   revalidateTag: vi.fn(),
+  // Passthrough: outside the Next runtime the wrapped loader just runs
+  // uncached (the results route reads reference distributions through it).
+  unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
 }));
 
 const draftFixture: SurveyDraft = {

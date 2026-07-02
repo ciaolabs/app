@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+
+import { DOTLOTTIE_WASM_URL } from "@/lib/dotlottie-wasm";
 
 // Lazy-load the Lottie player so its WASM/canvas runtime stays out of the
 // landing-page critical bundle (this preview is decorative chrome).
 const DotLottieReact = dynamic(
-  () => import("@lottiefiles/dotlottie-react").then((m) => ({ default: m.DotLottieReact })),
+  () =>
+    import("@lottiefiles/dotlottie-react").then((m) => {
+      m.setWasmUrl(DOTLOTTIE_WASM_URL);
+      return { default: m.DotLottieReact };
+    }),
   { ssr: false },
 );
 
@@ -31,14 +37,39 @@ function CiaoIcon({ className }: { className?: string }) {
 }
 
 function ThinkingLottie({ className }: { className?: string }) {
+  // The preview sits far below the fold; don't pull the lottie runtime (or its
+  // wasm) into the page until this spot is about to scroll into view.
+  const hostRef = useRef<HTMLSpanElement | null>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host || inView) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, [inView]);
+
   return (
-    <DotLottieReact
-      src="/loading.lottie"
-      loop
-      autoplay
-      className={className}
-      aria-label="Ciao! is waving"
-    />
+    <span ref={hostRef} className={`inline-block ${className ?? ""}`}>
+      {inView ? (
+        <DotLottieReact
+          src="/loading.lottie"
+          loop
+          autoplay
+          className="size-full"
+          aria-label="Ciao! is waving"
+        />
+      ) : null}
+    </span>
   );
 }
 

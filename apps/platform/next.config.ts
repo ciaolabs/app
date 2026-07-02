@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
       { source: "/api/survey-context", headers: [noStore] },
       {
         source:
-          "/(.*).(svg|png|jpg|jpeg|gif|webp|avif|ico|woff|woff2|ttf|otf|lottie)",
+          "/(.*).(svg|png|jpg|jpeg|gif|webp|avif|ico|woff|woff2|ttf|otf|lottie|wasm)",
         headers: [immutable],
       },
     ];

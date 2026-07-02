@@ -1,7 +1,6 @@
 "use client";
 
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
-
+import { useOptimisticSignedIn } from "@/components/auth/auth-provider";
 import { StartSurveyButton } from "@/components/auth/start-survey-button";
 
 const SIGN_IN_ROUTE = "/sign-in";
@@ -15,9 +14,9 @@ const CTA_CLASS_NAME =
  * button once AuthKit reports a user.
  */
 export function HeroCta() {
-  const { user } = useAuth();
+  const isSignedIn = useOptimisticSignedIn();
 
-  if (user) {
+  if (isSignedIn) {
     return <StartSurveyButton className={CTA_CLASS_NAME}>Start a survey →</StartSurveyButton>;
   }
 

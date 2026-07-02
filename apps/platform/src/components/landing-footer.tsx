@@ -1,10 +1,10 @@
 "use client";
 
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { useOptimisticSignedIn } from "@/components/auth/auth-provider";
 import { StartSurveyButton } from "@/components/auth/start-survey-button";
 import { ThemeModeToggle } from "@/components/theme-mode-toggle";
 import { routes } from "@/lib/routes";
@@ -50,10 +50,9 @@ function GitHubIcon() {
 const SIGN_IN_ROUTE = "/sign-in";
 
 export function LandingFooter() {
-  // Session resolves client-side on the static landing page; default to the
-  // signed-out CTA until it does.
-  const { user } = useAuth();
-  const isSignedIn = Boolean(user);
+  // Session resolves client-side on the static landing page, upgraded
+  // optimistically from the session-hint cookie.
+  const isSignedIn = useOptimisticSignedIn();
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {

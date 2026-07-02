@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { InteractiveDotBackground } from "@/components/interactive-dot-background";
-import { AiSearchBar } from "@/components/ai/ai-chat";
+import { LazyAiSearchBar } from "@/components/ai/lazy-ai-search-bar";
 
 export const metadata: Metadata = {
   title: "Ciao! Surveys",
@@ -19,7 +19,7 @@ export default function SurveyLayout({
       <div className="app-glow app-glow-left" />
       <div className="app-glow app-glow-right" />
       {children}
-      <AiSearchBar />
+      <LazyAiSearchBar />
     </div>
   );
 }

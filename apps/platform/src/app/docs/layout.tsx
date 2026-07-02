@@ -5,7 +5,7 @@ import { DocsLayout } from "fumadocs-ui/layouts/docs";
 
 import { baseOptions } from "@/lib/layout.shared";
 import { source } from "@/lib/source";
-import { AiSearchBar } from "@/components/ai/ai-chat";
+import { LazyAiSearchBar } from "@/components/ai/lazy-ai-search-bar";
 import { AssistPageContentProvider } from "@/components/ai/assist-page-content";
 import { BodySection } from "@/components/body-section";
 import { InteractiveDotBackground } from "@/components/interactive-dot-background";
@@ -49,7 +49,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             {...baseOptions()}
           >
             {children}
-            <AiSearchBar />
+            <LazyAiSearchBar />
           </DocsLayout>
         </AssistPageContentProvider>
       </RootProvider>

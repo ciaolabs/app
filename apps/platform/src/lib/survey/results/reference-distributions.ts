@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 import {
   SURVEY_SCHEMA_VERSION,
   SURVEY_SCORING_VERSION,
@@ -190,14 +192,43 @@ export async function loadInternalQuestionDistributions(
 }
 
 /**
+ * Cache tag for the cross-request distribution cache. The distributions are
+ * identical for every user and only change when the recompute cron runs, which
+ * revalidates this tag.
+ */
+export const REFERENCE_DISTRIBUTIONS_CACHE_TAG = "reference-distributions";
+
+// unstable_cache JSON-serializes return values, which would silently turn the
+// distributions Map into `{}` — so the cached layer stores a plain-entries
+// shape and callers rehydrate the Map. The 1-day revalidate is a staleness
+// bound for out-of-band DB edits; the cron gives immediate freshness via the
+// tag. A DB failure inside the loader throws, so failures are never cached.
+type SerializedDistributionSet = {
+  version: string;
+  entries: [string, number[]][];
+};
+
+const loadSerializedDistributionsCached = unstable_cache(
+  async (surveyType: SurveyType): Promise<SerializedDistributionSet> => {
+    const set = await loadInternalQuestionDistributions(surveyType);
+    return { version: set.version, entries: Array.from(set.distributions.entries()) };
+  },
+  ["internal-question-distributions"],
+  { tags: [REFERENCE_DISTRIBUTIONS_CACHE_TAG], revalidate: 86400 },
+);
+
+/**
  * Best-effort loader for request paths: never throws (a DB hiccup should not
- * break the dashboard), falling back to the seeded distributions.
+ * break the dashboard), falling back to the seeded distributions. Reads go
+ * through the shared data cache, so steady-state requests skip the database
+ * entirely (and keep working when the free-tier database is paused).
  */
 export async function loadInternalQuestionDistributionsSafe(
   surveyType: SurveyType,
 ): Promise<ReferenceDistributionSet> {
   try {
-    return await loadInternalQuestionDistributions(surveyType);
+    const cached = await loadSerializedDistributionsCached(surveyType);
+    return { version: cached.version, distributions: new Map(cached.entries) };
   } catch {
     return SEEDED_DISTRIBUTION_SET;
   }

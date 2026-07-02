@@ -121,7 +121,7 @@ export default function HomePage() {
               aria-hidden="true"
               className="pointer-events-none absolute -left-8 -right-8 top-1/2 h-[36rem] -translate-y-[15%] bg-center bg-no-repeat [background-size:180%_auto] sm:-left-8 sm:-right-8 sm:h-[42rem] sm:[background-size:100%_auto] lg:-left-10 lg:-right-10"
               style={{
-                backgroundImage: 'url("/surveys-sun.png")',
+                backgroundImage: 'url("/surveys-sun.webp")',
                 maskImage:
                   "linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%)",
                 WebkitMaskImage:

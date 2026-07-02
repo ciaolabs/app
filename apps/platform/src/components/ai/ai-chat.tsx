@@ -4,7 +4,13 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { DotLottieReact, setWasmUrl } from "@lottiefiles/dotlottie-react";
+
+import { DOTLOTTIE_WASM_URL } from "@/lib/dotlottie-wasm";
+
+// This module is lazy-loaded (see lazy-ai-search-bar), so pointing the player
+// at the self-hosted wasm here still runs before any animation mounts.
+setWasmUrl(DOTLOTTIE_WASM_URL);
 import { useAiSettings } from "@/lib/use-ai-settings";
 import { apiRoutes, routes } from "@/lib/routes";
 import { MarkdownRenderer } from "@/components/chat/markdown-renderer";

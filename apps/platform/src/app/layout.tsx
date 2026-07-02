@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import localFont from "next/font/local";
 import { Space_Mono } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { APP_NAME } from "@/lib/app-config";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { getStaticInitialAuth } from "@/lib/auth";
 
@@ -76,10 +76,10 @@ export default function RootLayout({
         />
       </head>
       <body className={`${uncutSans.variable} ${monoFont.variable} antialiased`}>
-        <AuthKitProvider initialAuth={initialAuth}>
+        <AuthProvider initialAuth={initialAuth}>
           {children}
           <Toaster />
-        </AuthKitProvider>
+        </AuthProvider>
         <SpeedInsights />
       </body>
     </html>

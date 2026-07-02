@@ -69,6 +69,7 @@ import {
 import { MODEL_OPTIONS, resolveUsableModel, type ApiKeyProvider } from "@/lib/account/models";
 import { useAiSettings } from "@/lib/use-ai-settings";
 import { apiRoutes, routes } from "@/lib/routes";
+import { DOTLOTTIE_WASM_URL } from "@/lib/dotlottie-wasm";
 const InteractiveDotBackground = dynamic(
   () => import("@/components/interactive-dot-background").then((m) => ({ default: m.InteractiveDotBackground })),
   { ssr: false },
@@ -76,7 +77,11 @@ const InteractiveDotBackground = dynamic(
 // Lazy-load the Lottie player so its WASM/canvas runtime isn't in the initial
 // chat bundle — it's only needed transiently for the "Thinking..." indicator.
 const DotLottieReact = dynamic(
-  () => import("@lottiefiles/dotlottie-react").then((m) => ({ default: m.DotLottieReact })),
+  () =>
+    import("@lottiefiles/dotlottie-react").then((m) => {
+      m.setWasmUrl(DOTLOTTIE_WASM_URL);
+      return { default: m.DotLottieReact };
+    }),
   { ssr: false },
 );
 import { IncognitoGhostIcon } from "@/components/incognito-ghost-icon";

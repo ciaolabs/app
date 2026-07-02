@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useEffect, useState } from "react";
 
+import { useOptimisticSignedIn } from "@/components/auth/auth-provider";
 import { StartSurveyButton } from "@/components/auth/start-survey-button";
 import { routes } from "@/lib/routes";
 
@@ -29,10 +29,9 @@ function BookIcon() {
 }
 
 export function LandingHeader() {
-  // The landing page is statically rendered, so the session resolves
-  // client-side; until it does we show the signed-out CTA (the common case).
-  const { user } = useAuth();
-  const isSignedIn = Boolean(user);
+  // The landing page is statically rendered; signed-in state resolves
+  // client-side, upgraded optimistically from the session-hint cookie.
+  const isSignedIn = useOptimisticSignedIn();
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
