@@ -192,3 +192,18 @@ export async function getInitialAuth(): Promise<InitialAuth> {
     return NO_INITIAL_AUTH;
   }
 }
+
+/**
+ * Initial auth for layouts that must stay statically renderable. Unlike
+ * `getInitialAuth` this never calls `withAuth()` (which reads cookies and
+ * forces every route under the layout into per-request rendering). In the
+ * local-dev bypass it returns the stub user; otherwise it returns undefined so
+ * `AuthKitProvider` resolves the real session client-side after hydration.
+ */
+export function getStaticInitialAuth(): InitialAuth | undefined {
+  if (isLocalDevAuthBypass()) {
+    return LOCAL_DEV_INITIAL_AUTH;
+  }
+
+  return undefined;
+}

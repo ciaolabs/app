@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useEffect, useState } from "react";
 
 import { StartSurveyButton } from "@/components/auth/start-survey-button";
 import { routes } from "@/lib/routes";
 
-type LandingHeaderProps = {
-  isSignedIn: boolean;
-  signInHref?: string;
-};
+const SIGN_IN_ROUTE = "/sign-in";
 
 function CiaoIcon() {
   return (
@@ -30,7 +28,11 @@ function BookIcon() {
   );
 }
 
-export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHeaderProps) {
+export function LandingHeader() {
+  // The landing page is statically rendered, so the session resolves
+  // client-side; until it does we show the signed-out CTA (the common case).
+  const { user } = useAuth();
+  const isSignedIn = Boolean(user);
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
@@ -140,7 +142,7 @@ export function LandingHeader({ isSignedIn, signInHref = "/sign-in" }: LandingHe
             <span className="hidden sm:inline">Start a survey →</span>
           </StartSurveyButton>
         ) : (
-          <a href={signInHref} className={ctaClassName}>
+          <a href={SIGN_IN_ROUTE} className={ctaClassName}>
             <span className="sm:hidden">Sign in →</span>
             <span className="hidden sm:inline">Sign in to start →</span>
           </a>

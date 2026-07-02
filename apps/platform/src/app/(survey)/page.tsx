@@ -1,20 +1,17 @@
-import { StartSurveyButton } from "@/components/auth/start-survey-button";
 import { LandingFooter } from "@/components/landing-footer";
 import { LandingHeader } from "@/components/landing-header";
+import { HeroCta } from "@/components/home/hero-cta";
 import { SurveyChatPreview } from "@/components/home/survey-chat-preview";
 import { SurveyPreview } from "@/components/home/survey-preview";
 import { SurveyResultsPreview } from "@/components/home/survey-results-preview";
-import { getCurrentUserId } from "@/lib/auth";
 
-const SIGN_IN_ROUTE = "/sign-in";
-
-export default async function HomePage() {
-  const isSignedIn = Boolean(await getCurrentUserId());
-  const signInUrl = isSignedIn ? null : SIGN_IN_ROUTE;
-
+// The highest-traffic page: fully static so the CDN serves it without a
+// serverless render or auth-cookie read. Signed-in state (header/footer/hero
+// CTAs) resolves client-side inside the components themselves.
+export default function HomePage() {
   return (
     <>
-      <LandingHeader isSignedIn={isSignedIn} signInHref={signInUrl ?? "/"} />
+      <LandingHeader />
       <main className="mx-auto flex min-h-screen w-full max-w-[min(1800px,calc(100vw-2rem))] flex-col px-4 pt-0 sm:max-w-[min(1800px,calc(100vw-3rem))] sm:px-8 lg:max-w-[min(1800px,calc(100vw-4rem))] lg:px-10 xl:px-12 2xl:max-w-[min(1900px,calc(100vw-5rem))] 2xl:px-14">
         <section
         className="hero-sun relative mt-6 overflow-hidden rounded-3xl border border-(--line) px-4 py-10 shadow-(--shadow-soft) sm:px-8 sm:py-14 lg:px-10 lg:py-16"
@@ -30,20 +27,7 @@ export default async function HomePage() {
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              {isSignedIn ? (
-                <StartSurveyButton
-                  className="clay-button-hover inline-flex h-12 items-center gap-2 rounded-full border border-black bg-(--accent-blue) px-6 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)"
-                >
-                  Start a survey →
-                </StartSurveyButton>
-              ) : (
-                <a
-                  href={signInUrl ?? "#"}
-                  className="clay-button-hover inline-flex h-12 items-center gap-2 rounded-full border border-black bg-(--accent-blue) px-6 text-sm font-semibold text-(--selected-contrast) shadow-(--shadow-soft)"
-                >
-                  Sign in to start →
-                </a>
-              )}
+              <HeroCta />
 
               <a
                 href="https://github.com/ciaobang/surveys"
@@ -210,7 +194,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-        <LandingFooter isSignedIn={isSignedIn} signInHref={signInUrl ?? "/"} />
+        <LandingFooter />
       </main>
     </>
   );

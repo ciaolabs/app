@@ -3,7 +3,6 @@ import { AUTH_PROVIDER, getReadyDb, type Sql } from "@ciaobang/db";
 import { normalizeModelId } from "./models";
 
 type AccountRow = { id: string; display_name: string | null; organization: string | null };
-type PrefsRow = { chat_model: string };
 
 export async function getOrCreateAccount(userId: string, sql?: Sql): Promise<AccountRow> {
   const db = sql ?? (await getReadyDb());
@@ -35,9 +34,20 @@ export async function updateProfile(
 
 export async function getPreferences(userId: string, sql?: Sql): Promise<{ chatModel: string }> {
   const db = sql ?? (await getReadyDb());
-  const account = await getOrCreateAccount(userId, db);
-  const [row] = await db<PrefsRow[]>`
-    select chat_model from app_private.user_preferences where user_account_id = ${account.id}
+  // Runs on every chat turn: upsert the account and read its preferences in a
+  // single statement — the pool is `max: 1`, so separate queries serialize
+  // into back-to-back round trips.
+  const [row] = await db<{ chat_model: string | null }[]>`
+    with account as (
+      insert into app_private.user_accounts (provider, provider_user_id, last_seen_at)
+      values (${AUTH_PROVIDER}, ${userId}, now())
+      on conflict (provider, provider_user_id)
+      do update set last_seen_at = excluded.last_seen_at
+      returning id
+    )
+    select p.chat_model
+    from account a
+    left join app_private.user_preferences p on p.user_account_id = a.id
   `;
   return { chatModel: normalizeModelId(row?.chat_model) };
 }

@@ -6,7 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { APP_NAME } from "@/lib/app-config";
 import { Toaster } from "@/components/ui/sonner";
-import { getInitialAuth } from "@/lib/auth";
+import { getStaticInitialAuth } from "@/lib/auth";
 
 import "./globals.css";
 
@@ -37,12 +37,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialAuth = await getInitialAuth();
+  // Never read the session cookie here: a dynamic API in the root layout
+  // forces every route (landing, docs, sign-in) into per-request serverless
+  // rendering. AuthKitProvider resolves the real session client-side instead;
+  // auth-gated pages keep their own server-side checks.
+  const initialAuth = getStaticInitialAuth();
 
   return (
     <html lang="en" data-theme="light" data-scroll-behavior="smooth" suppressHydrationWarning>

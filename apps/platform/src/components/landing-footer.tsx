@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,12 +47,13 @@ function GitHubIcon() {
   );
 }
 
-type LandingFooterProps = {
-  isSignedIn: boolean;
-  signInHref?: string;
-};
+const SIGN_IN_ROUTE = "/sign-in";
 
-export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterProps) {
+export function LandingFooter() {
+  // Session resolves client-side on the static landing page; default to the
+  // signed-out CTA until it does.
+  const { user } = useAuth();
+  const isSignedIn = Boolean(user);
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
@@ -127,7 +129,7 @@ export function LandingFooter({ isSignedIn, signInHref = "/" }: LandingFooterPro
                   </StartSurveyButton>
                 ) : (
                   <a
-                    href={signInHref}
+                    href={SIGN_IN_ROUTE}
                     className="inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-full bg-black px-2.5 text-[11px] font-semibold text-white transition hover:bg-neutral-800 lg:h-10 lg:gap-2 lg:px-6 lg:text-sm"
                   >
                     Sign in to start →

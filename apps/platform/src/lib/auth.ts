@@ -3,4 +3,5 @@ export {
   getCurrentUserId,
   requireCurrentUserId,
   getInitialAuth,
+  getStaticInitialAuth,
 } from "@ciaobang/auth";
