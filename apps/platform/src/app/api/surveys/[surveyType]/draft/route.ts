@@ -5,6 +5,7 @@ import { getActiveSurveyDefinition } from "@/lib/survey/definitions";
 import { checkSurveyAction } from "@/lib/survey/lifecycle";
 import { getSurveyRepository } from "@/lib/survey/repository";
 
+export const dynamic = "force-dynamic";
 
 type SurveyRouteContext = {
   params: Promise<{ surveyType: string }>;

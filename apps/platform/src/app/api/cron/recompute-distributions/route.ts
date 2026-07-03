@@ -7,6 +7,7 @@ import {
   recomputeReferenceDistributions,
 } from "@/lib/survey/results/reference-distributions";
 
+export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 // Recomputes per-question response distributions from real submissions so the

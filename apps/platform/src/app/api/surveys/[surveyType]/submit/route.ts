@@ -8,6 +8,7 @@ import { getSurveyRepository } from "@/lib/survey/repository";
 import { submitPayloadSchema, validateAnswerMap } from "@/lib/survey/schema";
 import { logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
 
 type SurveyRouteContext = {
   params: Promise<{ surveyType: string }>;

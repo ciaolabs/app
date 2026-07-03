@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 
 import { ValuesBeliefsDashboardShell } from "@/components/dashboard/values-beliefs-dashboard-shell";
 import { valuesBeliefsSurveyDefinition } from "@/lib/survey/definitions";
