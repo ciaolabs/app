@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 import {
   SURVEY_SCHEMA_VERSION,
@@ -198,24 +198,26 @@ export async function loadInternalQuestionDistributions(
  */
 export const REFERENCE_DISTRIBUTIONS_CACHE_TAG = "reference-distributions";
 
-// unstable_cache JSON-serializes return values, which would silently turn the
-// distributions Map into `{}` — so the cached layer stores a plain-entries
-// shape and callers rehydrate the Map. The 1-day revalidate is a staleness
-// bound for out-of-band DB edits; the cron gives immediate freshness via the
-// tag. A DB failure inside the loader throws, so failures are never cached.
+// The cache layer serializes return values, which would silently turn the
+// distributions Map into `{}` — so it stores a plain-entries shape and callers
+// rehydrate the Map. The 1-day revalidate is a staleness bound for
+// out-of-band DB edits; the cron gives immediate freshness via the tag. A DB
+// failure inside the loader throws, so failures are never cached.
 type SerializedDistributionSet = {
   version: string;
   entries: [string, number[]][];
 };
 
-const loadSerializedDistributionsCached = unstable_cache(
-  async (surveyType: SurveyType): Promise<SerializedDistributionSet> => {
-    const set = await loadInternalQuestionDistributions(surveyType);
-    return { version: set.version, entries: Array.from(set.distributions.entries()) };
-  },
-  ["internal-question-distributions"],
-  { tags: [REFERENCE_DISTRIBUTIONS_CACHE_TAG], revalidate: 86400 },
-);
+async function loadSerializedDistributionsCached(
+  surveyType: SurveyType,
+): Promise<SerializedDistributionSet> {
+  "use cache";
+  cacheTag(REFERENCE_DISTRIBUTIONS_CACHE_TAG);
+  cacheLife({ revalidate: 86400 });
+
+  const set = await loadInternalQuestionDistributions(surveyType);
+  return { version: set.version, entries: Array.from(set.distributions.entries()) };
+}
 
 /**
  * Best-effort loader for request paths: never throws (a DB hiccup should not

@@ -24,6 +24,7 @@
     "@ciaobang/db": "workspace:*",
     "@ciaobang/rag": "workspace:*",
     "@lottiefiles/dotlottie-react": "^0.19.5",
+    "@orama/orama": "3.1.18",
     "@radix-ui/react-avatar": "^1.2.0",
     "@radix-ui/react-dialog": "^1.1.17",
     "@radix-ui/react-scroll-area": "^1.2.12",

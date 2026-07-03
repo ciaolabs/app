@@ -6,6 +6,7 @@ import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { baseOptions } from "@/lib/layout.shared";
 import { source } from "@/lib/source";
 import { LazyAiSearchBar } from "@/components/ai/lazy-ai-search-bar";
+import DocsSearchDialog from "@/components/docs-search-dialog";
 import { AssistPageContentProvider } from "@/components/ai/assist-page-content";
 import { BodySection } from "@/components/body-section";
 import { InteractiveDotBackground } from "@/components/interactive-dot-background";
@@ -37,6 +38,9 @@ export default function Layout({ children }: { children: ReactNode }) {
           attribute: ["class", "data-theme"],
           defaultTheme: "light",
         }}
+        // Static search client: /api/search is a prerendered index, queries
+        // run in the browser (see docs-search-dialog.tsx).
+        search={{ SearchDialog: DocsSearchDialog }}
       >
         <ThemeModeSync />
         {/* Provider wraps both the page (which publishes the current doc's

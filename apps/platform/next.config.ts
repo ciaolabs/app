@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
   // its default list; fumadocs is ours to add.)
   experimental: {
     optimizePackageImports: ["lucide-react", "fumadocs-ui", "fumadocs-core"],
+    // Enables the `"use cache"` directive for caching *global* data reads
+    // (reference distributions). Deliberately NOT `cacheComponents`: that
+    // changes how whole pages are served and Vercel ISR-cached the full
+    // /app response cross-user both times we tried it (see git history
+    // 12d8638/d4d7eb2 and 745ae91/9528cf6).
+    useCache: true,
   },
   // The chat surface moved from /chat to /app; keep old links working.
   async redirects() {

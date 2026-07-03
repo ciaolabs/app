@@ -12,6 +12,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "platform", "exec", "next", "dev"],
       "autoPort": true
+    },
+    {
+      "name": "platform-start",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "platform", "exec", "next", "start"],
+      "autoPort": true
     }
   ]
 }
