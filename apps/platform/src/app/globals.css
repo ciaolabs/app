@@ -809,40 +809,76 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
   }
 }
 
-@keyframes mobileNavBackdropIn {
+@keyframes mobileNavPanelIn {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes mobileNavPanelOut {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes mobileNavItemIn {
   from {
     opacity: 0;
+    transform: translateY(0.6rem);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes mobileNavSheetIn {
-  0% {
-    opacity: 0;
-    transform: translateX(1.1rem);
-  }
-  62% {
-    opacity: 1;
-    transform: translateX(-0.35rem);
-  }
-  82% {
-    transform: translateX(0.12rem);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.mobile-nav-panel {
+  will-change: transform;
+  animation: mobileNavPanelIn 380ms cubic-bezier(0.32, 0.72, 0.22, 1) both;
 }
 
-.mobile-nav-backdrop {
-  animation: mobileNavBackdropIn 180ms ease-out both;
+.mobile-nav-panel[data-state="closing"] {
+  animation: mobileNavPanelOut 260ms cubic-bezier(0.5, 0, 0.7, 0.2) both;
 }
 
-.mobile-nav-sheet {
-  transform-origin: right center;
-  animation: mobileNavSheetIn 240ms cubic-bezier(0.22, 0.88, 0.3, 1.08) both;
+.mobile-nav-panel .mobile-nav-item {
+  animation: mobileNavItemIn 360ms cubic-bezier(0.22, 0.88, 0.3, 1) both;
+}
+
+.mobile-nav-panel .mobile-nav-item:nth-child(1) { animation-delay: 120ms; }
+.mobile-nav-panel .mobile-nav-item:nth-child(2) { animation-delay: 160ms; }
+.mobile-nav-panel .mobile-nav-item:nth-child(3) { animation-delay: 200ms; }
+.mobile-nav-panel .mobile-nav-item:nth-child(4) { animation-delay: 240ms; }
+.mobile-nav-panel .mobile-nav-item:nth-child(5) { animation-delay: 280ms; }
+.mobile-nav-panel .mobile-nav-item:nth-child(6) { animation-delay: 320ms; }
+.mobile-nav-panel .mobile-nav-item:nth-child(7) { animation-delay: 360ms; }
+.mobile-nav-panel .mobile-nav-item:nth-child(8) { animation-delay: 400ms; }
+
+.mobile-nav-panel[data-state="closing"] .mobile-nav-item {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+.mobile-nav-cta {
+  animation: mobileNavItemIn 360ms cubic-bezier(0.22, 0.88, 0.3, 1) 200ms both;
+}
+
+.mobile-nav-panel[data-state="closing"] .mobile-nav-cta {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+.mobile-nav-cta a,
+.mobile-nav-cta button {
+  width: 100%;
 }
 
 .opening-dots {
@@ -881,11 +917,18 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mobile-nav-backdrop,
-  .mobile-nav-sheet,
+  .mobile-nav-panel,
+  .mobile-nav-panel .mobile-nav-item,
+  .mobile-nav-cta,
   .opening-dots span,
   .loading-skeleton {
     animation: none;
+  }
+
+  .mobile-nav-panel .mobile-nav-item,
+  .mobile-nav-cta {
+    opacity: 1;
+    transform: none;
   }
 
   .opening-dots span {
@@ -991,8 +1034,7 @@ html[data-theme="dark"] .clay-button-hover:hover:not(:disabled) {
   header.nav-glass,
   nav[aria-label="Breadcrumb"],
   footer,
-  .mobile-nav-backdrop,
-  .mobile-nav-sheet,
+  .mobile-nav-panel,
   .interactive-dot-background,
   .hero-blob,
   [aria-hidden="true"][class*="hero-blob"],

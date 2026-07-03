@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type AnimationEvent as ReactAnimationEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 
 import { UserMenu } from "@/components/auth/user-menu";
@@ -128,6 +135,20 @@ function MenuIcon() {
   );
 }
 
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
+      <path
+        d="m5.5 5.5 9 9m0-9-9 9"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
 function getSaveStatusIndicatorColor(saveStatus: string, isError: boolean): string {
   if (isError) {
     return "bg-(--accent-rose)";
@@ -163,6 +184,13 @@ function readInitialThemeMode(): ThemeMode {
   return readStoredThemeMode();
 }
 
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== "undefined"
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 function actionButtonClassName() {
   return "clay-button-hover inline-flex h-10 items-center justify-center rounded-full border border-(--line-strong) bg-(--surface-panel-strong) text-sm font-semibold text-(--ink) shadow-(--shadow-soft)";
 }
@@ -183,9 +211,10 @@ export function SiteTopNav({
 }: SiteTopNavProps) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [hasHydrated, setHasHydrated] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // "closing" keeps the panel mounted while the slide-up exit animation plays.
+  const [mobileMenuState, setMobileMenuState] = useState<"closed" | "open" | "closing">("closed");
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
-  const mobileMenuPanelRef = useRef<HTMLDivElement | null>(null);
+  const isMobileMenuOpen = mobileMenuState === "open";
 
   useEffect(() => {
     const mode = readInitialThemeMode();
@@ -213,34 +242,53 @@ export function SiteTopNav({
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuState((currentState) => {
+      if (currentState === "closed") {
+        return currentState;
+      }
+      // Reduced motion skips the exit animation, so there is no
+      // animationend event to advance "closing" to "closed".
+      return prefersReducedMotion() ? "closed" : "closing";
+    });
+  }, []);
+
   useEffect(() => {
     if (!isMobileMenuOpen) {
       return;
     }
 
-    function handlePointerDown(event: MouseEvent) {
-      const target = event.target as Node;
-      if (
-        !mobileMenuButtonRef.current?.contains(target)
-        && !mobileMenuPanelRef.current?.contains(target)
-      ) {
-        setIsMobileMenuOpen(false);
-      }
-    }
-
     function handleEscape(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setIsMobileMenuOpen(false);
+        closeMobileMenu();
       }
     }
 
-    document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isMobileMenuOpen, closeMobileMenu]);
+
+  useEffect(() => {
+    if (mobileMenuState === "closed") {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = previousOverflow;
     };
-  }, [isMobileMenuOpen]);
+  }, [mobileMenuState]);
+
+  const handleMobileMenuAnimationEnd = useCallback(
+    (event: ReactAnimationEvent<HTMLDivElement>) => {
+      if (event.target === event.currentTarget && mobileMenuState === "closing") {
+        setMobileMenuState("closed");
+        mobileMenuButtonRef.current?.focus();
+      }
+    },
+    [mobileMenuState],
+  );
 
   const toggleTheme = useCallback(() => {
     // Persist only on explicit toggles: a stored "system" mode must survive
@@ -332,7 +380,13 @@ export function SiteTopNav({
           <button
             ref={mobileMenuButtonRef}
             type="button"
-            onClick={() => setIsMobileMenuOpen((currentValue) => !currentValue)}
+            onClick={() => {
+              if (isMobileMenuOpen) {
+                closeMobileMenu();
+              } else {
+                setMobileMenuState("open");
+              }
+            }}
             className={iconButtonClassName()}
             aria-label="Open navigation menu"
             aria-expanded={isMobileMenuOpen}
@@ -344,110 +398,128 @@ export function SiteTopNav({
         </div>
       </div>
 
-      {isMobileMenuOpen && typeof document !== "undefined"
+      {mobileMenuState !== "closed" && typeof document !== "undefined"
         ? createPortal(
-            <>
-              <button
-                type="button"
-                aria-label="Close navigation menu"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="mobile-nav-backdrop fixed inset-0 z-70 bg-black/20 backdrop-blur-[2px] lg:hidden"
-              />
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+              data-state={mobileMenuState}
+              onAnimationEnd={handleMobileMenuAnimationEnd}
+              className="mobile-nav-panel fixed inset-0 z-80 flex flex-col bg-(--surface-panel-strong) lg:hidden"
+            >
+              <div className="flex items-center justify-between px-4 py-3 sm:px-5">
+                <div className="min-w-0 overflow-hidden">
+                  <SiteBreadcrumb title={breadcrumbTitle} items={breadcrumbItems} />
+                </div>
 
-              <div className="fixed right-0 top-1/2 z-80 w-[min(18rem,calc(100vw-1rem))] -translate-y-1/2 pl-3 lg:hidden">
-                <div
-                  ref={mobileMenuPanelRef}
-                  role="dialog"
-                  aria-modal="true"
-                  aria-label="Navigation menu"
-                  className="mobile-nav-sheet max-h-[calc(100vh-2rem)] overflow-y-auto rounded-l-3xl border-l border-y border-(--line-strong) bg-(--surface-panel-strong) p-2 shadow-(--shadow-strong) backdrop-blur"
+                <button
+                  type="button"
+                  autoFocus
+                  onClick={closeMobileMenu}
+                  className={`${iconButtonClassName()} w-10 shrink-0`}
+                  aria-label="Close navigation menu"
+                  title="Close"
                 >
-                  <div className="space-y-1">
-                    {saveStatus ? (
-                      <div
-                        className={[
-                          "flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold",
-                          saveStatusIsError ? "text-(--accent-rose)" : "text-(--ink-soft)",
-                        ].join(" ")}
-                      >
-                        <span className={`h-2 w-2 shrink-0 rounded-full ${getSaveStatusIndicatorColor(saveStatus, saveStatusIsError)}`} />
-                        {saveStatus}
-                      </div>
-                    ) : null}
+                  <CloseIcon />
+                </button>
+              </div>
 
-                    <div onClick={() => setIsMobileMenuOpen(false)}>{action}</div>
-
-                    <Link
-                      href="/"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="clay-button-hover flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-(--ink)"
+              <nav className="flex-1 overflow-y-auto px-4 pb-4 pt-2 sm:px-5">
+                <div className="space-y-1">
+                  {saveStatus ? (
+                    <div
+                      className={[
+                        "mobile-nav-item flex items-center gap-3 rounded-2xl px-3 py-2 text-base font-semibold",
+                        saveStatusIsError ? "text-(--accent-rose)" : "text-(--ink-soft)",
+                      ].join(" ")}
                     >
-                      <HomeIcon />
-                      <span>Home</span>
-                    </Link>
+                      <span className={`h-2 w-2 shrink-0 rounded-full ${getSaveStatusIndicatorColor(saveStatus, saveStatusIsError)}`} />
+                      {saveStatus}
+                    </div>
+                  ) : null}
 
-                    <Link
-                      href={routes.surveys}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="clay-button-hover flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-(--ink)"
-                    >
-                      <DashboardIcon />
-                      <span>Dashboard</span>
-                    </Link>
+                  <Link
+                    href="/"
+                    onClick={closeMobileMenu}
+                    className="mobile-nav-item clay-button-hover flex min-h-13 items-center gap-3 rounded-2xl px-3 text-base font-semibold text-(--ink)"
+                  >
+                    <HomeIcon />
+                    <span>Home</span>
+                  </Link>
 
+                  <Link
+                    href={routes.surveys}
+                    onClick={closeMobileMenu}
+                    className="mobile-nav-item clay-button-hover flex min-h-13 items-center gap-3 rounded-2xl px-3 text-base font-semibold text-(--ink)"
+                  >
+                    <DashboardIcon />
+                    <span>Dashboard</span>
+                  </Link>
+
+                  <a
+                    href={routes.docs()}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={closeMobileMenu}
+                    className="mobile-nav-item clay-button-hover flex min-h-13 items-center gap-3 rounded-2xl px-3 text-base font-semibold text-(--ink)"
+                  >
+                    <DocsIcon />
+                    <span>Docs</span>
+                  </a>
+
+                  {helpHref ? (
                     <a
-                      href={routes.docs()}
+                      href={helpHref}
                       target="_blank"
                       rel="noreferrer"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="clay-button-hover flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-(--ink)"
+                      onClick={closeMobileMenu}
+                      className="mobile-nav-item clay-button-hover flex min-h-13 items-center gap-3 rounded-2xl px-3 text-base font-semibold text-(--ink)"
                     >
-                      <DocsIcon />
-                      <span>Docs</span>
+                      <HelpIcon />
+                      <span>Help</span>
                     </a>
-
-                    {helpHref ? (
-                      <a
-                        href={helpHref}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="clay-button-hover flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-(--ink)"
-                      >
-                        <HelpIcon />
-                        <span>Help</span>
-                      </a>
-                    ) : helpOnClick ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsMobileMenuOpen(false);
-                          helpOnClick();
-                        }}
-                        className="clay-button-hover flex min-h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-semibold text-(--ink)"
-                      >
-                        <HelpIcon />
-                        <span>Help</span>
-                      </button>
-                    ) : null}
-
+                  ) : helpOnClick ? (
                     <button
                       type="button"
                       onClick={() => {
-                        toggleTheme();
-                        setIsMobileMenuOpen(false);
+                        closeMobileMenu();
+                        helpOnClick();
                       }}
-                      className="clay-button-hover flex min-h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-semibold text-(--ink)"
+                      className="mobile-nav-item clay-button-hover flex min-h-13 w-full items-center gap-3 rounded-2xl px-3 text-left text-base font-semibold text-(--ink)"
                     >
-                      {hasHydrated && theme === "dark" ? <SunIcon /> : <MoonIcon />}
-                      <span>{themeLabel}</span>
+                      <HelpIcon />
+                      <span>Help</span>
                     </button>
+                  ) : null}
 
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toggleTheme();
+                      closeMobileMenu();
+                    }}
+                    className="mobile-nav-item clay-button-hover flex min-h-13 w-full items-center gap-3 rounded-2xl px-3 text-left text-base font-semibold text-(--ink)"
+                  >
+                    {hasHydrated && theme === "dark" ? <SunIcon /> : <MoonIcon />}
+                    <span>{themeLabel}</span>
+                  </button>
+
+                  <div className="mobile-nav-item">
                     <UserMenu trigger="row" />
                   </div>
                 </div>
-              </div>
-            </>,
+              </nav>
+
+              {action ? (
+                <div
+                  onClick={closeMobileMenu}
+                  className="mobile-nav-cta border-t border-(--line-strong) px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-4 sm:px-5"
+                >
+                  {action}
+                </div>
+              ) : null}
+            </div>,
             document.body,
           )
         : null}
