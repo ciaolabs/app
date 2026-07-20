@@ -70,7 +70,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "@vitest/coverage-v8": "^4.1.10",
-    "eslint": "^9.7",
+    "eslint": "^10.7",
     "eslint-config-next": "16.2.10",
     "jose": "^6.2.3",
     "jsdom": "^29.0.1",
