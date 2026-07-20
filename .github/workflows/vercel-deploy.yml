@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           # pnpm@11 requires Node >=22.13 (see root package.json packageManager).
           node-version: 22
