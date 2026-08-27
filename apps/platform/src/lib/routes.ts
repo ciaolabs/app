@@ -24,7 +24,19 @@ export const routes = {
   chat: "/app",
   account: (anchor?: "models") => (anchor ? `/app/account#${anchor}` : "/app/account"),
   docs: (slug?: string) => (slug ? `/docs/${slug}` : "/docs"),
+  terms: "/terms",
+  privacy: "/privacy",
+  security: "/security",
 } as const;
+
+/** The legal pages, in the order the shared legal header lists them. */
+export const LEGAL_ROUTES = [
+  { href: routes.terms, label: "Terms of Service" },
+  { href: routes.privacy, label: "Privacy Policy" },
+  { href: routes.security, label: "Security Policy" },
+] as const;
+
+export type LegalRoute = (typeof LEGAL_ROUTES)[number]["href"];
 
 /** API endpoints, for `fetch()` callers. */
 export const apiRoutes = {

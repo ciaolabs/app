@@ -2182,6 +2182,17 @@ export function ChatShell({
               <SettingsMenu surveyContext={surveyContext} />
             </div>
             <div className="mx-auto w-full max-w-4xl">
+              <p className="mb-2 text-center text-xs text-(--muted)">
+                Make sure you agree to our{" "}
+                <Link href={routes.terms} className="underline underline-offset-2 hover:text-(--ink)">
+                  Terms
+                </Link>{" "}
+                and our{" "}
+                <Link href={routes.privacy} className="underline underline-offset-2 hover:text-(--ink)">
+                  Privacy Policy
+                </Link>
+                .
+              </p>
               {!hasApiKeys ? (
                 <div className="flex items-center justify-between gap-3 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) px-4 py-3 shadow-(--shadow-strong)">
                   <p className="min-w-0 text-sm text-(--ink-soft)">

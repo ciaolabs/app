@@ -1630,3 +1630,40 @@ html[data-theme="dark"] [data-section="chat"] .interactive-dot-background::befor
   --color-fd-ring: rgba(255, 255, 255, 0.4);
   --color-fd-overlay: rgba(0, 0, 0, 0.5);
 }
+
+.legal-prose h2 {
+  color: var(--ink);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 2rem;
+}
+.legal-prose h3 {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+}
+.legal-prose p {
+  line-height: 1.7;
+}
+.legal-prose ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.legal-prose a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.legal-prose a:hover {
+  opacity: 0.8;
+}
+.legal-prose strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
