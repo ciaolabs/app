@@ -638,17 +638,19 @@ function ModelPicker({
         disabled={disabled}
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          "inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-sm font-semibold text-(--ink) transition hover:bg-(--surface-inset) disabled:cursor-not-allowed disabled:opacity-60",
+          "inline-flex h-7 max-w-[7.5rem] items-center gap-1 rounded-md px-1.5 text-xs font-semibold text-(--ink) transition hover:bg-(--surface-inset) disabled:cursor-not-allowed disabled:opacity-60 sm:max-w-none sm:gap-1.5 sm:px-2 sm:text-sm",
         )}
       >
-        <span className="truncate">{current.label}</span>
+        {/* Short name on phones so the message box keeps the row's width. */}
+        <span className="truncate sm:hidden">{current.shortLabel}</span>
+        <span className="hidden truncate sm:inline">{current.label}</span>
         <ChevronsUpDownIcon className="size-3.5 shrink-0 text-(--ink-soft)" />
       </button>
 
       {open ? (
         <div
           role="menu"
-          className="absolute bottom-full left-0 z-30 mb-2 w-72 rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-1.5 shadow-(--shadow-strong)"
+          className="absolute right-0 bottom-full z-30 mb-2 w-[min(18rem,calc(100vw-3rem))] rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) p-1.5 shadow-(--shadow-strong) sm:right-auto sm:left-0"
         >
           <p className="px-3 pt-2 pb-1 text-xs font-semibold tracking-wide text-(--ink-soft) uppercase">
             AI model
@@ -2211,7 +2213,7 @@ export function ChatShell({
                     placeholder="Ask anything..."
                     disabled={isBusy}
                     rows={1}
-                    className="min-h-0 max-h-40 flex-1 border-0 bg-transparent px-1 py-1.5 text-base text-(--ink) placeholder:text-(--muted) focus-visible:border-0"
+                    className="min-h-0 max-h-40 min-w-0 flex-1 border-0 bg-transparent px-1 py-1.5 text-base text-(--ink) placeholder:text-(--muted) focus-visible:border-0"
                     onKeyDown={(event) => {
                       if (event.key === "Enter" && !event.shiftKey) {
                         event.preventDefault();

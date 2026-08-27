@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 import { useOptimisticSignedIn } from "@/components/auth/auth-provider";
@@ -70,22 +69,12 @@ export function LandingFooter() {
     return () => observer.disconnect();
   }, []);
 
-  const footerImage = theme === "dark" ? "/footer-bg-dark.webp" : "/footer-bg-light.webp";
-
   return (
     <footer className="mt-6">
-      {/* Landscape container with the tulip image */}
-      <div
-        className="relative min-h-[60rem] w-full overflow-hidden rounded-t-3xl border border-(--line) shadow-(--shadow-soft)"
-        style={{
-          background: `var(--surface-panel) url('${footerImage}') no-repeat center bottom / cover`,
-        }}
-      >
-        {/* White card pinned to the upper (white-sky) zone of the image. On
-            mobile it flows in-place and grows to fit all content; on large
-            screens it pins to the top corner and the compact horizontal
-            layout keeps it short. */}
-        <div className="relative mx-4 mt-10 rounded-2xl border border-(--line) bg-[#f5f3ef] px-5 py-6 [html[data-theme='dark']_&]:bg-[#202322] sm:mx-12 sm:mt-12 sm:px-7 sm:py-7">
+      {/* Plain panel: the footer is sized by its card, with no landscape image
+          behind it in either theme. */}
+      <div className="relative w-full overflow-hidden rounded-t-3xl border border-(--line) bg-(--surface-panel) shadow-(--shadow-soft)">
+        <div className="relative mx-4 my-8 rounded-2xl border border-(--line) bg-[#f5f3ef] px-5 py-6 [html[data-theme='dark']_&]:bg-[#202322] sm:mx-12 sm:my-10 sm:px-7 sm:py-7">
 
           {/* Waving-hand animation for the Ciao! logo */}
           <style dangerouslySetInnerHTML={{ __html: `

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDownIcon, EyeIcon, EyeOffIcon, HistoryIcon, LockIcon, LogOutIcon, PanelLeftCloseIcon, PanelLeftIcon, PlusIcon, SearchIcon, Trash2Icon, UserIcon } from "lucide-react";
+import { ChevronsUpDownIcon, EyeIcon, EyeOffIcon, HistoryIcon, LockIcon, LogOutIcon, MenuIcon, PanelLeftCloseIcon, PanelLeftIcon, PlusIcon, SearchIcon, Trash2Icon, UserIcon } from "lucide-react";
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -10,6 +10,14 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Tooltip,
   TooltipContent,
@@ -67,14 +75,14 @@ function SectionNav({
   onSelect: (s: Section) => void;
 }) {
   return (
-    <nav className="w-52 shrink-0 space-y-2">
+    <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:mx-0 lg:w-52 lg:shrink-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0">
       {(["general", "models"] as const).map((s) => (
         <button
           key={s}
           type="button"
           onClick={() => onSelect(s)}
           className={cn(
-            "flex min-h-11 w-full items-center rounded-2xl border px-4 text-left text-sm font-semibold shadow-(--shadow-soft) transition",
+            "flex min-h-11 shrink-0 items-center justify-center rounded-2xl border px-4 text-center text-sm font-semibold whitespace-nowrap shadow-(--shadow-soft) transition lg:w-full lg:justify-start lg:text-left",
             active === s
               ? "border-(--ink) bg-(--accent-blue) text-(--selected-contrast)"
               : "border-(--line-strong) bg-(--surface-panel-strong) text-(--ink-soft) hover:bg-(--surface-inset) hover:text-(--ink)",
@@ -101,7 +109,10 @@ function SaveButton({
       type="button"
       onClick={onClick}
       disabled={loading || disabled}
-      className={cn(clayPrimaryButton, "h-11 disabled:cursor-not-allowed disabled:opacity-50")}
+      className={cn(
+        clayPrimaryButton,
+        "h-11 flex-1 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none",
+      )}
     >
       {loading ? "Saving…" : "Save"}
     </button>
@@ -147,14 +158,14 @@ function ApiKeyField({
     <div>
       <label className="block text-sm font-semibold text-(--ink)">{label}</label>
       {editing ? (
-        <div className="mt-1 flex gap-2">
-          <div className="relative flex-1">
+        <div className="mt-1 flex flex-col gap-2 sm:flex-row">
+          <div className="relative min-w-0 flex-1">
             <Input
               type={show ? "text" : "password"}
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder={`Paste your ${label} here`}
-              className={cn(accountInputClass, "pr-10")}
+              className={cn(accountInputClass, "w-full pr-10")}
             />
             <button
               type="button"
@@ -164,39 +175,45 @@ function ApiKeyField({
               {show ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
             </button>
           </div>
-          <SaveButton onClick={handleSave} loading={false} disabled={!value.trim()} />
-          {hasKey && (
-            <button
-              type="button"
-              onClick={() => {
-                setEditing(false);
-                setValue("");
-              }}
-              className={cn(claySecondaryButton, "h-11 px-4")}
-            >
-              Cancel
-            </button>
-          )}
+          <div className="flex gap-2">
+            <SaveButton onClick={handleSave} loading={false} disabled={!value.trim()} />
+            {hasKey && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(false);
+                  setValue("");
+                }}
+                className={cn(claySecondaryButton, "h-11 flex-1 px-4 sm:flex-none")}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
       ) : (
-        <div className="mt-1 flex items-center gap-3">
-          <div className="flex h-11 flex-1 items-center rounded-full border border-(--line-strong) bg-(--surface-inset) px-4 font-mono text-sm text-(--muted) shadow-(--shadow-soft)">
-            {provider === "anthropic" ? "sk-ant-•••••••••••••" : "AI•••••••••••••••"}
+        <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+          <div className="flex h-11 min-w-0 flex-1 items-center overflow-hidden rounded-full border border-(--line-strong) bg-(--surface-inset) px-4 font-mono text-sm text-(--muted) shadow-(--shadow-soft)">
+            <span className="truncate">
+              {provider === "anthropic" ? "sk-ant-•••••••••••••" : "AI•••••••••••••••"}
+            </span>
           </div>
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className={cn(claySecondaryButton, "h-11 px-4")}
-          >
-            Update
-          </button>
-          <button
-            type="button"
-            onClick={handleRemove}
-            className={cn(clayDangerButton, "h-11 px-4")}
-          >
-            Remove
-          </button>
+          <div className="flex gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className={cn(claySecondaryButton, "h-11 flex-1 px-4 sm:flex-none")}
+            >
+              Update
+            </button>
+            <button
+              type="button"
+              onClick={handleRemove}
+              className={cn(clayDangerButton, "h-11 flex-1 px-4 sm:flex-none")}
+            >
+              Remove
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -256,19 +273,19 @@ function GeneralSection({
   }
 
   return (
-    <div className="space-y-10">
-      <section className="clay-card p-6">
-        <h2 className="font-display text-2xl text-(--ink)">Profile</h2>
+    <div className="space-y-6 sm:space-y-10">
+      <section className="clay-card p-5 sm:p-6">
+        <h2 className="font-display text-xl text-(--ink) sm:text-2xl">Profile</h2>
         <div className="mt-6 space-y-5">
           <div>
             <label className="block text-sm font-semibold text-(--ink)">Display Name</label>
-            <div className="mt-1 flex gap-2">
+            <div className="mt-1 flex flex-col gap-2 sm:flex-row">
               <Input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 disabled={disabled}
-                className={cn(accountInputClass, "flex-1")}
+                className={cn(accountInputClass, "min-w-0 flex-1")}
               />
               <SaveButton onClick={() => saveField("name")} loading={savingName} disabled={disabled} />
             </div>
@@ -276,14 +293,14 @@ function GeneralSection({
 
           <div>
             <label className="block text-sm font-semibold text-(--ink)">Organisation</label>
-            <div className="mt-1 flex gap-2">
+            <div className="mt-1 flex flex-col gap-2 sm:flex-row">
               <Input
                 type="text"
                 value={organization}
                 onChange={(e) => setOrganization(e.target.value)}
                 placeholder="Enter your organisation"
                 disabled={disabled}
-                className={cn(accountInputClass, "flex-1")}
+                className={cn(accountInputClass, "min-w-0 flex-1")}
               />
               <SaveButton onClick={() => saveField("org")} loading={savingOrg} disabled={disabled} />
             </div>
@@ -291,23 +308,23 @@ function GeneralSection({
 
           <div>
             <p className="text-sm font-semibold text-(--ink)">Email</p>
-            <p className="mt-1 text-sm text-(--muted)">{email}</p>
+            <p className="mt-1 text-sm break-words text-(--muted)">{email}</p>
           </div>
         </div>
       </section>
 
-      <section className="clay-card p-6">
-        <h2 className="font-display text-2xl text-(--ink)">Usage Plan</h2>
+      <section className="clay-card p-5 sm:p-6">
+        <h2 className="font-display text-xl text-(--ink) sm:text-2xl">Usage Plan</h2>
         <p className="mt-2 text-sm text-(--muted)">Free</p>
       </section>
 
-      <section className="clay-card p-6">
-        <h2 className="font-display text-2xl text-(--ink)">Actions</h2>
+      <section className="clay-card p-5 sm:p-6">
+        <h2 className="font-display text-xl text-(--ink) sm:text-2xl">Actions</h2>
         <div className="mt-4">
           <button
             type="button"
             onClick={() => void signOut({ returnTo: window.location.origin })}
-            className={cn(claySecondaryButton, "h-11")}
+            className={cn(claySecondaryButton, "h-11 w-full sm:w-auto")}
           >
             <LogOutIcon className="size-4" />
             Sign Out
@@ -315,20 +332,20 @@ function GeneralSection({
         </div>
       </section>
 
-      <section className="clay-card border-(--accent-rose) p-6">
-        <h2 className="font-display text-2xl text-(--accent-rose)">Danger Zone</h2>
+      <section className="clay-card border-(--accent-rose) p-5 sm:p-6">
+        <h2 className="font-display text-xl text-(--accent-rose) sm:text-2xl">Danger Zone</h2>
         <p className="mt-1 text-sm text-(--muted)">
           Permanently delete your account and all associated data. This action cannot be undone.
         </p>
         <div className="mt-4">
           {confirmDelete ? (
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <p className="text-sm font-semibold text-(--ink)">Are you sure?</p>
               <button
                 type="button"
                 onClick={handleDeleteAccount}
                 disabled={deleting}
-                className={cn(clayDangerButton, "h-11 disabled:opacity-50")}
+                className={cn(clayDangerButton, "h-11 flex-1 disabled:opacity-50 sm:flex-none")}
               >
                 <Trash2Icon className="size-4" />
                 {deleting ? "Deleting…" : "Yes, delete my account"}
@@ -345,7 +362,7 @@ function GeneralSection({
             <button
               type="button"
               onClick={() => setConfirmDelete(true)}
-              className={cn(clayDangerButton, "h-11")}
+              className={cn(clayDangerButton, "h-11 w-full sm:w-auto")}
             >
               <Trash2Icon className="size-4" />
               Delete Account
@@ -398,17 +415,17 @@ function ModelsSection({
   }
 
   return (
-    <div className="space-y-10">
-      <section className="clay-card p-6">
-        <h2 className="font-display text-2xl text-(--ink)">Model Preferences</h2>
+    <div className="space-y-6 sm:space-y-10">
+      <section className="clay-card p-5 sm:p-6">
+        <h2 className="font-display text-xl text-(--ink) sm:text-2xl">Model Preferences</h2>
         <div className="mt-6">
           <label className="block text-sm font-semibold text-(--ink)">Chat model</label>
-          <div className="mt-1 flex gap-2">
+          <div className="mt-1 flex flex-col gap-2 sm:flex-row">
             <select
               value={chatModel}
               onChange={(e) => setChatModel(e.target.value)}
               disabled={disabled}
-              className={cn(accountInputClass, "flex-1")}
+              className={cn(accountInputClass, "min-w-0 flex-1")}
             >
               {MODEL_OPTIONS.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -428,8 +445,8 @@ function ModelsSection({
         </div>
       </section>
 
-      <section className="clay-card p-6">
-        <h2 className="font-display text-2xl text-(--ink)">API Keys</h2>
+      <section className="clay-card p-5 sm:p-6">
+        <h2 className="font-display text-xl text-(--ink) sm:text-2xl">API Keys</h2>
         <p className="mt-1 text-sm text-(--muted)">
           You provide your own API keys to use the chat.
         </p>
@@ -548,9 +565,11 @@ function SidebarAccountMenu() {
 function AccountSidebar({
   threads,
   onCollapse,
+  className,
 }: {
   threads: ChatThreadSummary[];
   onCollapse: () => void;
+  className?: string;
 }) {
   const router = useRouter();
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -566,7 +585,12 @@ function AccountSidebar({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <aside className="flex h-full w-[280px] shrink-0 flex-col border-r border-(--line-strong) bg-(--surface-panel) text-(--ink)">
+      <aside
+        className={cn(
+          "flex h-full w-[280px] shrink-0 flex-col border-r border-(--line-strong) bg-(--surface-panel) text-(--ink)",
+          className,
+        )}
+      >
         <div className="flex h-16 shrink-0 items-center justify-between gap-2 px-5">
           <Link href={routes.chat} className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -688,6 +712,7 @@ export function AccountShell({
   }, []);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarPeeked, setSidebarPeeked] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const peekTimerRef = useRef<number>(0);
 
   const showSidebarPeek = () => {
@@ -709,12 +734,14 @@ export function AccountShell({
 
   return (
     <main
-      className="fixed inset-0 flex overflow-hidden bg-(--background) p-3 text-(--ink)"
+      className="fixed inset-0 flex overflow-hidden bg-(--background) p-0 text-(--ink) sm:p-3"
       style={{ height: "100dvh" }}
     >
       <InteractiveDotBackground />
       {!sidebarCollapsed && (
-        <AccountSidebar threads={threads} onCollapse={() => setSidebarCollapsed(true)} />
+        <div className="hidden h-full lg:block">
+          <AccountSidebar threads={threads} onCollapse={() => setSidebarCollapsed(true)} />
+        </div>
       )}
 
       {sidebarCollapsed && (
@@ -748,7 +775,7 @@ export function AccountShell({
 
       {sidebarCollapsed && (
         <TooltipProvider delayDuration={300}>
-          <div className="absolute top-4 left-4 z-30 flex items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur">
+          <div className="absolute top-4 left-4 z-30 hidden items-center gap-1 rounded-2xl border border-(--line-strong) bg-(--surface-panel) p-1 shadow-(--shadow-soft) backdrop-blur lg:flex">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -795,9 +822,37 @@ export function AccountShell({
       <div className="relative min-h-0 flex-1 overflow-y-auto">
         <div className="app-glow app-glow-left" aria-hidden="true" />
         <div className="app-glow app-glow-right" aria-hidden="true" />
-        <div className="mx-auto max-w-4xl px-6 py-10">
-          <div className="mb-8 flex items-center justify-between">
-            <h1 className="font-display text-4xl text-(--ink)">Settings</h1>
+        <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
+          <div className="mb-6 flex items-center gap-3 sm:mb-8">
+            {/* Mobile entry point to the thread sidebar: the persistent rail and
+                the collapsed-rail toolbar are both desktop-only, so without this
+                the settings page has no way back to the chat on a phone. */}
+            <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open menu"
+                  className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl border border-(--line-strong) bg-(--surface-panel-strong) text-(--ink) shadow-(--shadow-soft) lg:hidden"
+                >
+                  <MenuIcon className="size-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="w-[300px] border-(--line) bg-(--surface-panel) p-0"
+              >
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Menu</SheetTitle>
+                  <SheetDescription>Chat threads and account actions.</SheetDescription>
+                </SheetHeader>
+                <AccountSidebar
+                  threads={threads}
+                  onCollapse={() => setMobileSidebarOpen(false)}
+                  className="w-full border-r-0"
+                />
+              </SheetContent>
+            </Sheet>
+            <h1 className="font-display text-3xl text-(--ink) sm:text-4xl">Settings</h1>
           </div>
 
           {dbError ? (
@@ -806,7 +861,7 @@ export function AccountShell({
             </div>
           ) : null}
 
-          <div className="flex gap-10">
+          <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
             <SectionNav active={section} onSelect={setSection} />
 
             <div className="min-w-0 flex-1">
