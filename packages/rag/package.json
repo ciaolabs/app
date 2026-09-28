@@ -8,11 +8,11 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.12",
+    "@ai-sdk/google": "^4.0.80",
     "@ciaobang/chat-context": "workspace:*",
     "@ciaobang/db": "workspace:*",
-    "ai": "^7.0.22",
-    "zod": "^4.3.6"
+    "ai": "^7.0.114",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "typescript": "6.0.3"
