@@ -12,7 +12,7 @@ export default function PrivacyPolicyPage() {
   return (
     <LegalLayout
       title="Ciao! Privacy Policy"
-      lastUpdated="2026-05-20"
+      lastUpdated="2026-10-18"
       effectiveDate="2026-05-20"
       currentPath={routes.privacy}
     >
@@ -130,6 +130,12 @@ export default function PrivacyPolicyPage() {
             <strong>OpenRouter.</strong> AI model routing. See
             {" "}
             <a href="https://openrouter.ai/privacy">OpenRouter&apos;s privacy policy</a>.
+          </li>
+          <li>
+            <strong>Parallel.</strong> Web research in the full chat. When the
+            assistant uses a research tool, search terms and requested source URLs
+            are sent to Parallel. See{" "}
+            <a href="https://parallel.ai/privacy-policy">Parallel&apos;s privacy policy</a>.
           </li>
         </ul>
 

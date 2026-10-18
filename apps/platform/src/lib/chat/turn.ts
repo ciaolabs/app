@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   convertToModelMessages,
   stepCountIs,
@@ -13,6 +14,7 @@ import { makeSurveyContextTools } from "@/lib/chat/agent-tools";
 import { buildChatSystemPrompt, createThreadTitle } from "@/lib/chat/prompt";
 import type { SurveyChatContext } from "@/lib/chat/survey-context";
 import type { ChatRepository } from "@/lib/chat/types";
+import { makeWebResearchTools } from "@/lib/chat/web-research";
 
 export type RagSearchCapability = { googleApiKey: string; sql: Sql };
 
@@ -25,6 +27,8 @@ export type ChatTurnInput = {
   threadId: string | null;
   temporary: boolean;
   repository: ChatRepository;
+  webSearch?: boolean;
+  abortSignal?: AbortSignal;
 };
 
 export type ChatTurn = (input: ChatTurnInput) => Promise<Response>;
@@ -47,10 +51,12 @@ export const runChatTurn: ChatTurn = async ({
   threadId,
   temporary,
   repository,
+  webSearch,
+  abortSignal,
 }) => {
   const latestUserText = getLatestUserText(messages);
 
-  const tools = ragSearch
+  const localTools = ragSearch
     ? {
         ...makeSurveyContextTools(surveyContext),
         searchDocs: makeSearchDocsTool(surveyContext, ragSearch.sql, ragSearch.googleApiKey),
@@ -73,13 +79,25 @@ export const runChatTurn: ChatTurn = async ({
     });
   }
 
+  // Hash local identifiers before sending a stable per-conversation quota ID.
+  // Temporary chats reuse their first message ID without creating a Thread.
+  const sessionId = createHash("sha256")
+    .update(JSON.stringify([userId, thread?.id ?? messages[0]?.id]))
+    .digest("hex");
+  const webSearchEnabled = process.env.CIAO_WEB_SEARCH !== "off" && webSearch !== false;
+  const tools = {
+    ...localTools,
+    ...(webSearchEnabled ? makeWebResearchTools(sessionId, abortSignal) : {}),
+  };
+
   const result = streamText({
     model,
-    system: buildChatSystemPrompt(surveyContext),
+    system: buildChatSystemPrompt(surveyContext, webSearchEnabled),
     messages: await convertToModelMessages(messages),
     temperature: 0.6,
     tools,
     stopWhen: stepCountIs(6),
+    abortSignal,
     onFinish: async ({ text }) => {
       if (!text.trim() || !thread) return;
       await repository.appendMessage({

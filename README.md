@@ -81,6 +81,25 @@ From `apps/platform` (or `pnpm --filter platform <script>`):
 - `pnpm test:e2e` — Playwright flow against an in-memory local server
 - `pnpm index` — (re)index the docs into DocChunks for chat retrieval (RAG)
 
+### Web research in chat
+
+The full chat at `/app` can search current psychology research and read source
+pages with [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp).
+Web research is enabled by default and connects only when the assistant uses a
+web tool. Anonymous search uses Fast mode, with no Parallel account or API key.
+The existing Anthropic/Google chat keys and Google-key requirement for Ciao Docs
+retrieval still apply. The lightweight assist widget and canned development chat
+do not use web research.
+
+Set `CIAO_WEB_SEARCH=off` to disable both web tools for the deployment. API callers
+can also send `webSearch: false` in a `/api/chat` request; a request cannot override
+the deployment disable setting. Search terms and requested URLs are sent to
+Parallel. The tools do not automatically attach survey results or chat history;
+the assistant is instructed to use general research terms and cite source URLs.
+Free access has usage limits. Research failures are reported to the assistant
+without switching to another search provider. Each web call has a 12-second
+deadline and follows chat cancellation.
+
 ### Database
 
 The schema lives in [apps/platform/db/schema.sql](./apps/platform/db/schema.sql)

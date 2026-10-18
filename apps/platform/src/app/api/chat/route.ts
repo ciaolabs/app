@@ -28,6 +28,7 @@ type ChatRequestBody = {
   temporary?: boolean;
   model?: string;
   surveyContext?: SurveyChatContext;
+  webSearch?: boolean;
 };
 
 function getLatestUserText(messages: UIMessage[]) {
@@ -140,5 +141,7 @@ export async function POST(request: Request) {
     threadId: body.threadId ?? null,
     temporary,
     repository: getChatRepository(),
+    webSearch: body.webSearch !== false,
+    abortSignal: request.signal,
   });
 }
