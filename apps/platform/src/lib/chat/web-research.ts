@@ -1,15 +1,57 @@
-import { createMCPClient, type MCPClient } from "@ai-sdk/mcp";
+import { createMCPClient, type CallToolResult, type MCPClient } from "@ai-sdk/mcp";
 import { tool } from "ai";
 import { z } from "zod";
 
 const ENDPOINT = "https://search.parallel.ai/mcp";
 const USER_AGENT = "Ciao-Platform/0.1.0 (+https://github.com/ciaolabs/app)";
 const TIMEOUT_MS = 12_000;
+const MAX_RESULT_CHARS = 24_000;
 
 const publicUrl = z.string().url().refine((value) => {
   const url = new URL(value);
   return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password;
 }, "Use an HTTP or HTTPS URL without credentials.");
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object";
+}
+
+function researchResult(result: CallToolResult) {
+  const text = Array.isArray(result.content)
+    ? result.content.flatMap((block: unknown) =>
+      isRecord(block) && block.type === "text" && typeof block.text === "string" ? [block.text] : [],
+    ).join("\n")
+    : "";
+  let data: unknown = result.structuredContent;
+  if (!data) {
+    try { data = JSON.parse(text); } catch { /* Some MCP servers return plain text. */ }
+  }
+  if (!text && !data) throw new Error("Empty research response.");
+  if (!isRecord(data) || !Array.isArray(data.results)) {
+    return { text: text.slice(0, MAX_RESULT_CHARS), truncated: text.length > MAX_RESULT_CHARS };
+  }
+
+  // Some pages exceed the advertised excerpt limit. Avoid sending a large page
+  // twice (content + structuredContent) into every subsequent model step.
+  let remaining = MAX_RESULT_CHARS;
+  let truncated = data.results.length > 6;
+  const sources = [];
+  for (const source of data.results.slice(0, 6)) {
+    if (!isRecord(source) || typeof source.url !== "string" || source.url.length > 2048 || !publicUrl.safeParse(source.url).success) continue;
+    const title = typeof source.title === "string" ? source.title.slice(0, 300) : "";
+    remaining -= source.url.length + title.length;
+    if (remaining <= 0) { truncated = true; break; }
+    const excerpts = Array.isArray(source.excerpts)
+      ? source.excerpts.filter((excerpt: unknown) => typeof excerpt === "string").join("\n")
+      : "";
+    const excerpt = excerpts.slice(0, Math.min(6000, remaining));
+    truncated ||= excerpt.length < excerpts.length;
+    remaining -= excerpt.length;
+    sources.push({ url: source.url, title, excerpt });
+  }
+  const errors = "errors" in data ? JSON.stringify(data.errors)?.slice(0, 1000) : undefined;
+  return { sources, truncated, ...(errors ? { errors } : {}) };
+}
 
 /** Register locally; connect only when the agent actually uses a research tool. */
 export function makeWebResearchTools(sessionId: string, requestSignal?: AbortSignal) {
@@ -55,7 +97,7 @@ export function makeWebResearchTools(sessionId: string, requestSignal?: AbortSig
       });
       if (result.isError) throw new Error("Research request failed.");
       // Preserve the source URLs and excerpts for the model to read and cite.
-      return result;
+      return researchResult(result);
     } catch {
       signal.throwIfAborted();
       throw new Error("Web research is unavailable. Tell the user and do not invent sources.");

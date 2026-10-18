@@ -163,6 +163,20 @@ describe("full chat web research", () => {
     expect(ids[0]).toBe(ids[1]);
   });
 
+  it("bounds oversized excerpts and removes duplicate MCP content before model consumption", async () => {
+    const large = { results: [{ url: SOURCE, title: "Research", excerpts: ["Evidence. ".repeat(40_000)] }] };
+    const http = mcpFixture(() => ({ content: [{ type: "text", text: JSON.stringify(large) }], structuredContent: large }));
+    vi.stubGlobal("fetch", http);
+    const model = scriptedModel([{ name: "fetchWebPage", args: { urls: [SOURCE] } }], (prompt) => {
+      expect(prompt).toContain(SOURCE);
+      expect(prompt).toContain("Evidence.");
+      expect(prompt).toContain('truncated');
+      expect(prompt.length).toBeLessThan(30_000);
+      return "A bounded research excerpt was received.";
+    });
+    expect(await (await runChatTurn(input(model))).text()).toContain("A bounded research excerpt");
+  });
+
   it.each(["javascript:alert(1)", "file:///etc/passwd", "https://user:secret@example.org/"])("rejects unsafe fetch URL %s before connecting", async (url) => {
     const http = mcpFixture();
     vi.stubGlobal("fetch", http);

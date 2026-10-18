@@ -12,7 +12,7 @@ export default function PrivacyPolicyPage() {
   return (
     <LegalLayout
       title="Ciao! Privacy Policy"
-      lastUpdated="2026-05-20"
+      lastUpdated="2026-10-18"
       effectiveDate="2026-05-20"
       currentPath={routes.privacy}
     >
