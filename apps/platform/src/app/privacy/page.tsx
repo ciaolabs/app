@@ -131,6 +131,12 @@ export default function PrivacyPolicyPage() {
             {" "}
             <a href="https://openrouter.ai/privacy">OpenRouter&apos;s privacy policy</a>.
           </li>
+          <li>
+            <strong>Parallel.</strong> Web research in the full chat. When the
+            assistant uses a research tool, search terms and requested source URLs
+            are sent to Parallel. See{" "}
+            <a href="https://parallel.ai/privacy-policy">Parallel&apos;s privacy policy</a>.
+          </li>
         </ul>
 
         <h3>Professional advisors</h3>

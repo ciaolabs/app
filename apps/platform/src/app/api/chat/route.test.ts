@@ -262,4 +262,21 @@ describe("POST /api/chat (HTTP shape)", () => {
     expect(runChatTurn).toHaveBeenCalledWith(expect.objectContaining({ ragSearch: null }));
     expect(getReadyDb).not.toHaveBeenCalled();
   });
+
+  it.each([undefined, false, true])("passes web-search choice %s and request cancellation to the turn", async (webSearch) => {
+    getCurrentUserId.mockResolvedValue("user_1");
+    const { POST } = await import("@/app/api/chat/route");
+    const request = buildRequest({
+      webSearch,
+      messages: [{ id: "m", role: "user", parts: [{ type: "text", text: "Research sources?" }] }],
+    }, { anthropic: "sk-anthropic", google: null });
+
+    await POST(request);
+
+    expect(runChatTurn).toHaveBeenCalledWith(expect.objectContaining({
+      webSearch: webSearch !== false,
+      abortSignal: request.signal,
+      ragSearch: null,
+    }));
+  });
 });

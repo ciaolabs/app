@@ -22,6 +22,8 @@
 
 **RAG Pipeline** — the retrieval pipeline for DocChunks. Steps: query rewriting (personalised using SurveyChatContext) → embedding → pgvector search → reranking (MMR or heuristic, no external service) → return top-k chunks as tool result.
 
+**Web research** — full-chat tools `searchWeb` and `fetchWebPage` use anonymous Parallel Search MCP for current public research and source excerpts. Registered by `runChatTurn` unless `CIAO_WEB_SEARCH=off` or the request sets `webSearch: false`; connections are lazy, time-limited and cancellable. They supplement the Google-key-gated `searchDocs` tool. Only tool arguments and a hashed conversation identifier are sent, with no automatic survey context or history attachment. The prompt instructs the model to use general research terms and treat external pages as untrusted evidence.
+
 **SurveyLifecycle** — the set of valid state transitions for a Submission, governed by `maxSubmissions`, `submittedCount`, and `hasActiveDraft`. Owned by `checkSurveyAction(definition, status, action)`, a pure function that returns a `LifecycleDecision` (`{ allowed: true }` or `{ allowed: false; reason; message }`). The denial message is owned by the lifecycle module so route handlers cannot copy-drift it. Actions: `start-draft`, `answer`, `submit`.
 
 **DraftStorage** — client-side persistence for in-progress survey answers. Currently `sessionStorage`; abstracted behind a typed adapter so components do not couple to storage mechanics.
